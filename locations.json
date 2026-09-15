@@ -1,0 +1,15 @@
+[
+  {"slug": "alghero", "name": "Alghero", "latitude": 40.56, "longitude": 8.26},
+  {"slug": "arbatax", "name": "Arbatax", "latitude": 39.92, "longitude": 9.72},
+  {"slug": "cagliari", "name": "Cagliari", "latitude": 39.17, "longitude": 9.15},
+  {"slug": "carloforte", "name": "Carloforte", "latitude": 39.10, "longitude": 8.28},
+  {"slug": "chia", "name": "Chia", "latitude": 38.87, "longitude": 8.84},
+  {"slug": "la-maddalena", "name": "La Maddalena", "latitude": 41.22, "longitude": 9.40},
+  {"slug": "olbia", "name": "Olbia", "latitude": 40.92, "longitude": 9.58},
+  {"slug": "oristano", "name": "Oristano", "latitude": 39.87, "longitude": 8.45},
+  {"slug": "porto-torres", "name": "Porto Torres", "latitude": 40.87, "longitude": 8.37},
+  {"slug": "santa-teresa-gallura", "name": "Santa Teresa Gallura", "latitude": 41.24, "longitude": 9.18},
+  {"slug": "siniscola", "name": "Siniscola", "latitude": 40.60, "longitude": 9.78},
+  {"slug": "torre-dei-corsari", "name": "Torre dei Corsari", "latitude": 39.688153, "longitude": 8.450613},
+  {"slug": "villasimius", "name": "Villasimius", "latitude": 39.10, "longitude": 9.52}
+]
