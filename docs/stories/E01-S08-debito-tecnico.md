@@ -3,7 +3,7 @@ id: E01-S08
 epic: E01
 title: "Debito tecnico dalle review di S00/S01"
 type: chore
-status: review
+status: done
 requirements: [FR-50, NFR-13]
 depends_on: [E01-S00, E01-S01]
 verify:
@@ -140,4 +140,25 @@ commento in `vitest.config.ts` e testo in `README.md`, senza effetto sul codice 
 
 ## Review log
 
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-10-19 — Reviewer — Verdetto: done
+
+Verify rieseguiti: `python3 -m unittest discover -s tests -v` → Ran 19 tests — OK (17 preesistenti + 2
+nuovi); nessun warning di deprecazione con `-W error::DeprecationWarning`; `git check-ignore -v
+worker/.dev.vars` → `.gitignore:14`; `git diff 8194514^..8194514` limitato ai 6 file attesi.
+
+`format_checker` dimostrato non vacuo: con payload negativo produce i 2 errori attesi, mentre
+`Draft202012Validator.FORMAT_CHECKER` e l'assenza di checker producono `[]` (conferma che i validator
+extra non sono installati). Golden reali → nessun falso rosso. Nessuna riga rimossa da
+`tests/test_fixtures.py`: i 17 test preesistenti non sono indeboliti.
+
+- R-1 (nit) `tests/test_fixtures.py:72-73,80-81,89-92` — `_RFC3339_RE` accetta il separatore spazio;
+  `_is_rfc3339` restituisce `False` per i non-string mentre `_is_uri` restituisce `True`. Nessun impatto
+  sui golden.
+- R-2 (nit) `worker/README.md:62-68` — lo snippet JSONC mostra solo `"id"` ma `wrangler.jsonc` ha anche
+  `preview_id` (il passo 3 lo copre). Non è una regressione.
+- R-3 (should, non bloccante) `docs/stories/E01-S08-debito-tecnico.md:5` — `type: chore` è fuori
+  dall'enum del template (`feature | quick | bug`); nessun tooling lo valida. Fix: usare `feature` o
+  estendere l'enum.
+
+`npm test` non eseguito: in `worker/` sono cambiati solo un commento in `vitest.config.ts` e il README,
+nessuna modifica a `src/`, dipendenze o binding (rischio residuo trascurabile).
