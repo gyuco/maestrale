@@ -61,10 +61,19 @@ girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'i
 
    ```bash
    npx wrangler kv namespace create FORECASTS
-   # ...
-   # [[kv_namespaces]]
-   # binding = "FORECASTS"
-   # id = "<32 caratteri esadecimali>"
+   ```
+
+   Wrangler stampa l'`id` e propone il frammento di configurazione: il progetto usa
+   `wrangler.jsonc`, quindi va inserito in JSONC nell'array già presente in `wrangler.jsonc`
+   (sostituendo il placeholder):
+
+   ```jsonc
+   "kv_namespaces": [
+     {
+       "binding": "FORECASTS",
+       "id": "<32 caratteri esadecimali>"
+     }
+   ]
    ```
 
    Per il namespace di anteprima (usato da `wrangler dev` remoto e dalle preview):
