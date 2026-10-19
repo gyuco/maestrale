@@ -7,11 +7,10 @@ import { defineConfig } from "vitest/config";
 // reali, simulati in locale con Miniflare.
 export default defineConfig({
   plugins: [
+    // Il binding KV `FORECASTS` arriva da `wrangler.jsonc`: non va duplicato qui,
+    // altrimenti i test resterebbero verdi anche rimuovendo il binding dal Worker.
     cloudflareTest({
       wrangler: { configPath: "./wrangler.jsonc" },
-      miniflare: {
-        kvNamespaces: ["FORECASTS"],
-      },
     }),
   ],
 });

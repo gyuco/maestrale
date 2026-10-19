@@ -3,7 +3,7 @@ id: E01-S01
 epic: E01
 title: "Scaffold Worker: TypeScript + Hono + Wrangler + KV + Vitest"
 type: feature
-status: review
+status: done
 requirements: [FR-49, FR-50, NFR-12, NFR-13, NFR-15]
 depends_on: [E01-S00]
 verify:
@@ -141,4 +141,38 @@ comportamento di Wrangler in modalità agent, non impatta l'AC.
 
 ## Review log
 
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-10-19 — Reviewer — verdict: **done**
+
+**Comandi eseguiti (tutti exit 0, worktree pulita dopo le mutazioni):**
+
+- `cd worker && npm test` → 3/3 verdi (Vitest 4.1.12, workerd).
+- `cd worker && npm run typecheck` → `tsc --noEmit`, nessun errore.
+- `cd worker && npx wrangler deploy --dry-run --outdir dist` → Total Upload 57.63 KiB / gzip 14.65 KiB, binding `env.FORECASTS (000…) KV Namespace`, dry-run.
+- `wrangler dev --port 8791` → `GET /` **200** `{"status":"ok","service":"maestrale"}`, `GET /nope` **404**.
+- `npm ci` su copia pulita (`git archive 82a5ae8 worker`) con npm 10.9.2 → install OK + 3 test verdi (lockfile coerente).
+- `npx wrangler types` → rigenera `worker-configuration.d.ts` identico all'header a parte la data (config e tipi coerenti).
+- `python3 -m unittest discover -s tests` → **Ran 17 tests — OK** (backend Python intatto).
+- `git ls-files worker` → solo sorgenti/config; nessun `node_modules`/`dist`/`.wrangler`; nessuna credenziale; nessun deploy reale.
+
+**Mutazioni locali (ripristinate, `git status worker` pulito):**
+
+- `src/index.ts`: `service: "MUTATED"` → 1 test rosso (i test non sono vacui).
+- `src/index.ts`: errore di tipo iniettato → `tsc` rosso TS2322 (i tipi generati non mascherano errori).
+- `wrangler.jsonc`: `compatibility_date` 2026-10-01 → test rossi con `newest date supported by this server binary is "2026-08-22"` (giustificazione del coder confermata).
+- `wrangler.jsonc`: rimozione `kv_namespaces` → test **ancora verdi** (vedi R-1).
+
+**R-1 — should — `worker/vitest.config.ts:12-14`** — `miniflare.kvNamespaces: ["FORECASTS"]` duplica il binding già letto da `wrangler.configPath`. Verificato: togliendo `kv_namespaces` da `wrangler.jsonc` i test restano verdi, quindi il test KV non copre la clausola AC-2 "dichiarato in wrangler.jsonc" e può dare falso verde se il binding viene rinominato/rimosso (il `Env` generato resta allineato finché non si rigenera). Fix: eliminare il blocco `miniflare` — con il solo `wrangler.configPath` i test restano verdi, e con il binding tolto da `wrangler.jsonc` falliscono con `Cannot read properties of undefined (reading 'put')` (verificato). Non bloccante: binding e dry-run sono corretti.
+
+**R-2 — should — `worker/package.json:19`** — `@cloudflare/vitest-pool-workers` è deprecato (warning a ogni `npm test`); il successore `@cloudflare/vitest-plugin@1.4.5` è pubblicato e stabile. Accettabile qui perché il pacchetto è citato nella storia, ma va deciso: migrazione (codemod `vitest:pool-workers-to-vitest-plugin`) in una storia E01 dedicata, oppure ADR in `docs/decisions/` che motiva il rinvio. Nota: trascina 5 vulnerabilità high di devDependency (`sharp`, `undici` via `miniflare`); `npm audit --omit=dev` = 0, quindi nessuna esposizione in produzione.
+
+**R-3 — nit — `worker/README.md:56-58`** — l'output di `wrangler kv namespace create` è mostrato in TOML (`[[kv_namespaces]]`) mentre il progetto usa `wrangler.jsonc`: mostrare il frammento JSONC (o usare `--update-config`).
+
+**R-4 — nit — `.gitignore:11-13`** — manca `worker/.dev.vars` (secrets locali Wrangler). Aggiungerlo prima del primo secret.
+
+**R-5 — nit — commit `82a5ae8`** — il messaggio non cita gli ID requisito (FR-49/FR-50, NFR-12/13/15) come chiede `AGENTS.md`.
+
+**R-6 — nit — `worker/wrangler.jsonc:10-12`** — `observability.enabled: true` non è richiesto dagli AC né citato in storia/architettura; innocuo, ma va annotato o rimandato alla storia che definisce l'osservabilità (FR-52).
+
+**R-7 — nit — `docs/`** — `docs/architecture.md` è ancora il template `status: draft` e `docs/adr/` contiene solo il template; le decisioni di questa storia (compat date pinnata al runtime di test, pool deprecato, `worker-configuration.d.ts` committato) vivono solo nel Dev notes. Spostarle in `docs/decisions/` come da `AGENTS.md`.
+
+**Note (nessuna azione):** il commit di `worker/worker-configuration.d.ts` (625 KB, 16k righe) è giustificato (typecheck offline, NFR-13), generato da `wrangler types`, rigenerabile e non maschera errori di tipo. `scheduled` è solo un commento `// E01-S04`: coerente con "nessun codice morto"; l'handler arriva in E01-S04. Placeholder KV (32 zeri) chiaramente documentato in config e README, accettato dal dry-run.
