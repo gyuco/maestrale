@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "commits": {
+    "builtin:workflows/gyukit@HEAD": "builtin@0.2.2"
+  },
+  "files": {
+    ".claude/skills/autopilot/SKILL.md": "43ac3aeb2da0190ac9be6ee5cde2e1f91d1556cf0700b7c72868668eb97b3d39",
+    ".claude/skills/quick-change/SKILL.md": "0bcef339f0929a51a698813671db993f1da6e2346586deac2472b7f7bf33a2b9",
+    ".claude/agents/analyst.md": "0f8d5b440b227026be17d60c74ac28d128a5edab38f19af52dd982ce3cd3f0c4",
+    ".claude/agents/architect.md": "90bf420bb26d4e92fbf8c64b5786379691cf3c06efb993e2a3bf23113c5293eb",
+    ".claude/agents/coder.md": "d5ff16904646b13f04586476d2a58a2245bf6d9b47a4032c403e0638516f57b9",
+    ".claude/agents/planner.md": "12bc3bee3cba302cab1492b4628c4568593c341b941c16fa2c26e7dbb9dd085e",
+    ".claude/agents/reviewer.md": "72197d4bc1af629032ac4ccea41252c038737d697e5be9b9c91cf8ff3c605bcc",
+    ".agents/skills/autopilot/SKILL.md": "43ac3aeb2da0190ac9be6ee5cde2e1f91d1556cf0700b7c72868668eb97b3d39",
+    ".agents/skills/quick-change/SKILL.md": "0bcef339f0929a51a698813671db993f1da6e2346586deac2472b7f7bf33a2b9",
+    ".opencode/agent/analyst.md": "91cc4c25c9ec719fd3ec77da72bb345b2a7ea7832ee6e89f89b17586fa2e4426",
+    ".opencode/agent/architect.md": "6612a053f82d344bccbbba0911e54b95740f90593602938c0876ff7725ebc4fb",
+    ".opencode/agent/coder.md": "e06efa4f93169ea097df02416a14c4b4db4454af00455056fb800e912c0a2fed",
+    ".opencode/agent/planner.md": "036e6706925d0b7677342b5f585c9bec2a90a7c757c560f6c0b2d3e0e2e73b3d",
+    ".opencode/agent/reviewer.md": "b24848ffad5df461f17c3bb55ae3555d8f8b0aac28364fc1c3d4d93f9d9e0046"
+  },
+  "blocks": {
+    "CLAUDE.md": "605bf79a6da87eea56a156afad515ceb4e1664715d52a8e5ad9ad061a5e654d5",
+    "AGENTS.md": "605bf79a6da87eea56a156afad515ceb4e1664715d52a8e5ad9ad061a5e654d5"
+  },
+  "mcp": {
+    ".mcp.json": {
+      "github": "822dba95f139c8fe92a2d0ee83010eb1ef48f01896dce39fc0af31991ab2a5ef",
+      "chrome-devtools": "e223f7b315f12f4ace997eae350c34d2b0bf8fb99317b7045183eb7263cc2780"
+    },
+    "opencode.json": {
+      "github": "d071a92fd48c6e7e14f2ef32f8fae96c10a86c259e24363390ba5effc6f28de1",
+      "chrome-devtools": "93f36b2464baafcea283894f1d23d015f122c658c6ebefd8d3709fb74bfb73eb"
+    }
+  }
+}

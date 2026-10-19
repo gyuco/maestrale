@@ -1,0 +1,30 @@
+{
+  "mcp": {
+    "my-planner-Maestrale": {
+      "type": "remote",
+      "url": "https://my-planner.giuseppe-concas.workers.dev/mcp",
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {file:~/.config/opencode/secrets/my-planner-token}"
+      },
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_PAT}"
+      },
+      "enabled": true
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
+      "enabled": true
+    }
+  }
+}
