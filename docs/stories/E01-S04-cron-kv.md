@@ -3,7 +3,7 @@ id: E01-S04
 epic: E01
 title: "Cron Trigger e scrittura KV con fallback"
 type: feature
-status: review
+status: done
 requirements: [FR-1, FR-2, FR-14, FR-18, FR-19, FR-20, FR-49, FR-52, NFR-14, NFR-15, NFR-17]
 depends_on: [E01-S00, E01-S01, E01-S02, E01-S03, E01-S05]
 verify:
@@ -310,3 +310,33 @@ nel README.
 
 ## Review log
 <!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+
+### 2026-10-19 — Reviewer — verdict: **done**
+
+Verify: `npm test` 90/90 passed; `npm run typecheck` 0 errori; `python3 -m unittest discover -s tests` 19 OK.
+`git diff 9342486..HEAD --stat`: nessuna modifica a `tests/fixtures/**`, `package.json`, lockfile.
+Parità con `update_forecasts.py` verificata (ordine chiavi, merge, `errors` solo del run corrente,
+`updated_locations` ordinati, `slug` dopo `longitude`, cache assente/illeggibile/`locations` non
+oggetto → `{}`, catalogo invalido → nessuna fetch né scrittura). Decisione PO "nessuna `put` se tutte
+falliscono" rispettata; `scheduled` risolve e logga.
+Mutation check (tutti rilevati, poi ripristinati, albero pulito): M1 merge col cache precedente rimosso
+→ 2 fail; M2 scrittura anche se tutte falliscono → 3 fail; M3 `dailyNumber` `undefined` → `null` → 2 fail;
+M4 concorrenza 13 → 1 fail; M5 `slug` prima di `name` → 1 fail.
+
+Findings (nessun blocker):
+- **R-1** (nit) `worker/src/update.ts:91` — `as Record<string, Forecast>` dopo `isRecord`: accettabile,
+  è lo stesso confine di fiducia di `store.ts` (payload non validato, come `json.load`). Nessuna azione;
+  eventualmente un commento che rimandi a `store.ts`.
+- **R-2** (nit) `worker/src/update.ts:57-62` — `String()`/`Number()` accettano in silenzio valori di
+  tipo errato (`latitude: "abc"` → `NaN` finisce nell'URL; `slug: null` → `"null"`). In Python `float()`
+  lancia in `update_one` e la località va in `errors`. Catalogo versionato, impatto basso; se si tocca
+  di nuovo, far fallire la località se `!Number.isFinite(...)`.
+- **R-3** (nit) `worker/test/update.test.ts:297` — AC-4 chiede `console.error` *per ogni località*; il test
+  verifica solo `toHaveBeenCalled()`. Asserire che ognuno dei 13 slug compaia nelle righe d'errore.
+- **R-4** (nit) `worker/test/update.test.ts:123-132` — il test su `generated_at` dipende dal numero di
+  chiamate a `now` dentro `buildForecast` (≥ 39); fragile se `buildForecast` cambia. Alternativa: `now`
+  che restituisce `T-end` solo dopo che il fake fetch ha servito la 26ª chiamata.
+- **R-5** (nit) `worker/src/update.ts:143` — `summary()` senza tipo di ritorno esplicito; usare
+  `Omit<UpdateResult, "written">`.
+- **R-6** (nit) AC-7 "rigetta con catalogo invalido" non è testato a livello di handler (catalogo importato
+  staticamente); coperto da AC-5 su `runUpdate`, che `scheduled` attende senza catch. Accettabile.
