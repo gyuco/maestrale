@@ -134,4 +134,36 @@ describe("buildForecast — port di previsioni_mare.build_forecast (FR-6..FR-13,
     expect(forecast.sources.sea.fetched_at).toBe(FIXED_TIMESTAMP);
     expect(forecast.sources.weather.fetched_at).toBe(FIXED_TIMESTAMP);
   });
+
+  describe("daily incompleto (AC-9, S03 R-4)", () => {
+    type Weather = typeof weatherResponse;
+    const run = (weather: unknown) =>
+      buildForecast(TORRE.name, TORRE.latitude, TORRE.longitude, TORRE.days, TORRE.timezone, {
+        fetchImpl: async (input) =>
+          String(input).startsWith(`${MARINE_SOURCE.endpoint}?`)
+            ? new Response(JSON.stringify(marineResponse))
+            : new Response(JSON.stringify(weather)),
+        now: () => FIXED_TIMESTAMP,
+      });
+    const clone = (): Weather => structuredClone(weatherResponse);
+
+    it("lancia se manca la chiave daily richiesta", async () => {
+      const weather: Record<string, unknown> = clone().daily;
+      delete weather["temperature_2m_max"];
+      await expect(run({ ...clone(), daily: weather })).rejects.toThrow();
+    });
+
+    it("lancia se la serie è più corta di time", async () => {
+      const weather = clone();
+      weather.daily.weather_code = weather.daily.weather_code.slice(0, 2);
+      await expect(run(weather)).rejects.toThrow();
+    });
+
+    it("un null presente resta null", async () => {
+      const weather = clone();
+      (weather.daily.temperature_2m_min as Array<number | null>)[0] = null;
+      const forecast = await run(weather);
+      expect(forecast.daily[0]!.weather.air_temperature_min_c).toBeNull();
+    });
+  });
 });

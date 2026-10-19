@@ -101,7 +101,12 @@ function optionalNumber(payload: Record<string, unknown>, field: string): number
 
 function dailyNumber(daily: Record<string, unknown>, field: string): number | null {
   const value = daily[field];
-  if (value === undefined || value === null) {
+  // Chiave assente o serie più corta di `time` (Python: KeyError/IndexError):
+  // la località fallisce. Un `null` presente resta `null`.
+  if (value === undefined) {
+    throw new Error(`Valore giornaliero mancante '${field}'`);
+  }
+  if (value === null) {
     return null;
   }
   if (typeof value === "number") {
