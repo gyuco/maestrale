@@ -545,6 +545,20 @@ conferme del proprietario restano a cura dell'orchestratore. Il Passo 0 (tag) è
 ### Esiti dei passi manuali (orchestratore)
 <!-- data, comando, esito -->
 
+Tutti il 2026-10-19, da `worker/`, con l'ok dell'owner.
+
+| Passo | Comando | Esito |
+|---|---|---|
+| 1 | `npx wrangler whoami` | già autenticato (OAuth), login non necessario |
+| 2 | `npx wrangler kv namespace create FORECASTS` / `--preview` | id `7b1c0444535542408cc05fa9dd59536b`, preview_id `b6b83416188441aea18ce2846ccad5d6` |
+| 3 | id in `worker/wrangler.jsonc`, `npm test` | 90/90, typecheck 0 errori; commit `a9bd0ab` |
+| 4 | `npx wrangler deploy` | `https://maestrale.giuseppe-concas.workers.dev`, versione `bf4c9433-004b-4b28-ad9d-80015267a84a`, 87.94 KiB (gzip 22.78), startup 3 ms, schedule `30 0,6,12,18 * * *`. `GET /` → 200 `{"status":"ok","service":"maestrale"}` (AC-8) |
+| 6 | `npx wrangler kv key put --binding FORECASTS latest --path ../tests/fixtures/golden_forecasts.json --remote --preview false` | prima: `/health` degraded "Cache forecast non ancora generato"; dopo: `ok`, `locations: 2` |
+| 7 | `node scripts/compare_backends.mjs --smoke <url>` + `curl` | `SMOKE OK` (ramo 200); `/forecast?localita=Torre%20dei%20Corsari` 200, località inesistente 404 (AC-10 parte smoke) |
+| 5 | `npx wrangler tail maestrale --format json` in background | **in attesa** del cron delle 00:30 UTC (AC-9 pendente) |
+| 8 | app Flutter con `--dart-define` | **in attesa** dell'owner |
+| 9 | dismissione host owner | **in attesa** dell'owner |
+
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 | iterazione | comando | esito | note |
