@@ -3,7 +3,7 @@ id: E01-S03
 epic: E01
 title: "Port pipeline: fetch Open-Meteo e aggregazioni giornaliere"
 type: feature
-status: review
+status: done
 requirements: [FR-3, FR-4, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-17, FR-51]
 depends_on: [E01-S00, E01-S01, E01-S02]
 verify:
@@ -131,3 +131,24 @@ Riferimenti:
 | 1 | python3 -m unittest discover -s tests -v | ok | 19 test |
 
 ## Review log
+
+### 2026-10-19 — verdict: done
+
+I re-ran all three verify commands myself: `npm test` passed (7 files, 44 tests), `npm run typecheck` had 0 errors, Python passed (19 tests, Python 3.12.2).
+Checks done:
+- Re-running `gen_pipeline_fixtures.py` gives byte-identical fixtures. The generator calls the real `round()` and `previsioni_mare.*`.
+- `round_cases.json` (5444 cases, about 65 decimal ties) matches 100%. `roundHalfEven` uses `BigInt` only, with no `toFixed`/`Math.round`.
+- AC-3: the golden is deep-equal and the key order matches (recursive check).
+- AC-5 mutation: with `schema_version: number`, `tsc` fails with TS2578 at `types.test.ts:96`. Restored.
+- Aggregate mutations, all caught, then restored:
+  - `sea_state` threshold 1.25→1.3
+  - `Math.floor`→`Math.trunc` in `directionName`
+  - `pySum` without compensation (caught by the golden and `circularMean`)
+- Fuzz of `directionName` against Python `//` (24,800 values near the sector boundaries): 0 mismatches.
+- `git diff d5df2ea..HEAD --stat`: no forbidden files touched. Only new fixtures were added. No new dependencies.
+
+- **R-1** (should) — `worker/test/aggregate.test.ts:92`: the tolerance is `1e-9` absolute, but the test name and the Dev notes say "≤1 ulp". Near 360, 1e-9 is about 17,000 ulp. Measured gap: only `[null,45,null]` differs (0.71 ulp), all other cases are exact. Expected fix: a relative tolerance, e.g. `<= 2 * Number.EPSILON * Math.abs(expected)`. Also add to the conventions/R-5 that a 1-ulp gap can, in theory, flip `rounded(...,0)` or `direction_name` right at a .5 / 22.5° boundary. This is an accepted residual risk, since the libm functions differ.
+- **R-2** (nit) — `tests/fixtures/gen_pipeline_fixtures.py:139`: the `mean` cases never exercise Neumaier summation. Removing the compensation breaks only the golden and `circularMean`, not `agg_cases.mean`. Add a case such as `[0.1]*10` or `[1e16, 1.0, -1e16]`. Note in the conventions that parity assumes CPython ≥ 3.12.
+- **R-3** (nit) — `worker/test/open_meteo.test.ts:127`: `.rejects.toThrow()` with no matcher. Assert `/Impossibile consultare/`, so the test shows that a timeout goes through the retry path like `TimeoutError` in Python.
+- **R-4** (nit) — `worker/src/forecast.ts:102`: `dailyNumber` returns `null` when the key is missing, while Python's `daily["..."]` raises `KeyError`. Missing provider data passes silently. Fail on `undefined` instead (keep `null` → `null`).
+- **R-5** (nit) — `worker/src/open_meteo.ts:144`: `mapWithConcurrency` skips `undefined` items and leaves holes typed as `R`. Remove the skip, or make the constraint `T extends {}`.
