@@ -1,0 +1,24 @@
+{
+  // Schema locale fornito da wrangler (autocompletamento nell'editor).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "maestrale",
+  "main": "src/index.ts",
+  // Data recente: abilita il comportamento corrente del runtime Workers.
+  // Vincolo: il workerd incluso in @cloudflare/vitest-pool-workers 0.23.0
+  // supporta al massimo 2026-08-22; alzarla solo dopo aver aggiornato il pool.
+  "compatibility_date": "2026-08-22",
+  "observability": {
+    "enabled": true
+  },
+  "kv_namespaces": [
+    {
+      "binding": "FORECASTS",
+      // PLACEHOLDER: id fittizio (32 hex) solo per build/dry-run e test locali.
+      // Sostituire con l'id restituito da:
+      //   npx wrangler kv namespace create FORECASTS
+      // Vedi worker/README.md, "Passi manuali".
+      "id": "00000000000000000000000000000000",
+      "preview_id": "00000000000000000000000000000000"
+    }
+  ]
+}
