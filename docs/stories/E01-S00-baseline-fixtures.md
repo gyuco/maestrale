@@ -3,7 +3,7 @@ id: E01-S00
 epic: E01
 title: "Baseline: fixture Open-Meteo e contratto API congelato"
 type: feature
-status: review
+status: done
 requirements: [FR-3, FR-4, FR-6, FR-7, FR-8, FR-12, FR-13, FR-19, FR-50, FR-51]
 depends_on: []
 verify:
@@ -109,4 +109,25 @@ due run).
 
 ## Review log
 
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-10-19 — Reviewer — Verdetto: done
+
+Verify: `python3 -m unittest discover -s tests -v` → Ran 17 tests — OK (anche con proxy
+fittizio verso 127.0.0.1:1, quindi offline). Golden verificate: hash di `regenerate.py`
+identici su due run; i 4 fixture grezzi sono byte-identici (salvo `generationtime_ms`)
+alle risposte live Open-Meteo ottenute con i `request_params` di `data_sources.py`;
+`golden_forecasts.json` == output di `update_forecasts.update_one` normalizzato;
+golden `/forecast` == risposta FastAPI (mutation test: modificare un valore o aggiungere
+un campo inventato fa fallire 2/3 test).
+
+- R-1 (nit) `tests/fixtures/regenerate.py:115-121` — il payload del cache duplica
+  `update_forecasts.py:100-106`; oggi identico, ma può derivare in silenzio.
+  Fix: riusare `update_forecasts.update_one`/un helper condiviso, o test di confronto.
+- R-2 (nit) `tests/test_fixtures.py:119` con `forecast.schema.json:37,147,172-173` —
+  `format: date-time`/`uri` non applicati (manca `format_checker`). Fix: passare
+  `FORMAT_CHECKER` o togliere i `format`.
+- R-3 (nit) `tests/test_fixtures.py:25-36`, `tests/fixtures/regenerate.py:43-51` —
+  catalogo località replicato (anche `locations.json`). Fix: derivarlo o documentare il pin.
+
+Note non bloccanti: `timezone` const `Europe/Rome` giustificato ma da annotare nel README;
+`location.slug` è aggiunto da `update_forecasts`, non da `build_forecast`;
+`jsonschema` è solo dev-dependency (ok).
