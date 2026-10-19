@@ -3,7 +3,7 @@ id: E01-S05
 epic: E01
 title: "API read-only su Workers (/health e /forecast) con parità col backend Python"
 type: feature
-status: review
+status: done
 requirements: [FR-19, FR-22, FR-23, FR-24, FR-25, FR-26, FR-28, FR-50, NFR-13]
 depends_on: [E01-S00, E01-S01, E01-S02, E01-S03]
 verify:
@@ -190,3 +190,35 @@ test dell'origine non consentita.
 | 3 | `npm test` + typecheck + `python3 -m unittest discover -s tests -v` | verde | 35 / 0 errori / 19 test OK |
 
 ## Review log
+
+### 2026-10-19 — Reviewer — verdict: **done** (nessun blocker)
+
+Verify rieseguiti: `npm test` 5 file / 35 test verdi; `npm run typecheck` 0 errori;
+`python3 -m unittest discover -s tests -v` 19 test OK. Parità con `backend/main.py` verificata su
+codici HTTP, messaggi, nomi di campo, regola di `status`, ordinamento di `available`, CORS.
+Decisioni documentate accettate: `cache_path` = `"kv:FORECASTS"` (eccezione OQ-19/FR-50), `GET /`
+mantenuta, 422 con `detail` stringa (status replicato; corpo FastAPI non rilevante per l'app),
+`round2` via `Math.round`, `generated_at` invalido → `degraded` invece del 500 Python.
+
+- **R-1** (should, non-blocking) — `worker/test/api.test.ts:105-113`: AC-1 cita «`generated_at`
+  manca **o è invalido**», ma è testato solo il caso `null`. Aggiungere un test con
+  `generated_at: "non-una-data"` → `degraded`, `stale: true`, `age_hours: null`,
+  `generated_at` restituito invariato.
+- **R-2** (nit, non-blocking) — `worker/src/routes/health.ts:27`: `Date.parse` interpreta un ISO
+  senza offset come ora locale, Python (`parse_utc`) come UTC. Su workerd il fuso è UTC, quindi
+  nessun effetto in produzione; per robustezza/esplicitezza aggiungere `Z` se manca l'offset o
+  documentarlo nel commento di `parseUtc`.
+- **R-3** (nit, non-blocking) — `worker/src/routes/health.ts:18`: `Number("")` = `0`, quindi
+  `FORECAST_MAX_AGE_HOURS=""` rende tutto `stale` (Python invece fallisce all'avvio). Trattare la
+  stringa vuota come non configurata (es. `env.FORECAST_MAX_AGE_HOURS?.trim() || DEFAULT`).
+- **R-4** (nit, non-blocking) — `worker/src/routes/health.ts:65,69`: piccole divergenze su
+  payload fuori contratto: `generated_at` non stringa viene restituito come `null` (Python lo
+  restituisce com'è) ed `errors: null` diventa `update_errors: {}` (Python `null`). Irrilevante
+  per lo schema congelato; eventualmente restituire `payload.generated_at ?? null` invariato.
+- **R-5** (nit, non-blocking) — `worker/test/api.test.ts:166-181`: il test del fallback per nome
+  verifica solo lo status 200; asserire anche il corpo (`location.name === "Sant'Antioco"`).
+- **R-6** (nit, non-blocking) — `worker/src/index.ts:37-44`: con lista di origini e origine non
+  consentita, la preflight Hono risponde 204 senza `Access-Control-Allow-Origin` mentre Starlette
+  risponde 400; il browser blocca comunque. Accettabile, eventualmente citarlo nelle differenze.
+- **R-7** (nit, non-blocking) — storia, AC-6: indica «17 test OK» per il Python, ma la suite ne
+  esegue 19 (come già riportato nelle Dev notes). Allineare il numero.
