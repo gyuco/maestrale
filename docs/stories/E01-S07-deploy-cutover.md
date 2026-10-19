@@ -3,7 +3,7 @@ id: E01-S07
 epic: E01
 title: "Deploy, cutover Flutter e dismissione del backend Python"
 type: feature
-status: in-progress
+status: review
 requirements: [FR-48, FR-49, FR-50, FR-52, NFR-11, NFR-12, NFR-13, NFR-15, NFR-18]
 depends_on: [E01-S00, E01-S01, E01-S02, E01-S03, E01-S04, E01-S05, E01-S08]
 verify:
@@ -373,19 +373,19 @@ Ordine obbligatorio: il confronto con Python (task 1-5) precede la rimozione (ta
 - [x] 4. Registrare in *Dev notes* comandi, output, data e hash del commit (AC-2). **Se c'è una
       differenza reale: fermarsi, annotarla, stato `blocked` e segnalarla** (è un difetto di S05
       o un'eccezione al PRD da decidere col proprietario, non da "sistemare" nel confronto)
-- [ ] 5. Aggiornare `app/README.md` (AC-3) e verificare che il diff su `app/lib`, `pubspec.*`,
+- [x] 5. Aggiornare `app/README.md` (AC-3) e verificare che il diff su `app/lib`, `pubspec.*`,
       `android`, `ios` sia vuoto; eseguire `flutter analyze` e `flutter test`
-- [ ] 6. Rimuovere Python (solo se il task 4 è verde): file e cartelle dell'elenco, voci obsolete di
+- [x] 6. Rimuovere Python (solo se il task 4 è verde): file e cartelle dell'elenco, voci obsolete di
       `.gitignore`; riscrivere `tests/fixtures/README.md` e correggere `legacy/copernicus/README.md`;
       eseguire `cd worker && npm test`, `npm run typecheck`, `npx wrangler deploy --dry-run
       --outdir dist` e i controlli di AC-4 (a)-(g)
-- [ ] 7. Aggiornare `README.md` radice e `worker/README.md` (AC-5), mantenendo le stringhe richieste
+- [x] 7. Aggiornare `README.md` radice e `worker/README.md` (AC-5), mantenendo le stringhe richieste
       dal test AC-8 di S04; rieseguire `npm test`
-- [ ] 8. Scrivere `docs/adr/0001-cloudflare-workers-kv.md` (AC-6) e compilare `docs/architecture.md`
+- [x] 8. Scrivere `docs/adr/0001-cloudflare-workers-kv.md` (AC-6) e compilare `docs/architecture.md`
       restando in `draft`
-- [ ] 9. Scrivere `docs/runbook.md` (AC-7): controllare ogni comando `wrangler` con `--help` o
+- [x] 9. Scrivere `docs/runbook.md` (AC-7): controllare ogni comando `wrangler` con `--help` o
       `--dry-run` (mai contro il remoto); lasciare la tabella delle misure Free con celle `da misurare`
-- [ ] 10. Eseguire tutti i comandi di `verify` (AC-11) e compilare *Dev notes*: esito del confronto,
+- [x] 10. Eseguire tutti i comandi di `verify` (AC-11) e compilare *Dev notes*: esito del confronto,
       elenco dei file cancellati, la scelta sul destino delle fixture, le conferme su "nessun
       `any`/dipendenza nuova"
 
@@ -504,8 +504,60 @@ Scoperte utili per il runbook:
   trattata come modulo (`Cannot find module .../scripts`). Il `verify` della storia è stato corretto in
   `node --test scripts/*.test.mjs` (stesso intento, funziona su Node 22).
 
+### Rimozione di Python e documentazione (coder, 2026-10-19)
+
+- **Tag**: `python-baseline` (locale, leggero, non pubblicato) su `2ff2cd8`, l'ultimo commit che contiene
+  ancora il Python; il commit di rimozione è `4188852`.
+- **File cancellati** (`git rm`): `backend/__init__.py`, `backend/main.py`, `previsioni_mare.py`,
+  `update_forecasts.py`, `data_sources.py`, `requirements.txt`, `requirements-dev.txt`,
+  `tests/test_backend.py`, `tests/test_data_sources.py`, `tests/test_fixtures.py`,
+  `tests/fixtures/gen_domain_fixtures.py`, `gen_pipeline_fixtures.py`, `regenerate.py`.
+  `git ls-files '*.py'` elenca solo `legacy/copernicus/*.py`.
+- **Fixture**: JSON congelate e invariate (`git diff` su `tests/fixtures/*.json`, `locations.json`,
+  `worker/src`, `worker/test` vuoto). Perdita accettata: nessuna validazione automatica dei golden contro
+  `forecast.schema.json`; ricetta di rigenerazione (tag) in `tests/fixtures/README.md` e nel runbook.
+- **Modificati**: `README.md`, `app/README.md` (solo doc: nessuna modifica Dart, `git diff` su
+  `app/lib`, `pubspec.*`, `android`, `ios` vuoto), `worker/README.md` (banner scaffold rimosso, paragrafo
+  Free/Paid riscritto conservando le stringhe richieste dal test AC-8 di S04; una prima stesura spezzava
+  "Workers Paid" su due righe e il test lo ha segnalato: corretto nel README, test non modificato),
+  `tests/fixtures/README.md`, `legacy/copernicus/README.md` (+ docstring dei due `.py` legacy:
+  "pipeline FastAPI" -> "pipeline operativa"), `.gitignore` (tolte le voci Python), `docs/architecture.md`
+  (sezioni 1, 2, 3, 5, 8, 9; resta `draft`).
+- **Nuovi**: `scripts/compare_backends.mjs`, `scripts/compare_backends.test.mjs` (15 test),
+  `docs/adr/0001-cloudflare-workers-kv.md` (`proposed`), `docs/runbook.md` (`draft`).
+- `wrangler.jsonc` non modificato (i placeholder KV restano finché l'orchestratore non crea i namespace).
+- Nessun `any`, nessuna dipendenza nuova (npm/pip/Dart): lo script usa solo `fetch` e moduli `node:`.
+- Comandi `wrangler` del runbook controllati con `--help`: `kv key put/get` (serve `--preview false`
+  con `id`+`preview_id`), `deployments list`, `rollback [version-id] -m`, `tail --format json`,
+  `dev --remote/--test-scheduled/--ip`. Non verificabile offline: quale KV usa `dev --remote` (scritto nel
+  runbook come tale).
+- Il `verify` della storia è stato corretto: `node --test scripts/` -> `node --test scripts/*.test.mjs`
+  (su Node 22 la directory non è accettata).
+
+### Stato degli AC
+
+AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-11: soddisfatti sul repository (vedi Run log).
+**AC-8, AC-9, AC-10: `[post-deploy]` PENDING** — da verificare dall'orchestratore dopo i Passi manuali 1-8
+(le celle della tabella delle misure nel runbook sono `da misurare`). Passo manuale 9 (host) e le
+conferme del proprietario restano a cura dell'orchestratore. Il Passo 0 (tag) è già fatto; il 10 è deciso
+(tollerare).
+
+### Esiti dei passi manuali (orchestratore)
+<!-- data, comando, esito -->
+
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
+| iterazione | comando | esito | note |
+|---|---|---|---|
+| 1 | `node --test scripts/*.test.mjs` | 15 pass / 0 fail | prima del codice: falliva (script assente) |
+| 1 | parità `--old :8000 --new :8787` (golden / cache vuota) | 0 differenze su 23 casi, entrambi | uvicorn + `wrangler dev --local` |
+| 1 | stessa parità con golden alterato | exit 1, 3 differenze | prova di non vacuità |
+| 1 | `cd worker && npm test` | 90/90 | dopo la rimozione di Python |
+| 1 | `cd worker && npm run typecheck` | ok | |
+| 1 | `cd worker && npx wrangler deploy --dry-run --outdir dist` | ok | `dist/` non committato |
+| 1 | `cd app && flutter analyze && flutter test` | No issues / 10 test pass | |
+| 1 | `test -z "$(git ls-files '*.py' | grep -v '^legacy/')"` | ok | |
+| 1 | grep AC-4(e) su README/app/worker/architecture/runbook/legacy | solo riferimenti storici etichettati nel runbook | |
 
 ## Review log
 <!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
