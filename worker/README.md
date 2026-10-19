@@ -30,12 +30,21 @@ e cache su **Workers KV** (binding `FORECASTS`).
 ```text
 worker/
 ├── src/index.ts              # app Hono + export default { fetch } (gancio scheduled: E01-S04)
+├── src/types.ts              # tipi del payload congelato (forecast.schema.json)
+├── src/slugify.ts            # port di backend/main.py:slugify (FR-22)
+├── src/data_sources.ts       # port di data_sources.py: catalogo sorgenti (FR-5)
 ├── test/app.test.ts          # test con SELF.fetch e binding KV
+├── test/types.test.ts        # golden assegnati ai tipi (E01-S02)
+├── test/slugify.test.ts      # parità con tests/fixtures/slug_cases.json (E01-S02)
+├── test/data_sources.test.ts # parità parametri/provenienza con la baseline Python (E01-S02)
 ├── worker-configuration.d.ts # tipi generati da `wrangler types` (Env + runtime)
 ├── wrangler.jsonc            # nome Worker, main, compatibility_date, KV FORECASTS
 ├── vitest.config.ts          # plugin cloudflareTest + kvNamespaces
 └── tsconfig.json
 ```
+
+I test dei moduli di dominio leggono le fixture di `tests/fixtures/` (generate dal codice Python
+in E01-S00/E01-S02), quindi il confronto è con la baseline reale, non con valori copiati a mano.
 
 ## Passi manuali (account Cloudflare)
 
