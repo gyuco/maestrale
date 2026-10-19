@@ -14,6 +14,9 @@ migrazione a Cloudflare Workers. Vivono qui (e non in `data/`) perché
 | `golden_forecast_torre-dei-corsari.json` | Esattamente il corpo restituito da `GET /forecast?localita=torre-dei-corsari` |
 | `forecast.schema.json` | JSON Schema draft 2020-12 del payload (contratto congelato) |
 | `regenerate.py` | Script che ricrea fixture e golden |
+| `slug_cases.json` | Casi `input`/`expected` di `backend.main.slugify` per il port TS (E01-S02) |
+| `request_params.json` | Parametri di `data_sources.py` (marine/weather) per il port TS (E01-S02) |
+| `gen_domain_fixtures.py` | Script che rigenera le due fixture di dominio (E01-S02) |
 
 Località coperte: `torre-dei-corsari`, `cagliari`.
 
@@ -33,6 +36,9 @@ python3 tests/fixtures/regenerate.py
 
 # Riscarica le risposte reali da Open-Meteo e poi ricostruisce i golden:
 python3 tests/fixtures/regenerate.py --fetch
+
+# Rigenera le fixture di dominio (slugify e parametri delle sorgenti):
+python3 tests/fixtures/gen_domain_fixtures.py
 
 # Verifica:
 python3 -m unittest discover -s tests -v

@@ -1,0 +1,29 @@
+{
+  "description": "Parametri di data_sources.py per la località di riferimento (stesse chiavi, stesso ordine).",
+  "case": {
+    "slug": "torre-dei-corsari",
+    "latitude": 39.688153,
+    "longitude": 8.450613,
+    "days": 7,
+    "timezone": "Europe/Rome"
+  },
+  "marine": {
+    "latitude": 39.688153,
+    "longitude": 8.450613,
+    "hourly": "wave_height,wave_direction,wave_period,sea_surface_temperature",
+    "timezone": "Europe/Rome",
+    "forecast_days": 7,
+    "cell_selection": "sea",
+    "models": "best_match"
+  },
+  "weather": {
+    "latitude": 39.688153,
+    "longitude": 8.450613,
+    "hourly": "temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+    "timezone": "Europe/Rome",
+    "forecast_days": 7,
+    "cell_selection": "land",
+    "models": "best_match",
+    "daily": "weather_code,temperature_2m_min,temperature_2m_max,wind_speed_10m_max,wind_gusts_10m_max"
+  }
+}
