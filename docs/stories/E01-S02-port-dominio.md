@@ -3,7 +3,7 @@ id: E01-S02
 epic: E01
 title: "Port del dominio: tipi TS del payload, slugify e catalogo sorgenti"
 type: feature
-status: review
+status: done
 requirements: [FR-3, FR-4, FR-5, FR-12, FR-13, FR-19, FR-22, FR-50, FR-51]
 depends_on: [E01-S00, E01-S01]
 verify:
@@ -184,4 +184,24 @@ i 2 test di ordine delle chiavi (mentre `toEqual` da solo non li avrebbe visti).
 
 ## Review log
 
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-10-19 — Reviewer — Verdetto: done
+
+Verify rieseguiti: `cd worker && npm test` → 4 file / 16 test verdi; `npm run typecheck` → 0 errori;
+`python3 -m unittest discover -s tests -v` → 17 OK.
+
+Parità reale verificata, non dichiarata: `gen_domain_fixtures.py` rigenera JSON byte-identici; confronto
+sistematico TS↔Python su 4062 input `slugify`, 200 `request_params`, 18 `provenance` → 0 divergenze.
+Mutazioni su `slugify`/`provenance`/`requestParams` fanno fallire i test. Scope rispettato: nessuna
+dipendenza nuova, `worker/src/index.ts` intatto, fixture/golden esistenti non modificati.
+
+- R-1 (should) `worker/test/types.test.ts:93-94` — il `@ts-expect-error` su `schema_version` è soddisfatto
+  da un errore diverso (spread dei tipi allargati) e non vincola la costante. Fix: asserire su un literal
+  puro. Raccolto in E01-S03, dove arriva la validazione a runtime.
+- R-2 (nit) `worker/test/types.test.ts:36-51` — l'assegnazione del golden copre solo golden→tipi e non
+  intercetta un `null` in più; il confronto con lo schema è comunque corretto.
+- R-3 (nit) `docs/stories/E01-S02-port-dominio.md:115` — "sei campi di `daily.sea`" → sono sette.
+- R-4 (nit) `worker/src/data_sources.ts:101-104` — divergenza residua solo su risposte provider senza
+  `latitude`/`longitude` (tipo non producibile da Open-Meteo): guard da valutare nel fetch (E01-S03/S04).
+
+Note: gli slug con apostrofi/parentesi non rispettano il `pattern` dello schema ma è la parità richiesta
+con `backend/main.py` (FR-51); le 13 località del catalogo non lo attivano.
