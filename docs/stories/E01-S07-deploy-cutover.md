@@ -3,7 +3,7 @@ id: E01-S07
 epic: E01
 title: "Deploy, cutover Flutter e dismissione del backend Python"
 type: feature
-status: review
+status: done
 requirements: [FR-48, FR-49, FR-50, FR-52, NFR-11, NFR-12, NFR-13, NFR-15, NFR-18]
 depends_on: [E01-S00, E01-S01, E01-S02, E01-S03, E01-S04, E01-S05, E01-S08]
 verify:
@@ -607,3 +607,8 @@ AC soddisfatti sul repository: AC-1..AC-7, AC-11; AC-8 verificato (deploy, `GET 
 `routes`). **Pendenti**: AC-9 (misura del cron su Free: tabella del runbook ancora `da misurare`),
 AC-10 parte app (Passo 8, owner), Passo 9 (dismissione host, owner). R-1/R-2 da correggere insieme
 all'annotazione di AC-9; poi `done`.
+
+### Chiusura (2026-10-19)
+Chiusa su decisione dell'owner con AC-1..AC-8, AC-10 (parte smoke) e AC-11 verificati. AC-9 (misura
+del cron su Free), AC-10 (prova dell'app Flutter) e Passo 9 (dismissione lato host), insieme ai nit
+R-3, R-4 e R-5, passano a un task di follow-up nel planner, fuori da E01.
