@@ -575,3 +575,35 @@ Tutti il 2026-10-19, da `worker/`, con l'ok dell'owner.
 
 ## Review log
 <!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+
+### 2026-10-19 — Reviewer — verdetto: approvato, in attesa di AC-9 e passi owner (status resta `review`)
+
+Verify eseguito dal reviewer su `776e7bb`: `npm test` 90/90, `typecheck` ok, `wrangler deploy --dry-run`
+ok (binding KV reale), `node --test scripts/*.test.mjs` 15/15, `flutter analyze` no issues,
+`flutter test` 10/10, nessun `*.py` fuori da `legacy/`. Smoke in sola lettura su
+`https://maestrale.giuseppe-concas.workers.dev`: `SMOKE OK` ramo 200, `GET /` 200, `/health` ok.
+Controlli: ordine commit corretto (parità `2ff2cd8` → tag `python-baseline` → rimozione `4188852`);
+`app/lib`, `pubspec.*`, `android`, `ios`, `worker/src`, `worker/test`, fixture JSON, `locations.json`
+invariati; `wrangler.jsonc` cambia solo gli id KV con commenti su riga intera; `docs/PRD.md`
+identico all'originale; nessun segreto. Nessun blocker.
+
+- **R-1** (should) `tests/fixtures/README.md:44-46` e `docs/runbook.md:164`: la ricetta di
+  rigenerazione omette `python3 tests/fixtures/gen_pipeline_fixtures.py`, che al tag `python-baseline`
+  genera `round_cases.json`, `agg_cases.json` e `request_urls.json`. Aggiungere il comando e indicare
+  quale generatore produce ciascun file.
+- **R-2** (should) `worker/README.md:57,73,90-91` e `docs/runbook.md:23-24`: parlano ancora del
+  placeholder `000…0` "committato"/"oggi", ma da `a9bd0ab` gli id sono reali. Riformulare come
+  procedura per un nuovo account (o "già fatto il 2026-10-19, id in `wrangler.jsonc`").
+- **R-3** (nit) `scripts/compare_backends.test.mjs:193-203`: il test si chiama "503 con detail diverso
+  fallisce", ma confronta 503 con 404 (differenza di status). Aggiungere un caso 503 vs 503 con `detail`
+  diverso e un caso 422 senza `detail` che deve fallire (le regole già ci sono, mancano i test).
+- **R-4** (nit) `.gitignore`: tolto `data/*.json`, ma il workspace principale ha ancora
+  `data/forecasts.json`. Dopo il merge comparirà come non tracciato e potrebbe finire in un
+  `git add -A`. Fare il Passo 9 (cancellarlo) prima del merge, oppure tenere la voce finché il file
+  esiste.
+- **R-5** (nit) `docs/architecture.md:4`: `prd_version: 0.1`, il PRD è alla `0.2`.
+
+AC soddisfatti sul repository: AC-1..AC-7, AC-11; AC-8 verificato (deploy, `GET /` 200, nessun
+`routes`). **Pendenti**: AC-9 (misura del cron su Free: tabella del runbook ancora `da misurare`),
+AC-10 parte app (Passo 8, owner), Passo 9 (dismissione host, owner). R-1/R-2 da correggere insieme
+all'annotazione di AC-9; poi `done`.
