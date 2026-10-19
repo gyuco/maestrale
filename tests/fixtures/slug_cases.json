@@ -1,0 +1,105 @@
+{
+  "description": "Casi di slugify generati da backend.main.slugify (E01-S02).",
+  "cases": [
+    {
+      "input": "Santa Teresa",
+      "expected": "santa-teresa"
+    },
+    {
+      "input": "Torre dei Corsari",
+      "expected": "torre-dei-corsari"
+    },
+    {
+      "input": "Cagliari",
+      "expected": "cagliari"
+    },
+    {
+      "input": "La Maddalena",
+      "expected": "la-maddalena"
+    },
+    {
+      "input": "Porto Torres",
+      "expected": "porto-torres"
+    },
+    {
+      "input": "Sant'Antioco",
+      "expected": "sant'antioco"
+    },
+    {
+      "input": "Cagliarì",
+      "expected": "cagliari"
+    },
+    {
+      "input": "  Chia  ",
+      "expected": "chia"
+    },
+    {
+      "input": "Porto_Torres",
+      "expected": "porto-torres"
+    },
+    {
+      "input": "FOO_BAR baz",
+      "expected": "foo-bar-baz"
+    },
+    {
+      "input": "A  B",
+      "expected": "a-b"
+    },
+    {
+      "input": "Città  Metropolitana",
+      "expected": "citta-metropolitana"
+    },
+    {
+      "input": "12 Ètà 3",
+      "expected": "12-eta-3"
+    },
+    {
+      "input": "Żebbuġ",
+      "expected": "zebbug"
+    },
+    {
+      "input": "Chia\tPiana\nSud",
+      "expected": "chia-piana-sud"
+    },
+    {
+      "input": "A\u001cB",
+      "expected": "a-b"
+    },
+    {
+      "input": "foo_",
+      "expected": "foo-"
+    },
+    {
+      "input": "under__score",
+      "expected": "under--score"
+    },
+    {
+      "input": "Łeba",
+      "expected": "eba"
+    },
+    {
+      "input": "Ørsted",
+      "expected": "rsted"
+    },
+    {
+      "input": "Ω ohm",
+      "expected": "ohm"
+    },
+    {
+      "input": "Œuvre",
+      "expected": "uvre"
+    },
+    {
+      "input": "San Teodoro (OT)",
+      "expected": "san-teodoro-(ot)"
+    },
+    {
+      "input": "",
+      "expected": ""
+    },
+    {
+      "input": "   ",
+      "expected": ""
+    }
+  ]
+}

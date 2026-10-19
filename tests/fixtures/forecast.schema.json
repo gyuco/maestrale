@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://maestrale.local/schema/forecast.schema.json",
+  "title": "Maestrale — payload del cache previsioni",
+  "description": "Contratto dell'oggetto salvato dal job (schema_version 1) e restituito da GET /forecast?localita=<slug|nome>. Congela nomi di campo, tipi e struttura usati dall'app Flutter (FR-19, FR-50, FR-51).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at", "updated_locations", "errors", "locations"],
+  "properties": {
+    "schema_version": {
+      "description": "Versione del contratto del payload (FR-19).",
+      "const": 1
+    },
+    "generated_at": {
+      "description": "Fine dell'esecuzione del job, UTC ISO 8601 (FR-19).",
+      "$ref": "#/$defs/isoTimestamp"
+    },
+    "updated_locations": {
+      "description": "Slug aggiornati con successo nell'esecuzione, ordinati.",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "description": "Messaggi d'errore per gli slug falliti (FR-18).",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "locations": {
+      "description": "Previsione per slug: è esattamente ciò che restituisce GET /forecast (FR-22).",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/forecast" }
+    }
+  },
+  "$defs": {
+    "isoTimestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "isoDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "nullableNumber": {
+      "type": ["number", "null"]
+    },
+    "coordinates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" }
+      }
+    },
+    "forecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["location", "cells", "timezone", "generated_at", "sources", "daily"],
+      "properties": {
+        "location": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "latitude", "longitude", "slug"],
+          "properties": {
+            "name": { "type": "string" },
+            "latitude": { "type": "number" },
+            "longitude": { "type": "number" },
+            "slug": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          }
+        },
+        "cells": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["marine", "weather"],
+          "properties": {
+            "marine": {
+              "description": "Cella di mare effettivamente usata dal provider (FR-13).",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["latitude", "longitude"],
+              "properties": {
+                "latitude": { "type": "number" },
+                "longitude": { "type": "number" }
+              }
+            },
+            "weather": {
+              "description": "Cella di terra effettivamente usata dal provider (FR-13).",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["latitude", "longitude", "elevation_m"],
+              "properties": {
+                "latitude": { "type": "number" },
+                "longitude": { "type": "number" },
+                "elevation_m": { "$ref": "#/$defs/nullableNumber" }
+              }
+            }
+          }
+        },
+        "timezone": {
+          "description": "Fuso orario del catalogo località; la pipeline operativa usa Europe/Rome.",
+          "const": "Europe/Rome"
+        },
+        "generated_at": { "$ref": "#/$defs/isoTimestamp" },
+        "sources": {
+          "description": "Provenienza dei dati (FR-12).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sea", "weather"],
+          "properties": {
+            "sea": { "$ref": "#/$defs/source" },
+            "weather": { "$ref": "#/$defs/source" }
+          }
+        },
+        "daily": {
+          "description": "Giorni aggregati, ordinati per data crescente (FR-6).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/day" }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "provider",
+        "service",
+        "endpoint",
+        "model_selection",
+        "variables",
+        "requested_coordinates",
+        "resolved_cell",
+        "fetched_at",
+        "attribution",
+        "documentation_url",
+        "license_url"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "provider": { "type": "string" },
+        "service": { "type": "string" },
+        "endpoint": { "type": "string", "format": "uri" },
+        "model_selection": { "type": "string" },
+        "variables": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hourly", "daily"],
+          "properties": {
+            "hourly": { "type": "array", "items": { "type": "string" } },
+            "daily": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "requested_coordinates": { "$ref": "#/$defs/coordinates" },
+        "resolved_cell": {
+          "description": "Cella risolta dal provider, con quota se fornita.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["latitude", "longitude"],
+          "properties": {
+            "latitude": { "type": "number" },
+            "longitude": { "type": "number" },
+            "elevation_m": { "type": "number" }
+          }
+        },
+        "fetched_at": { "$ref": "#/$defs/isoTimestamp" },
+        "attribution": { "type": "string" },
+        "documentation_url": { "type": "string", "format": "uri" },
+        "license_url": { "type": "string", "format": "uri" }
+      }
+    },
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "sea", "weather"],
+      "properties": {
+        "date": { "$ref": "#/$defs/isoDate" },
+        "sea": { "$ref": "#/$defs/sea" },
+        "weather": { "$ref": "#/$defs/weather" }
+      }
+    },
+    "sea": {
+      "description": "Aggregato marino giornaliero (FR-7).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "wave_height_mean_m",
+        "wave_height_max_m",
+        "wave_period_mean_s",
+        "wave_direction_mean_deg",
+        "wave_direction_name",
+        "water_temperature_mean_c"
+      ],
+      "properties": {
+        "state": {
+          "description": "Stato del mare Douglas/WMO derivato dall'altezza media (FR-10).",
+          "type": ["string", "null"]
+        },
+        "wave_height_mean_m": { "$ref": "#/$defs/nullableNumber" },
+        "wave_height_max_m": { "$ref": "#/$defs/nullableNumber" },
+        "wave_period_mean_s": { "$ref": "#/$defs/nullableNumber" },
+        "wave_direction_mean_deg": {
+          "description": "Media circolare in gradi [0, 360) (FR-9).",
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "wave_direction_name": {
+          "description": "Rosa dei venti a 8 settori (FR-11).",
+          "type": ["string", "null"]
+        },
+        "water_temperature_mean_c": { "$ref": "#/$defs/nullableNumber" }
+      }
+    },
+    "weather": {
+      "description": "Aggregato meteo giornaliero (FR-8).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "air_temperature_mean_c",
+        "air_temperature_min_c",
+        "air_temperature_max_c",
+        "weather_code",
+        "wind_speed_mean_kmh",
+        "wind_speed_max_kmh",
+        "wind_gust_mean_kmh",
+        "wind_gust_max_kmh",
+        "wind_direction_mean_deg",
+        "wind_name"
+      ],
+      "properties": {
+        "air_temperature_mean_c": { "$ref": "#/$defs/nullableNumber" },
+        "air_temperature_min_c": { "$ref": "#/$defs/nullableNumber" },
+        "air_temperature_max_c": { "$ref": "#/$defs/nullableNumber" },
+        "weather_code": {
+          "description": "Codice WMO orario/giornaliero del provider.",
+          "type": ["integer", "null"]
+        },
+        "wind_speed_mean_kmh": { "$ref": "#/$defs/nullableNumber" },
+        "wind_speed_max_kmh": { "$ref": "#/$defs/nullableNumber" },
+        "wind_gust_mean_kmh": { "$ref": "#/$defs/nullableNumber" },
+        "wind_gust_max_kmh": { "$ref": "#/$defs/nullableNumber" },
+        "wind_direction_mean_deg": {
+          "description": "Media circolare in gradi [0, 360) (FR-9).",
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "wind_name": {
+          "description": "Rosa dei venti a 8 settori (FR-11).",
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

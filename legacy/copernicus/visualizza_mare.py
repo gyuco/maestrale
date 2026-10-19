@@ -1,4 +1,4 @@
-"""Visualizzatore legacy, non usato dalla pipeline FastAPI.
+"""Visualizzatore legacy, non usato dalla pipeline operativa.
 
 Visualizza i dati mare scaricati da sardegna_mare.py per una località.
 

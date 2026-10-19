@@ -1,0 +1,29 @@
+{
+  // Schema locale fornito da wrangler (autocompletamento nell'editor).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "maestrale",
+  "main": "src/index.ts",
+  // Data recente: abilita il comportamento corrente del runtime Workers.
+  // Vincolo: il workerd incluso in @cloudflare/vitest-pool-workers 0.23.0
+  // supporta al massimo 2026-08-22; alzarla solo dopo aver aggiornato il pool.
+  "compatibility_date": "2026-08-22",
+  // Cron Trigger (FR-49): ogni 6 h, solo UTC. 00:30/06:30/12:30/18:30 UTC sono
+  // 02:30/08:30/14:30/20:30 con l'ora legale (CEST) e 01:30/07:30/13:30/19:30
+  // in inverno (CET): l'intervallo non cambia, si sposta solo l'ora locale.
+  "triggers": {
+    "crons": ["30 0,6,12,18 * * *"]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "kv_namespaces": [
+    {
+      "binding": "FORECASTS",
+      // Namespace reali creati il 2026-10-19 con
+      //   npx wrangler kv namespace create FORECASTS [--preview]
+      // Gli id non sono segreti. Vedi docs/runbook.md.
+      "id": "7b1c0444535542408cc05fa9dd59536b",
+      "preview_id": "b6b83416188441aea18ce2846ccad5d6"
+    }
+  ]
+}
