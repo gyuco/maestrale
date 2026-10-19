@@ -44,6 +44,7 @@ python3 -m pip install -r requirements.txt -r requirements-dev.txt
 python3 tests/fixtures/regenerate.py            # ricostruisce i golden dalle risposte già presenti
 python3 tests/fixtures/regenerate.py --fetch    # riscarica le risposte reali da Open-Meteo
 python3 tests/fixtures/gen_domain_fixtures.py   # slug e parametri delle sorgenti
+python3 tests/fixtures/gen_pipeline_fixtures.py # round_cases, agg_cases, request_urls
 python3 -m unittest discover -s tests -v        # include la validazione contro lo schema
 ```
 

@@ -54,7 +54,10 @@ valori copiati a mano.
 ## Passi manuali (account Cloudflare)
 
 Questi passi **non** sono automatizzati: richiedono l'account Cloudflare del proprietario e non
-girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'id del namespace KV.
+girano in CI. Sono già stati eseguiti il 2026-10-19: `wrangler.jsonc` contiene gli id reali
+(`id` `7b1c0444535542408cc05fa9dd59536b`, `preview_id` `b6b83416188441aea18ce2846ccad5d6`) e il Worker è
+pubblicato su `https://maestrale.giuseppe-concas.workers.dev`. Servono di nuovo solo per un account o
+namespace diverso.
 
 1. Login (una volta sola, apre il browser):
 
@@ -70,7 +73,7 @@ girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'i
 
    Wrangler stampa l'`id` e propone il frammento di configurazione: il progetto usa
    `wrangler.jsonc`, quindi va inserito in JSONC nell'array già presente in `wrangler.jsonc`
-   (sostituendo il placeholder):
+   (sostituendo l'id esistente):
 
    ```jsonc
    "kv_namespaces": [
@@ -87,8 +90,7 @@ girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'i
    npx wrangler kv namespace create FORECASTS --preview
    ```
 
-3. Sostituisci in `wrangler.jsonc` i due placeholder
-   `00000000000000000000000000000000` con gli id reali (`id` e `preview_id`).
+3. Sostituisci in `wrangler.jsonc` `id` e `preview_id` con gli id restituiti.
 
 4. Deploy:
 

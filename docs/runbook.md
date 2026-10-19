@@ -20,8 +20,8 @@ sviluppo; nessun custom domain).
 1. **[account]** `npx wrangler login` (autorizzazione nel browser).
 2. **[account]** Crea i namespace KV e annota i due id (non sono segreti):
    `npx wrangler kv namespace create FORECASTS` e `npx wrangler kv namespace create FORECASTS --preview`.
-3. Scrivi gli id in `worker/wrangler.jsonc` (`id` e `preview_id`, oggi
-   `00000000000000000000000000000000`). Se aggiungi commenti usa solo righe intere che iniziano con
+3. Scrivi gli id in `worker/wrangler.jsonc` (`id` e `preview_id`; dal 2026-10-19
+   sono `7b1c0444535542408cc05fa9dd59536b` e `b6b83416188441aea18ce2846ccad5d6`). Se aggiungi commenti usa solo righe intere che iniziano con
    `//` (il test `worker/test/update.test.ts` legge il file così). Poi `cd worker && npm test`.
 4. Prova di build senza pubblicare: `npx wrangler deploy --dry-run --outdir dist` (`dist/` non si committa).
 5. **[account]** `npx wrangler deploy`. Al primo deploy wrangler può chiedere di **registrare il
@@ -161,7 +161,7 @@ Decisione del proprietario (2026-10-19): sul Free un cron che fallisce si **toll
 
 Il codice Python rimosso è nel tag git **locale** `python-baseline` (non pubblicato). Ricetta completa
 in [`tests/fixtures/README.md`](../tests/fixtures/README.md): `git checkout python-baseline`, poi
-`python3 tests/fixtures/regenerate.py [--fetch]`.
+`python3 tests/fixtures/regenerate.py [--fetch]`, `gen_domain_fixtures.py` e `gen_pipeline_fixtures.py`.
 
 ## Dismissione lato host del backend Python storico (una tantum)
 
