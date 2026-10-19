@@ -19,12 +19,11 @@
   "kv_namespaces": [
     {
       "binding": "FORECASTS",
-      // PLACEHOLDER: id fittizio (32 hex) solo per build/dry-run e test locali.
-      // Sostituire con l'id restituito da:
-      //   npx wrangler kv namespace create FORECASTS
-      // Vedi worker/README.md, "Passi manuali".
-      "id": "00000000000000000000000000000000",
-      "preview_id": "00000000000000000000000000000000"
+      // Namespace reali creati il 2026-10-19 con
+      //   npx wrangler kv namespace create FORECASTS [--preview]
+      // Gli id non sono segreti. Vedi docs/runbook.md.
+      "id": "7b1c0444535542408cc05fa9dd59536b",
+      "preview_id": "b6b83416188441aea18ce2846ccad5d6"
     }
   ]
 }

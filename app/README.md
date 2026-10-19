@@ -1,6 +1,6 @@
 # Maestrale — app Flutter
 
-Client mobile del backend FastAPI. Cerca una località costiera e mostra le medie
+Client mobile del backend Maestrale (Cloudflare Worker). Cerca una località costiera e mostra le medie
 giornaliere di onde, temperatura dell'acqua, temperatura dell'aria e vento. Una
 località può essere impostata come pagina iniziale: viene salvata sul dispositivo
 e caricata automaticamente agli avvii successivi. L'icona mappa nella barra
@@ -17,26 +17,34 @@ di `objective_c`.
 
 ## Avvio
 
-Avvia prima il backend dalla root del repository, poi:
+L'URL del backend si passa **in fase di build** con `--dart-define`; non servono modifiche al codice.
+Contro il Worker pubblicato (deploy di sviluppo su `workers.dev`):
 
 ```bash
 cd app
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://localhost:8000
+flutter run --dart-define=API_BASE_URL=https://maestrale.<sottodominio-account>.workers.dev
+```
+
+In locale, avviando il Worker con `cd worker && npm run dev` (ascolta su `http://localhost:8787`):
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://localhost:8787
 ```
 
 `API_BASE_URL` non deve terminare con `/`. Il valore predefinito è
-`http://localhost:8000`.
+`http://localhost:8000` (retaggio del vecchio backend locale): con il Worker va sempre indicato
+l'URL corretto.
 
-Indirizzi utili in sviluppo:
+Indirizzi utili in sviluppo locale (`wrangler dev`):
 
-- iOS Simulator, macOS, web: `http://localhost:8000`
-- Android Emulator: `http://10.0.2.2:8000`
-- dispositivo fisico: `http://<IP-LAN-del-computer>:8000` (backend in ascolto su
-  `0.0.0.0` e dispositivo sulla stessa rete)
+- iOS Simulator, macOS, web: `http://localhost:8787`
+- Android Emulator: `http://10.0.2.2:8787`
+- dispositivo fisico: `http://<IP-LAN-del-computer>:8787` (avviare il Worker con
+  `npx wrangler dev --ip 0.0.0.0` e dispositivo sulla stessa rete)
 
-Per una build di produzione usare un endpoint HTTPS. Il manifest Android accetta
-HTTP in chiaro esclusivamente per facilitare lo sviluppo locale.
+Per una build di produzione usare un endpoint HTTPS (il Worker su `workers.dev` lo è). Il manifest
+Android accetta HTTP in chiaro esclusivamente per facilitare lo sviluppo locale.
 
 ## API consumata
 

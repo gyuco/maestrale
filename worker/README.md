@@ -3,8 +3,9 @@
 Backend Maestrale su **Cloudflare Workers** (TypeScript), con router [Hono](https://hono.dev)
 e cache su **Workers KV** (binding `FORECASTS`).
 
-> Stato: **scaffold** (E01-S01). Qui c'è solo la route di prova `GET /`; le API `/forecast` e
-> `/health` e il job di aggiornamento arrivano nelle storie successive di E01.
+Espone `GET /` (probe), `GET /health` e `GET /forecast?localita=...` (contratto identico al backend
+Python storico, FR-50) e aggiorna il cache KV con un Cron Trigger ogni 6 h (FR-49). Operatività
+(deploy, cron, rollback, osservabilità, limiti): [`docs/runbook.md`](../docs/runbook.md).
 
 ## Requisiti
 
@@ -29,27 +30,34 @@ e cache su **Workers KV** (binding `FORECASTS`).
 
 ```text
 worker/
-├── src/index.ts              # app Hono + export default { fetch } (gancio scheduled: E01-S04)
+├── src/index.ts              # app Hono + export default { fetch, scheduled }
+├── src/routes/               # GET /health e GET /forecast
+├── src/update.ts             # job di aggiornamento (13 località, merge con il cache)
+├── src/forecast.ts           # costruzione della previsione per località
+├── src/aggregate.ts          # aggregazioni giornaliere e arrotondamenti
+├── src/open_meteo.ts         # client Open-Meteo con retry
+├── src/store.ts              # lettura/scrittura del cache nella KV (chiave `latest`)
 ├── src/types.ts              # tipi del payload congelato (forecast.schema.json)
-├── src/slugify.ts            # port di backend/main.py:slugify (FR-22)
-├── src/data_sources.ts       # port di data_sources.py: catalogo sorgenti (FR-5)
-├── test/app.test.ts          # test con SELF.fetch e binding KV
-├── test/types.test.ts        # golden assegnati ai tipi (E01-S02)
-├── test/slugify.test.ts      # parità con tests/fixtures/slug_cases.json (E01-S02)
-├── test/data_sources.test.ts # parità parametri/provenienza con la baseline Python (E01-S02)
+├── src/slugify.ts            # slug dei nomi di località (FR-22)
+├── src/data_sources.ts       # catalogo sorgenti e parametri delle richieste (FR-5)
+├── test/                     # Vitest dentro workerd (Miniflare), fixture di ../tests/fixtures
 ├── worker-configuration.d.ts # tipi generati da `wrangler types` (Env + runtime)
-├── wrangler.jsonc            # nome Worker, main, compatibility_date, KV FORECASTS
+├── wrangler.jsonc            # nome Worker, main, compatibility_date, cron, KV FORECASTS
 ├── vitest.config.ts          # plugin cloudflareTest + kvNamespaces
 └── tsconfig.json
 ```
 
-I test dei moduli di dominio leggono le fixture di `tests/fixtures/` (generate dal codice Python
-in E01-S00/E01-S02), quindi il confronto è con la baseline reale, non con valori copiati a mano.
+I test leggono le fixture JSON congelate di `tests/fixtures/` (prodotte dall'implementazione Python
+storica, vedi `tests/fixtures/README.md`), quindi il confronto è con la baseline reale e non con
+valori copiati a mano.
 
 ## Passi manuali (account Cloudflare)
 
 Questi passi **non** sono automatizzati: richiedono l'account Cloudflare del proprietario e non
-girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'id del namespace KV.
+girano in CI. Sono già stati eseguiti il 2026-10-19: `wrangler.jsonc` contiene gli id reali
+(`id` `7b1c0444535542408cc05fa9dd59536b`, `preview_id` `b6b83416188441aea18ce2846ccad5d6`) e il Worker è
+pubblicato su `https://maestrale.giuseppe-concas.workers.dev`. Servono di nuovo solo per un account o
+namespace diverso.
 
 1. Login (una volta sola, apre il browser):
 
@@ -65,7 +73,7 @@ girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'i
 
    Wrangler stampa l'`id` e propone il frammento di configurazione: il progetto usa
    `wrangler.jsonc`, quindi va inserito in JSONC nell'array già presente in `wrangler.jsonc`
-   (sostituendo il placeholder):
+   (sostituendo l'id esistente):
 
    ```jsonc
    "kv_namespaces": [
@@ -82,8 +90,7 @@ girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'i
    npx wrangler kv namespace create FORECASTS --preview
    ```
 
-3. Sostituisci in `wrangler.jsonc` i due placeholder
-   `00000000000000000000000000000000` con gli id reali (`id` e `preview_id`).
+3. Sostituisci in `wrangler.jsonc` `id` e `preview_id` con gli id restituiti.
 
 4. Deploy:
 
@@ -91,12 +98,13 @@ girano in CI. Il `wrangler.jsonc` committato contiene un **placeholder** per l'i
    npm run deploy
    ```
 
-   Il deploy reale va fatto solo dopo aver completato i passi 1–3. Per verificare il bundle
+   Il deploy di sviluppo pubblica su `https://maestrale.<sottodominio-account>.workers.dev` (nessun
+   custom domain). Va fatto solo dopo aver completato i passi 1–3. Per verificare il bundle
    senza pubblicare: `npx wrangler deploy --dry-run --outdir dist`.
 
 ## Aggiornamento programmato
 
-Il job di aggiornamento (`src/update.ts`, port di `update_forecasts.py`) gira come **Cron Trigger**
+Il job di aggiornamento (`src/update.ts`, porting del job Python storico) gira come **Cron Trigger**
 (handler `scheduled` in `src/index.ts`) con espressione fissa, in **UTC**:
 
 ```text
@@ -117,11 +125,13 @@ riscritta (`generated_at` invecchia e `/health` diventa `stale`); l'handler riso
 aver loggato, per non far ritentare il cron. Un catalogo invalido o una `KV.put` fallita fanno
 fallire l'invocazione. L'esito è nei log (`event: "forecast_update"`).
 
-> **Attenzione: serve il piano Workers Paid.** Un'esecuzione richiede 26 subrequest (13 × 2), fino a
-> 78 con i retry. Sul **piano Free** (10 ms di CPU, 50 subrequest per invocazione) il cron
-> **fallirebbe**. Il piano **Paid** (10.000 subrequest, CPU fino a 15 min per cron con intervallo
-> >= 1 h) deve essere abilitato **prima del deploy di produzione** (E01-S07). La conferma del piano
-> è ancora aperta (OQ-22).
+> **Piano Cloudflare.** Un'esecuzione richiede 26 subrequest (13 × 2), fino a 78 con i retry. Il
+> **piano Free** ha 10 ms di CPU e 50 subrequest per invocazione: in **sviluppo** si usa il piano
+> Free e il cron **probabilmente non riesce a completare** (E01-S07: si tollera e si misura; i
+> valori reali sono nella tabella di [`docs/runbook.md`](../docs/runbook.md)). Il piano
+> **Workers Paid** (10.000 subrequest, CPU fino a 15 min per cron con intervallo >= 1 h) è una decisione
+> futura, da prendere sulle misure e **comunque prima di aprire l'app ad altri utenti** (regola
+> go/no-go nel runbook). La conferma del piano resta aperta (OQ-22).
 
 Prova in locale:
 

@@ -1,4 +1,4 @@
-"""Prototipo legacy, non usato dalla pipeline FastAPI.
+"""Prototipo legacy, non usato dalla pipeline operativa.
 
 Situazione del mare - Sardegna
 Scarica temperatura/correnti (fisica) e altezza onde da Copernicus Marine Service.
