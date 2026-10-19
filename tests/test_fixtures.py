@@ -6,10 +6,14 @@ ignorata. I test non accedono alla rete: validano solo gli artefatti committati.
 
 from __future__ import annotations
 
+import copy
+import datetime
 import json
+import re
 import unittest
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 import jsonschema
@@ -59,6 +63,38 @@ WEATHER_DAILY = (
 def load_json(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as source:
         return json.load(source)
+
+
+# `jsonschema` non abilita `format` per default, e l'extra `jsonschema[format]`
+# (rfc3339-validator / rfc3986-validator) non è installato: senza questi checker
+# `format: date-time` e `format: uri` sarebbero silenziosamente ignorati. I checker
+# equivalenti sono ricostruiti con la sola libreria standard (nessuna dipendenza in più).
+_RFC3339_RE = re.compile(
+    r"^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$"
+)
+
+
+def _is_rfc3339(value: Any) -> bool:
+    """Verifica `format: date-time` (RFC 3339) senza l'extra `jsonschema[format]`."""
+
+    if not isinstance(value, str) or not _RFC3339_RE.match(value):
+        return False
+    try:
+        datetime.datetime.fromisoformat(value.replace("Z", "+00:00").replace("z", "+00:00"))
+    except ValueError:
+        return False
+    return True
+
+
+def _is_uri(value: Any) -> bool:
+    """Verifica `format: uri` senza l'extra `jsonschema[format]` (basta uno schema)."""
+
+    return not isinstance(value, str) or bool(urlparse(value).scheme)
+
+
+FORMAT_CHECKER = jsonschema.FormatChecker()
+FORMAT_CHECKER.checks("date-time")(_is_rfc3339)
+FORMAT_CHECKER.checks("uri")(_is_uri)
 
 
 class RawFixturesTest(unittest.TestCase):
@@ -116,7 +152,9 @@ class GoldenContractTest(unittest.TestCase):
         jsonschema.Draft202012Validator.check_schema(cls.schema)
 
     def validate(self, instance: dict[str, Any]) -> list[str]:
-        validator = jsonschema.Draft202012Validator(self.schema)
+        validator = jsonschema.Draft202012Validator(
+            self.schema, format_checker=FORMAT_CHECKER
+        )
         return [
             f"{list(error.absolute_path)}: {error.message}"
             for error in sorted(validator.iter_errors(instance), key=str)
@@ -127,6 +165,34 @@ class GoldenContractTest(unittest.TestCase):
             "https://json-schema.org/draft/2020-12/schema", self.schema["$schema"]
         )
         self.assertEqual(1, self.schema["properties"]["schema_version"]["const"])
+
+    def test_validator_rejects_malformed_generated_at(self) -> None:
+        """`format: date-time` è applicato davvero: un timestamp non RFC 3339 è rifiutato."""
+
+        instance = {
+            "schema_version": 1,
+            "generated_at": "19/10/2026 09:00",
+            "updated_locations": [],
+            "errors": {},
+            "locations": {},
+        }
+        errors = self.validate(instance)
+        self.assertTrue(any("date-time" in error for error in errors), errors)
+
+    def test_validator_rejects_malformed_source_uri(self) -> None:
+        """`format: uri` è applicato davvero: un endpoint senza schema è rifiutato."""
+
+        forecast = copy.deepcopy(self.forecast)
+        forecast["sources"]["sea"]["endpoint"] = "marine-api"
+        wrapper = {
+            "schema_version": 1,
+            "generated_at": self.forecast["generated_at"],
+            "updated_locations": [TORRE_SLUG],
+            "errors": {},
+            "locations": {TORRE_SLUG: forecast},
+        }
+        errors = self.validate(wrapper)
+        self.assertTrue(any("uri" in error for error in errors), errors)
 
     def test_golden_cache_matches_schema(self) -> None:
         self.assertEqual([], self.validate(self.cache))

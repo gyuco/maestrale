@@ -17,6 +17,24 @@ migrazione a Cloudflare Workers. Vivono qui (e non in `data/`) perché
 
 Località coperte: `torre-dei-corsari`, `cagliari`.
 
+**L'elenco delle località è un pin intenzionale delle fixture.** Il catalogo operativo
+(`locations.json`) contiene 13 località, ma le fixture ne coprono solo due (la più "ricca" come
+celle mare/terra e una seconda per esercitare la logica multi-località). I golden contengono
+l'intero cache e i test lo confrontano con essi: cambiare il catalogo delle fixture
+richiederebbe di rigenerare i golden, quindi il sottoinsieme è fissato qui, non derivato dal
+catalogo.
+
+Anche `timezone=Europe/Rome` è un **pin intenzionale**: è il default del modulo operativo
+(`DEFAULT_TIMEZONE` in `previsioni_mare.py`) e il valore passato esplicitamente da
+`update_forecasts.py`; lo schema lo dichiara come `const`. Se la pipeline cambiasse fuso orario,
+i golden andrebbero rigenerati.
+
+`location.slug` **non** è prodotto da `build_forecast` (che restituisce solo `name`,
+`latitude`, `longitude`, oltre a celle, fuso, `generated_at`, sources e daily):
+è `update_forecasts.py` ad aggiungerlo dopo la chiamata
+(`forecast["location"]["slug"] = location["slug"]`). Le fixture rappresentano quindi il payload
+unito del job, non l'output del solo builder.
+
 Le richieste grezze usano gli stessi parametri di `data_sources.py`
 (`hourly`/`daily`, `timezone=Europe/Rome`, `forecast_days=7`,
 `cell_selection=sea|land`, `models=best_match`).
