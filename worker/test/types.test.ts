@@ -90,8 +90,16 @@ describe("tipi del payload congelato (forecast.schema.json)", () => {
   });
 
   it("rifiuta i valori fuori contratto (asserzioni di compilazione)", () => {
-    // @ts-expect-error — `schema_version` è la costante 1.
-    const wrongVersion: ForecastCache = { ...goldenCache, schema_version: 2 };
+    // Literal puro (non uno spread di tipi allargati): il solo errore atteso è
+    // `schema_version: 2`, così la costante è davvero vincolata.
+    const wrongVersion: ForecastCache = {
+      // @ts-expect-error — `schema_version` è la costante 1.
+      schema_version: 2,
+      generated_at: "",
+      updated_locations: [],
+      errors: {},
+      locations: {},
+    };
     // @ts-expect-error — `timezone` è la costante "Europe/Rome".
     const wrongTimezone: Forecast = { ...goldenForecast, timezone: "Europe/London" };
     // @ts-expect-error — la cella meteo richiede `elevation_m` (number | null).

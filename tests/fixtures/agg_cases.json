@@ -1,0 +1,382 @@
+{
+  "description": "Casi di mean/circular_mean/sea_state/direction_name generati da previsioni_mare.py (E01-S03).",
+  "mean": [
+    {
+      "input": [],
+      "expected": null
+    },
+    {
+      "input": [
+        null
+      ],
+      "expected": null
+    },
+    {
+      "input": [
+        null,
+        null
+      ],
+      "expected": null
+    },
+    {
+      "input": [
+        12.5
+      ],
+      "expected": 12.5
+    },
+    {
+      "input": [
+        1.0,
+        2.0,
+        3.0
+      ],
+      "expected": 2.0
+    },
+    {
+      "input": [
+        null,
+        1.0,
+        null,
+        2.0
+      ],
+      "expected": 1.5
+    },
+    {
+      "input": [
+        -0.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "input": [
+        10.0,
+        20.0,
+        30.0,
+        40.0
+      ],
+      "expected": 25.0
+    },
+    {
+      "input": [
+        -5.5,
+        5.5
+      ],
+      "expected": 0.0
+    },
+    {
+      "input": [
+        1000000000.0,
+        -1000000000.0
+      ],
+      "expected": 0.0
+    },
+    {
+      "input": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "expected": 0.0
+    }
+  ],
+  "circular_mean": [
+    {
+      "input": [],
+      "expected": null
+    },
+    {
+      "input": [
+        null
+      ],
+      "expected": null
+    },
+    {
+      "input": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+      ],
+      "expected": 135.0
+    },
+    {
+      "input": [
+        350.0,
+        10.0
+      ],
+      "expected": 360.0
+    },
+    {
+      "input": [
+        359.0,
+        1.0
+      ],
+      "expected": 360.0
+    },
+    {
+      "input": [
+        null,
+        45.0,
+        null
+      ],
+      "expected": 44.99999999999999
+    },
+    {
+      "input": [
+        0.0,
+        180.0
+      ],
+      "expected": 90.0
+    },
+    {
+      "input": [
+        90.0,
+        270.0
+      ],
+      "expected": 180.0
+    },
+    {
+      "input": [
+        10.0,
+        20.0,
+        30.0
+      ],
+      "expected": 19.999999999999996
+    },
+    {
+      "input": [
+        337.5,
+        22.5
+      ],
+      "expected": 6.885215159639141e-15
+    },
+    {
+      "input": [
+        180.0,
+        0.0,
+        90.0
+      ],
+      "expected": 90.0
+    }
+  ],
+  "sea_state": [
+    {
+      "input": null,
+      "expected": null
+    },
+    {
+      "input": -5.0,
+      "expected": "Calmo"
+    },
+    {
+      "input": -0.001,
+      "expected": "Calmo"
+    },
+    {
+      "input": 0.0,
+      "expected": "Calmo"
+    },
+    {
+      "input": 0.05,
+      "expected": "Quasi calmo"
+    },
+    {
+      "input": 0.1,
+      "expected": "Quasi calmo"
+    },
+    {
+      "input": 0.1000001,
+      "expected": "Poco mosso"
+    },
+    {
+      "input": 0.5,
+      "expected": "Poco mosso"
+    },
+    {
+      "input": 0.5000001,
+      "expected": "Mosso"
+    },
+    {
+      "input": 1.25,
+      "expected": "Mosso"
+    },
+    {
+      "input": 1.2500001,
+      "expected": "Molto mosso"
+    },
+    {
+      "input": 2.5,
+      "expected": "Molto mosso"
+    },
+    {
+      "input": 2.5000001,
+      "expected": "Agitato"
+    },
+    {
+      "input": 4.0,
+      "expected": "Agitato"
+    },
+    {
+      "input": 4.0000001,
+      "expected": "Molto agitato"
+    },
+    {
+      "input": 6.0,
+      "expected": "Molto agitato"
+    },
+    {
+      "input": 6.0000001,
+      "expected": "Grosso"
+    },
+    {
+      "input": 9.0,
+      "expected": "Grosso"
+    },
+    {
+      "input": 9.0000001,
+      "expected": "Molto grosso"
+    },
+    {
+      "input": 14.0,
+      "expected": "Molto grosso"
+    },
+    {
+      "input": 14.0000001,
+      "expected": "Tempestoso"
+    },
+    {
+      "input": 20.0,
+      "expected": "Tempestoso"
+    },
+    {
+      "input": 100.0,
+      "expected": "Tempestoso"
+    }
+  ],
+  "direction_name": [
+    {
+      "input": null,
+      "expected": null
+    },
+    {
+      "input": 0.0,
+      "expected": "Tramontana"
+    },
+    {
+      "input": 22.4,
+      "expected": "Tramontana"
+    },
+    {
+      "input": 22.5,
+      "expected": "Grecale"
+    },
+    {
+      "input": 22.5000001,
+      "expected": "Grecale"
+    },
+    {
+      "input": 44.999,
+      "expected": "Grecale"
+    },
+    {
+      "input": 45.0,
+      "expected": "Grecale"
+    },
+    {
+      "input": 67.4,
+      "expected": "Grecale"
+    },
+    {
+      "input": 67.5,
+      "expected": "Levante"
+    },
+    {
+      "input": 90.0,
+      "expected": "Levante"
+    },
+    {
+      "input": 112.4,
+      "expected": "Levante"
+    },
+    {
+      "input": 112.5,
+      "expected": "Scirocco"
+    },
+    {
+      "input": 135.0,
+      "expected": "Scirocco"
+    },
+    {
+      "input": 157.5,
+      "expected": "Ostro"
+    },
+    {
+      "input": 180.0,
+      "expected": "Ostro"
+    },
+    {
+      "input": 202.5,
+      "expected": "Libeccio"
+    },
+    {
+      "input": 225.0,
+      "expected": "Libeccio"
+    },
+    {
+      "input": 247.5,
+      "expected": "Ponente"
+    },
+    {
+      "input": 270.0,
+      "expected": "Ponente"
+    },
+    {
+      "input": 292.5,
+      "expected": "Maestrale"
+    },
+    {
+      "input": 315.0,
+      "expected": "Maestrale"
+    },
+    {
+      "input": 337.4,
+      "expected": "Maestrale"
+    },
+    {
+      "input": 337.5,
+      "expected": "Tramontana"
+    },
+    {
+      "input": 359.9,
+      "expected": "Tramontana"
+    },
+    {
+      "input": 360.0,
+      "expected": "Tramontana"
+    },
+    {
+      "input": 359.999,
+      "expected": "Tramontana"
+    },
+    {
+      "input": -0.1,
+      "expected": "Tramontana"
+    },
+    {
+      "input": -22.5,
+      "expected": "Tramontana"
+    },
+    {
+      "input": -45.0,
+      "expected": "Maestrale"
+    },
+    {
+      "input": 720.5,
+      "expected": "Tramontana"
+    },
+    {
+      "input": 1080.25,
+      "expected": "Tramontana"
+    }
+  ]
+}

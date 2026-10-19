@@ -1,0 +1,5 @@
+{
+  "description": "URL costruiti con urlencode() sui parametri di data_sources.py (E01-S03): verifica della query string del port fetchJson.",
+  "marine": "https://marine-api.open-meteo.com/v1/marine?latitude=39.688153&longitude=8.450613&hourly=wave_height%2Cwave_direction%2Cwave_period%2Csea_surface_temperature&timezone=Europe%2FRome&forecast_days=7&cell_selection=sea&models=best_match",
+  "weather": "https://api.open-meteo.com/v1/forecast?latitude=39.688153&longitude=8.450613&hourly=temperature_2m%2Cwind_speed_10m%2Cwind_direction_10m%2Cwind_gusts_10m&timezone=Europe%2FRome&forecast_days=7&cell_selection=land&models=best_match&daily=weather_code%2Ctemperature_2m_min%2Ctemperature_2m_max%2Cwind_speed_10m_max%2Cwind_gusts_10m_max"
+}
