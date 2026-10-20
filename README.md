@@ -59,10 +59,70 @@ Endpoint (sola lettura, solo `GET`):
 ```text
 GET /health
 GET /forecast?localita=Torre%20dei%20Corsari
+GET /history?localita=Cagliari&from=2026-10-14&to=2026-10-20
 ```
 
 Configurazione opzionale (variabili del Worker): `FORECAST_MAX_AGE_HOURS` (default `12`, soglia dati
 vecchi in ore) e `CORS_ORIGINS` (default `*`).
+
+### Storico (`GET /history`)
+
+Serie storica dei valori del **giorno 0** di una località (sola lettura, `GET`/`HEAD`).
+
+**Importante (FR-82)**: i valori di `/history` sono **previsioni del giorno stesso** (giorno 0,
+ultima esecuzione riuscita del giorno), **non misure osservate**. Lo storico **parte dalla data di
+attivazione** (`<data di attivazione>`, da compilare al primo deploy con lo storico, vedi
+[`docs/runbook.md`](docs/runbook.md)), **senza backfill**: i giorni precedenti non esistono.
+
+Parametri:
+
+| Parametro | Obbligatorio | Significato |
+|---|---|---|
+| `localita` | si | nome o slug, risolto come in `/forecast` |
+| `from`, `to` | si | date `YYYY-MM-DD` (fuso Europe/Rome), estremi inclusi; `to` nel futuro ammesso |
+| `granularity` | no | `day` (default) oppure `month` |
+
+Limiti: al più **366 giorni** (`day`) o **120 mesi** toccati (`month`); anche con `month`, `from`/`to`
+restano `YYYY-MM-DD` e i mesi parziali agli estremi si riconoscono da `days`.
+
+Esempio `day` (`granularity=day`):
+
+```json
+{
+  "schema_version": 1,
+  "location": { "slug": "cagliari", "name": "Cagliari" },
+  "granularity": "day",
+  "from": "2026-10-14",
+  "to": "2026-10-20",
+  "timezone": "Europe/Rome",
+  "items": [
+    { "date": "2026-10-14", "air_temperature_mean_c": 21.3, "air_temperature_min_c": 17.0,
+      "air_temperature_max_c": 25.1, "water_temperature_mean_c": 22.4, "state": "Poco mosso",
+      "wave_height_mean_m": 0.42, "wave_height_max_m": 0.61 }
+  ]
+}
+```
+
+Esempio `month` (`granularity=month`): gli elementi hanno `month` (`YYYY-MM`) e `days` (giorni
+aggregati) al posto di `date`:
+
+```json
+{ "month": "2026-10", "days": 7, "air_temperature_mean_c": 20.8, "air_temperature_min_c": 15.2,
+  "air_temperature_max_c": 26.0, "water_temperature_mean_c": 22.1, "state": "Poco mosso",
+  "wave_height_mean_m": 0.45, "wave_height_max_m": 1.1 }
+```
+
+Aggregazione mensile: medie di temperatura (1 decimale) e onde (2 decimali), minimo dei minimi,
+massimo dei massimi; i valori `null` sono ignorati nelle medie (tutti `null` danno `null`); `state` e'
+la **moda** degli stati del mese e, a parita', vince lo stato piu' alto della scala Douglas. Giorni o
+mesi senza record sono omessi; nessun record: `items` vuoto, 200.
+
+Codici: **200** ok; **404** localita' non nel catalogo (`detail.message` e `detail.available`, come
+`/forecast`); **422** parametri non validi (`detail` in italiano); **503** storico temporaneamente
+non disponibile (`detail`: "Storico temporaneamente non disponibile").
+
+`Cache-Control` (solo sulla 200): `public, max-age=900` (15 min) se `to` e' oggi o futuro
+(Europe/Rome), `public, max-age=86400` (24 h) se l'intervallo e' interamente nel passato.
 
 Il job di aggiornamento gira come Cron Trigger `30 0,6,12,18 * * *` (UTC). Dettagli,
 deploy, rollback, osservabilità e limiti del piano Cloudflare:
@@ -72,7 +132,7 @@ architettura: [`docs/architecture.md`](docs/architecture.md) e `docs/adr/`.
 ## Deploy
 
 Il deploy richiede l'account Cloudflare del proprietario e passi manuali (namespace KV, `wrangler
-deploy`): vedi [`worker/README.md`](worker/README.md#passi-manuali-account-cloudflare) e
+deploy`): vedi [`worker/README.md`](worker/README.md#passi-manuali-account-cloudflare) e per lo storico D1 la sezione "Rilascio dello storico" del
 [`docs/runbook.md`](docs/runbook.md). Il Worker risponde su
 `https://maestrale.<sottodominio-account>.workers.dev`.
 
@@ -105,7 +165,7 @@ Lo smoke test di un Worker pubblicato: `node scripts/compare_backends.mjs --smok
 ```text
 .
 ├── app/                 # client Flutter
-├── worker/              # backend Cloudflare Workers (src/, test/, wrangler.jsonc)
+├── worker/              # backend Cloudflare Workers (src/, test/, migrations/, wrangler.jsonc)
 ├── scripts/             # confronto di parità e smoke test (compare_backends.mjs)
 ├── tests/fixtures/      # fixture JSON congelate della baseline Python (vedi il loro README)
 ├── docs/                # PRD, architettura, ADR, storie, runbook

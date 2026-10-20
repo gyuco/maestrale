@@ -1,7 +1,7 @@
 ---
 id: RUNBOOK
 status: draft
-updated: 2026-10-19
+updated: 2026-10-20
 ---
 
 # Runbook — Maestrale (Cloudflare Worker)
@@ -66,6 +66,10 @@ Parametri del job (variabili d'ambiente opzionali, default nel codice; si impost
 | `PAID_ALERT_SUBREQUESTS` | 40 | soglia dell'avviso `subrequests` (NFR-15 b) |
 | `PAID_ALERT_KV_WRITES_PER_DAY` | 700 | soglia dell'avviso `kv_writes_per_day` (NFR-15 c, OQ-29) |
 | `LOCATIONS_MAX_AGE_SECONDS` | 86400 | `max-age` del `Cache-Control` di `GET /locations` (FR-63) |
+| `HISTORY_WRITE_BATCH_ROWS` | 100 | righe per istruzione D1 di scrittura dello storico (1..400) |
+| `HISTORY_MAX_AGE_SHORT_SECONDS` | 900 | `max-age` di `GET /history` se `to` >= oggi Europe/Rome (FR-79) |
+| `HISTORY_MAX_AGE_LONG_SECONDS` | 86400 | `max-age` di `GET /history` se l'intervallo e' tutto nel passato |
+| `PAID_ALERT_D1_SIZE_MB` | 350 | soglia dell'avviso `d1_size` (70% dei 500 MB Free; MB = 1024*1024 byte) |
 | `LEGACY_LATEST_FALLBACK` | attivo | `false`/`0` disattiva il ripiego su `latest` di `/forecast` (solo dopo la dismissione, sotto) |
 
 Lancio manuale, in ordine di praticità:
@@ -127,6 +131,57 @@ Lancio manuale, in ordine di praticità:
    `npx wrangler kv key delete --binding FORECASTS latest --remote --preview false`.
    **Dopo la cancellazione il rollback alla versione v0.2 non è più supportato.**
 
+## Storico giornaliero su D1 (FR-69..FR-82, ADR-0002)
+
+Database D1 `maestrale-history`, binding `HISTORY` (`worker/wrangler.jsonc`, `d1_databases`,
+`migrations_dir: "migrations"`), tabella `daily_history` (migrazione `worker/migrations/0001_daily_history.sql`).
+Scrive solo il job `scheduled` (dopo `put meta`, un solo tentativo, un solo `batch()`); legge `GET /history`.
+
+### Rilascio dello storico
+
+In `wrangler.jsonc` il `database_id` e' un **segnaposto** (`00000000-0000-0000-0000-000000000000`):
+va sostituito con l'id reale prima del deploy. Da `worker/`:
+
+1. **[account]** `npx wrangler d1 create maestrale-history --location=weur` (primario in Europa occidentale).
+2. Copiare il `database_id` stampato in `worker/wrangler.jsonc` al posto del segnaposto (blocco
+   `d1_databases`, binding `HISTORY`). L'id non e' un segreto. Poi `npm test`.
+3. **[account]** `npx wrangler d1 migrations apply maestrale-history --remote` **prima** del deploy del
+   Worker che usa lo storico. Verifica: `npx wrangler d1 execute maestrale-history --remote --command "SELECT name FROM sqlite_master WHERE type='table'"`
+   deve mostrare `daily_history`.
+4. **[account]** `npx wrangler deploy`. La **data del primo deploy con lo storico e' la data di
+   attivazione** (nessun backfill): _data di attivazione: da compilare al deploy_ (riportarla anche nel
+   `README.md`, sezione "Storico").
+5. Dopo il primo cron: `npx wrangler d1 execute maestrale-history --remote --command "SELECT COUNT(*) FROM daily_history"`
+   (= numero di localita' aggiornate) e log `forecast_update` con `history_rows` > 0 e `history_failed: 0`.
+
+Effetto di un deploy **prima** delle migrazioni: il cache KV non si rompe (il job registra l'errore
+storico nel log, `history_failed`/`history_error`, e `/forecast` e `/health` restano invariati);
+`GET /history` risponde **503** finche' le migrazioni non sono applicate.
+
+### Osservabilita' dello storico
+
+Campi aggiuntivi del log `forecast_update`: `history_date` (giorno 0, Europe/Rome), `history_rows`
+(righe scritte), `history_queries` (istruzioni D1, contate come subrequest), `history_failed` (righe
+non scritte), `history_error` (messaggio, se la scrittura e' fallita; anche `console.error`),
+`history_missing_day0` (slug senza elemento del giorno 0, nessuna riga), `d1_rows_written` e
+`d1_size_bytes` (da `meta` del `batch()`, se riportati da D1). Un errore D1 non rende `/health`
+`degraded`: l'upsert dell'esecuzione successiva (entro 6 h) riscrive il giorno 0.
+
+**Allarme `d1_size`**: `paid_alerts` contiene `d1_size` quando `d1_size_bytes` supera
+`PAID_ALERT_D1_SIZE_MB` (default 350 MB, 70% dei 500 MB Free). Azione: valutare il piano **Paid**
+(10 GB). Stime (NFR-24): 500 localita' x 10 anni ~ 280-350 MB; 13 localita' ~ 8 MB in 10 anni.
+Dimensione a mano: `npx wrangler d1 info maestrale-history` **[account]**.
+
+Subrequest con lo storico: `2·ceil(N/50) + N + 2 + ceil(N/100)` (N localita', blocchi Open-Meteo da 50,
+1 `get meta`, N `put`, 1 `put meta`, ceil(N/100) istruzioni D1): **18** nominali con 13 localita'; la
+soglia (b) di 40 si raggiunge a circa **35** localita' su Free (sostituisce la stima di ~36 sopra).
+
+### Rollback e conservazione
+
+- Tornare a una versione senza storico **non tocca D1**: i giorni del rollback mancano, senza backfill.
+- Il job **non cancella mai righe**. Uno slug rimosso dal catalogo resta in D1 ma non e' interrogabile
+  (`/history` risponde 404); uno slug rinominato riparte da zero (OQ-36).
+
 ## Rollback
 
 1. `npx wrangler deployments list` **[account]**: elenca le ultime 10 versioni distribuite.
@@ -176,11 +231,11 @@ Dove guardare:
 
 Fabbisogno del job con il cache per località e le chiamate a blocchi (ADR-0003 §5), N località e
 blocchi da 50: `2·ceil(N/50)` richieste Open-Meteo + 1 `get meta` + N `put` + 1 `put meta`; con 13
-località **17 subrequest** nominali (18 alla prima esecuzione), 21 con i retry dei blocchi. Il tetto
+località **17 subrequest** nominali senza storico (18 alla prima esecuzione), **18** con la scrittura dello storico D1 (19 alla prima esecuzione), 22 con i retry dei blocchi. Il tetto
 `UPDATE_MAX_SUBREQUESTS` (45) fa sì che il caso peggiore (fallback con retry) non faccia mai fallire
 l'invocazione: le località non tentate finiscono in `errors` con il messaggio "budget di subrequest
 esaurito" e conservano il dato precedente. Su Free la soglia (b) di 40 subrequest si raggiunge a circa
-36 località; le 700 scritture KV/giorno a circa 174.
+35 località; le 700 scritture KV/giorno a circa 174.
 
 **I retry restano a 3** (`DEFAULT_RETRIES = 3`, FR-17 "fino a 3 tentativi").
 
@@ -197,7 +252,7 @@ misura valida):
 lo leggono da `worker/src/catalog.ts`). Processo: PR che modifica `locations.json` e rigenera lo
 snapshot dell'app (`node scripts/sync_app_catalog.mjs`) -> `npm test` nel Worker e `flutter test`
 nell'app (verificano duplicati, coordinate e sincronia dello snapshot) -> regola go/no-go sotto
-(oltre ~36 località sul piano Free serve prima Paid) -> `npx wrangler deploy`. Fino al cron successivo
+(oltre ~35 località sul piano Free serve prima Paid) -> `npx wrangler deploy`. Fino al cron successivo
 le località nuove sono in `/locations` ma `/forecast` risponde 404 (al più 6 h).
 
 ## Regola go/no-go per Paid
