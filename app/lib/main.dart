@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'config/api_config.dart';
 import 'screens/forecast_screen.dart';
 import 'services/forecast_api.dart';
+import 'services/history_api.dart';
 import 'services/catalog_snapshot.dart';
 import 'services/home_location_store.dart';
 import 'services/location_cache_store.dart';
@@ -33,12 +34,14 @@ class SeaForecastApp extends StatelessWidget {
     this.api,
     this.homeLocationStore,
     this.locationService,
+    this.historyApi,
   });
 
   final LocationRepository locationRepository;
   final ForecastApi? api;
   final HomeLocationStore? homeLocationStore;
   final LocationService? locationService;
+  final HistoryApi? historyApi;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +118,7 @@ class SeaForecastApp extends StatelessWidget {
         homeLocationStore: locationStore,
         locationRepository: locationRepository,
         locationService: locationService,
+        historyApi: historyApi,
       ),
     );
   }

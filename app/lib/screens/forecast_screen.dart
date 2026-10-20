@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import '../models/coastal_location.dart';
 import '../models/forecast.dart';
 import '../services/forecast_api.dart';
+import '../services/history_api.dart';
 import '../services/home_location_store.dart';
 import '../services/location_repository.dart';
 import '../services/location_service.dart';
 import 'coastal_map_screen.dart';
+import 'history_screen.dart';
 
 const _navy = Color(0xFF123B56);
 const _ocean = Color(0xFF008FAA);
@@ -22,9 +24,11 @@ class ForecastScreen extends StatefulWidget {
     required this.homeLocationStore,
     required this.locationRepository,
     this.locationService,
+    this.historyApi,
   });
 
   final ForecastApi api;
+  final HistoryApi? historyApi;
   final LocationRepository locationRepository;
   final HomeLocationStore homeLocationStore;
   final LocationService? locationService;
@@ -186,6 +190,20 @@ class _ForecastScreenState extends State<ForecastScreen>
     );
   }
 
+  void _openHistory() {
+    final forecast = _forecast;
+    if (forecast == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => HistoryScreen(
+          slug: forecast.location.slug,
+          name: forecast.location.name,
+          api: widget.historyApi,
+        ),
+      ),
+    );
+  }
+
   Widget _topBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 18, 22, 10),
@@ -238,12 +256,15 @@ class _ForecastScreenState extends State<ForecastScreen>
             tooltip: 'Apri mappa',
             onPressed: _openMap,
           ),
-          const SizedBox(width: 8),
-          _RoundButton(
-            icon: Icons.notifications_none_rounded,
-            tooltip: 'Notifiche',
-            onPressed: () {},
-          ),
+          if (_forecast != null) ...[
+            const SizedBox(width: 8),
+            _RoundButton(
+              key: const Key('open-history-button'),
+              icon: Icons.history_rounded,
+              tooltip: 'Storico',
+              onPressed: _openHistory,
+            ),
+          ],
         ],
       ),
     );

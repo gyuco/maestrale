@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/forecast.dart';
+import 'api_errors.dart';
 
 class ForecastApiException implements Exception {
   const ForecastApiException(this.message);
@@ -27,7 +28,7 @@ class ForecastApi {
         .get(uri)
         .timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) {
-      throw ForecastApiException(_errorMessage(response));
+      throw ForecastApiException(apiErrorMessage(response));
     }
     try {
       return Forecast.fromJson(
@@ -36,21 +37,5 @@ class ForecastApi {
     } on Object catch (error) {
       throw ForecastApiException('Risposta del server non valida: $error');
     }
-  }
-
-  String _errorMessage(http.Response response) {
-    try {
-      final payload = jsonDecode(response.body) as Map<String, dynamic>;
-      final detail = payload['detail'];
-      if (detail is String) {
-        return detail;
-      }
-      if (detail is Map<String, dynamic>) {
-        return detail['message'] as String? ?? 'Errore ${response.statusCode}';
-      }
-    } on Object {
-      // Il backend potrebbe non avere restituito JSON.
-    }
-    return 'Il server ha risposto con errore ${response.statusCode}';
   }
 }

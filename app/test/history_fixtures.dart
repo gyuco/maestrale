@@ -1,0 +1,63 @@
+const historyDayFixture = <String, dynamic>{
+  'schema_version': 1,
+  'location': {'slug': 'torre-dei-corsari', 'name': 'Torre dei Corsari'},
+  'granularity': 'day',
+  'from': '2026-10-14',
+  'to': '2026-10-15',
+  'timezone': 'Europe/Rome',
+  'items': [
+    {
+      'date': '2026-10-14',
+      'air_temperature_mean_c': 22,
+      'air_temperature_min_c': 18.5,
+      'air_temperature_max_c': 0,
+      'water_temperature_mean_c': 20.1,
+      'state': 'Poco mosso',
+      'wave_height_mean_m': 0.4,
+      'wave_height_max_m': 1,
+    },
+    {
+      'date': '2026-10-15',
+      'air_temperature_mean_c': null,
+      'air_temperature_min_c': null,
+      'air_temperature_max_c': null,
+      'water_temperature_mean_c': null,
+      'state': null,
+      'wave_height_mean_m': null,
+      'wave_height_max_m': null,
+    },
+  ],
+};
+
+const historyMonthFixture = <String, dynamic>{
+  'schema_version': 1,
+  'location': {'slug': 'torre-dei-corsari', 'name': 'Torre dei Corsari'},
+  'granularity': 'month',
+  'from': '2026-09-01',
+  'to': '2026-10-20',
+  'timezone': 'Europe/Rome',
+  'items': [
+    {
+      'month': '2026-09',
+      'days': 30,
+      'air_temperature_mean_c': 24.2,
+      'air_temperature_min_c': 15,
+      'air_temperature_max_c': 33.3,
+      'water_temperature_mean_c': 22,
+      'state': 'Mosso',
+      'wave_height_mean_m': 0.7,
+      'wave_height_max_m': 2.1,
+    },
+    {
+      'month': '2026-10',
+      'days': 3,
+      'air_temperature_mean_c': null,
+      'air_temperature_min_c': null,
+      'air_temperature_max_c': null,
+      'water_temperature_mean_c': null,
+      'state': null,
+      'wave_height_mean_m': null,
+      'wave_height_max_m': null,
+    },
+  ],
+};
