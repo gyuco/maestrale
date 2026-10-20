@@ -6,6 +6,7 @@ import '../models/coastal_location.dart';
 import '../models/forecast.dart';
 import '../services/forecast_api.dart';
 import '../services/home_location_store.dart';
+import '../services/location_repository.dart';
 import '../services/location_service.dart';
 import 'coastal_map_screen.dart';
 
@@ -19,10 +20,12 @@ class ForecastScreen extends StatefulWidget {
     super.key,
     required this.api,
     required this.homeLocationStore,
+    required this.locationRepository,
     this.locationService,
   });
 
   final ForecastApi api;
+  final LocationRepository locationRepository;
   final HomeLocationStore homeLocationStore;
   final LocationService? locationService;
 
@@ -137,6 +140,7 @@ class _ForecastScreenState extends State<ForecastScreen>
     final location = await Navigator.of(context).push<CoastalLocation>(
       MaterialPageRoute(
         builder: (context) => CoastalMapScreen(
+          locationRepository: widget.locationRepository,
           initialLocationName: _locationController.text.trim(),
           locationService: widget.locationService,
         ),
@@ -267,12 +271,8 @@ class _ForecastScreenState extends State<ForecastScreen>
           optionsViewOpenDirection: OptionsViewOpenDirection.down,
           displayStringForOption: (location) => location.name,
           optionsBuilder: (textEditingValue) {
-            final query = textEditingValue.text.trim().toLowerCase();
-            if (query.isEmpty) {
-              return const Iterable<CoastalLocation>.empty();
-            }
-            return coastalLocations.where(
-              (location) => location.name.toLowerCase().contains(query),
+            return widget.locationRepository.catalog.value.suggest(
+              textEditingValue.text,
             );
           },
           onSelected: _selectLocation,
@@ -283,10 +283,9 @@ class _ForecastScreenState extends State<ForecastScreen>
               focusNode: focusNode,
               textInputAction: TextInputAction.search,
               onSubmitted: (_) {
-                final query = controller.text.trim().toLowerCase();
-                final hasSuggestions = coastalLocations.any(
-                  (location) => location.name.toLowerCase().contains(query),
-                );
+                final hasSuggestions = widget.locationRepository.catalog.value
+                    .suggest(controller.text)
+                    .isNotEmpty;
                 if (hasSuggestions) {
                   onFieldSubmitted();
                 } else {

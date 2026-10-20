@@ -37,9 +37,15 @@ export interface FetchJsonOptions {
   readonly sleep?: SleepFn;
   readonly retries?: number;
   readonly timeoutMs?: number;
+  /**
+   * Chiamato prima di **ogni** tentativo (anche i retry). Se lancia, l'errore
+   * si propaga subito: nessun retry né attesa. Serve al job per contare
+   * subrequest e peso per tentativo e per rispettare i budget (ADR-0003 §4).
+   */
+  readonly beforeAttempt?: () => Promise<void> | void;
 }
 
-function defaultSleep(milliseconds: number): Promise<void> {
+export function defaultSleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, milliseconds);
   });
@@ -72,12 +78,12 @@ function describeError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Scarica e valida una risposta JSON, con retry progressivo (FR-17). */
-export async function fetchJson(
+/** Scarica una risposta JSON con retry progressivo (FR-17), senza validarne la forma. */
+async function fetchPayload(
   baseUrl: string,
   params: RequestParams,
-  options: FetchJsonOptions = {},
-): Promise<JsonObject> {
+  options: FetchJsonOptions,
+): Promise<unknown> {
   const retries = options.retries ?? DEFAULT_RETRIES;
   const timeoutMs = options.timeoutMs ?? REQUEST_TIMEOUT_MS;
   const fetchImpl = options.fetchImpl ?? fetch;
@@ -86,7 +92,9 @@ export async function fetchJson(
   let lastError: unknown = null;
 
   for (let attempt = 0; attempt < retries; attempt += 1) {
-    let payload: unknown;
+    if (options.beforeAttempt !== undefined) {
+      await options.beforeAttempt();
+    }
     try {
       const response = await fetchImpl(url, {
         headers: { "User-Agent": USER_AGENT },
@@ -96,27 +104,62 @@ export async function fetchJson(
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} per ${url}`);
       }
-      payload = await response.json();
+      return await response.json();
     } catch (error) {
       lastError = error;
       if (attempt + 1 < retries) {
         await sleep(2 ** attempt * 1000);
       }
-      continue;
     }
-    if (!isRecord(payload)) {
-      // In Python `payload.get(...)` su un JSON non-oggetto solleva e non è
-      // catturato dal retry: stesso comportamento qui.
-      throw new TypeError(`Risposta JSON non oggetto per ${url}`);
-    }
-    if (payload["error"]) {
-      const reason = payload["reason"];
-      throw new Error(typeof reason === "string" ? reason : "Errore API sconosciuto");
-    }
-    return payload;
   }
 
   throw new Error(`Impossibile consultare ${baseUrl}: ${describeError(lastError)}`);
+}
+
+function throwIfProviderError(payload: JsonObject): void {
+  if (payload["error"]) {
+    const reason = payload["reason"];
+    throw new Error(typeof reason === "string" ? reason : "Errore API sconosciuto");
+  }
+}
+
+/** Scarica e valida una risposta JSON, con retry progressivo (FR-17). */
+export async function fetchJson(
+  baseUrl: string,
+  params: RequestParams,
+  options: FetchJsonOptions = {},
+): Promise<JsonObject> {
+  const payload = await fetchPayload(baseUrl, params, options);
+  if (!isRecord(payload)) {
+    // In Python `payload.get(...)` su un JSON non-oggetto solleva e non è
+    // catturato dal retry: stesso comportamento qui.
+    throw new TypeError(`Risposta JSON non oggetto per ${buildUrl(baseUrl, params)}`);
+  }
+  throwIfProviderError(payload);
+  return payload;
+}
+
+/**
+ * Come `fetchJson` per le chiamate multi-coordinata (FR-53): Open-Meteo risponde
+ * con una **lista** di strutture, una per coordinata, nello stesso ordine. Una
+ * risposta oggetto è accettata come lista di un elemento (blocco da una sola
+ * coordinata) oppure, con campo `error`, è un fallimento immediato. Gli elementi
+ * non-oggetto restano nella lista: li classifica il chiamante (FR-54).
+ */
+export async function fetchJsonList(
+  baseUrl: string,
+  params: RequestParams,
+  options: FetchJsonOptions = {},
+): Promise<unknown[]> {
+  const payload = await fetchPayload(baseUrl, params, options);
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  if (!isRecord(payload)) {
+    throw new TypeError(`Risposta JSON non valida per ${buildUrl(baseUrl, params)}`);
+  }
+  throwIfProviderError(payload);
+  return [payload];
 }
 
 /**

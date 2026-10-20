@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart' show LatLng;
 
 import '../models/coastal_location.dart';
+import '../models/location_catalog.dart';
+import '../services/location_repository.dart';
 import '../services/location_service.dart';
 
 const _navy = Color(0xFF123B56);
@@ -12,10 +15,13 @@ const _coral = Color(0xFFFF7557);
 class CoastalMapScreen extends StatefulWidget {
   const CoastalMapScreen({
     super.key,
+    required this.locationRepository,
     this.initialLocationName,
     this.locationService,
   });
 
+  /// Unica fonte del catalogo (FR-67).
+  final LocationRepository locationRepository;
   final String? initialLocationName;
   final LocationService? locationService;
 
@@ -32,6 +38,8 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
     silenceExceptions: true,
   );
   late final LocationService _locationService;
+  LocationCatalog? _markersCatalog;
+  List<Marker> _markers = const [];
   CoastalLocation? _selectedLocation;
   AppPosition? _userPosition;
   bool _mapReady = false;
@@ -43,6 +51,7 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
   void initState() {
     super.initState();
     _locationService = widget.locationService ?? const DeviceLocationService();
+    widget.locationRepository.catalog.addListener(_onCatalogChanged);
     final initialName = widget.initialLocationName?.trim();
     if (initialName != null && initialName.isNotEmpty) {
       _searchController.text = initialName;
@@ -51,24 +60,34 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _locateUser());
   }
 
+  LocationCatalog get _catalog => widget.locationRepository.catalog.value;
+
+  // Il catalogo può cambiare durante l'uso (copia di rete): si mantiene la
+  // selezione corrente (ADR-0005) e si ricostruiscono i marker.
+  void _onCatalogChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// I marker (anche 500) si costruiscono una volta per catalogo, non a ogni
+  /// `setState`: la selezione è disegnata in un livello separato.
+  List<Marker> _markersFor(LocationCatalog catalog) {
+    if (!identical(_markersCatalog, catalog)) {
+      _markersCatalog = catalog;
+      _markers = catalog.locations.map(_marker).toList(growable: false);
+    }
+    return _markers;
+  }
+
   @override
   void dispose() {
+    widget.locationRepository.catalog.removeListener(_onCatalogChanged);
     _searchFocusNode.dispose();
     _searchController.dispose();
     _mapController.dispose();
     super.dispose();
   }
 
-  CoastalLocation? _findExact(String query) {
-    final normalized = query.trim().toLowerCase();
-    for (final location in coastalLocations) {
-      if (location.name.toLowerCase() == normalized ||
-          location.slug == normalized) {
-        return location;
-      }
-    }
-    return null;
-  }
+  CoastalLocation? _findExact(String query) => _catalog.findExact(query);
 
   void _highlightLocation(CoastalLocation location) {
     _searchController.value = TextEditingValue(
@@ -83,18 +102,9 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
   }
 
   void _searchFromInput() {
-    final query = _searchController.text.trim().toLowerCase();
+    final query = _searchController.text.trim();
     if (query.isEmpty) return;
-    final exact = _findExact(query);
-    CoastalLocation? match = exact;
-    if (match == null) {
-      for (final location in coastalLocations) {
-        if (location.name.toLowerCase().contains(query)) {
-          match = location;
-          break;
-        }
-      }
-    }
+    final match = _catalog.findExact(query) ?? _catalog.firstContaining(query);
     if (match != null) {
       _highlightLocation(match);
       return;
@@ -107,13 +117,15 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
     );
   }
 
+  List<LatLng> _coordinates() => _catalog.locations
+      .map((location) => LatLng(location.latitude, location.longitude))
+      .toList(growable: false);
+
   void _showAllLocations() {
     if (!_mapReady) return;
     _mapController.fitCamera(
       CameraFit.coordinates(
-        coordinates: coastalLocations
-            .map((location) => LatLng(location.latitude, location.longitude))
-            .toList(growable: false),
+        coordinates: _coordinates(),
         padding: const EdgeInsets.all(42),
         maxZoom: 8.2,
       ),
@@ -312,13 +324,7 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
         focusNode: _searchFocusNode,
         displayStringForOption: (location) => location.name,
         optionsBuilder: (value) {
-          final query = value.text.trim().toLowerCase();
-          if (query.isEmpty) {
-            return const Iterable<CoastalLocation>.empty();
-          }
-          return coastalLocations.where(
-            (location) => location.name.toLowerCase().contains(query),
-          );
+          return _catalog.suggest(value.text);
         },
         onSelected: _highlightLocation,
         fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
@@ -374,16 +380,86 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
     );
   }
 
+  Marker _marker(CoastalLocation location, {bool selected = false}) {
+    return Marker(
+      key: Key(
+        selected
+            ? 'map-selected-pin-${location.slug}'
+            : 'map-pin-${location.slug}',
+      ),
+      point: LatLng(location.latitude, location.longitude),
+      width: selected ? 60 : 44,
+      height: selected ? 60 : 44,
+      alignment: Alignment.topCenter,
+      child: Semantics(
+        button: true,
+        label: 'Seleziona ${location.name}',
+        child: Tooltip(
+          message: location.name,
+          child: GestureDetector(
+            onTap: () => _highlightLocation(location),
+            child: Container(
+              decoration: BoxDecoration(
+                color: selected ? _coral : _ocean,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x5507536A),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(
+                selected
+                    ? Icons.location_on_rounded
+                    : Icons.beach_access_rounded,
+                color: Colors.white,
+                size: selected ? 33 : 23,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _clusterBubble(int count) {
+    return Container(
+      key: const Key('map-cluster'),
+      decoration: BoxDecoration(
+        color: _navy,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 3),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x5507536A),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        '$count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+
   Widget _map() {
-    final selectedSlug = _selectedLocation?.slug;
+    final catalog = _catalog;
     return FlutterMap(
       key: const Key('locations-map'),
       mapController: _mapController,
       options: MapOptions(
         initialCameraFit: CameraFit.coordinates(
-          coordinates: coastalLocations
-              .map((location) => LatLng(location.latitude, location.longitude))
-              .toList(growable: false),
+          coordinates: _coordinates(),
           padding: const EdgeInsets.all(38),
           maxZoom: 8.2,
         ),
@@ -402,51 +478,23 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
           userAgentPackageName: 'it.sardegnamare.sardegna_mare_app',
           maxNativeZoom: 19,
         ),
-        MarkerLayer(
-          markers: [
-            ...coastalLocations.map((location) {
-              final selected = location.slug == selectedSlug;
-              return Marker(
-                key: Key('map-pin-${location.slug}'),
-                point: LatLng(location.latitude, location.longitude),
-                width: selected ? 60 : 44,
-                height: selected ? 60 : 44,
-                alignment: Alignment.topCenter,
-                child: Semantics(
-                  button: true,
-                  label: 'Seleziona ${location.name}',
-                  child: Tooltip(
-                    message: location.name,
-                    child: GestureDetector(
-                      onTap: () => _highlightLocation(location),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        decoration: BoxDecoration(
-                          color: selected ? _coral : _ocean,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x5507536A),
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          selected
-                              ? Icons.location_on_rounded
-                              : Icons.beach_access_rounded,
-                          color: Colors.white,
-                          size: selected ? 33 : 23,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-            if (_userPosition case final position?)
+        MarkerClusterLayerWidget(
+          key: ValueKey(catalog),
+          options: MarkerClusterLayerOptions(
+            markers: _markersFor(catalog),
+            maxClusterRadius: 60,
+            size: const Size(46, 46),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(48),
+            maxZoom: 14,
+            builder: (context, markers) => _clusterBubble(markers.length),
+          ),
+        ),
+        if (_selectedLocation case final location?)
+          MarkerLayer(markers: [_marker(location, selected: true)]),
+        if (_userPosition case final position?)
+          MarkerLayer(
+            markers: [
               Marker(
                 key: const Key('user-location-pin'),
                 point: LatLng(position.latitude, position.longitude),
@@ -475,8 +523,8 @@ class _CoastalMapScreenState extends State<CoastalMapScreen> {
                   ),
                 ),
               ),
-          ],
-        ),
+            ],
+          ),
         const SimpleAttributionWidget(
           source: Text('OpenStreetMap contributors'),
         ),

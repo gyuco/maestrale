@@ -1,24 +1,41 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'config/api_config.dart';
 import 'screens/forecast_screen.dart';
 import 'services/forecast_api.dart';
+import 'services/catalog_snapshot.dart';
 import 'services/home_location_store.dart';
+import 'services/location_cache_store.dart';
+import 'services/location_catalog_api.dart';
+import 'services/location_repository.dart';
 import 'services/location_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const SeaForecastApp());
+  final repository = LocationRepository(
+    api: LocationCatalogApi(baseUrl: ApiConfig.baseUrl),
+    cacheStore: const SharedPreferencesLocationCacheStore(),
+    snapshot: const AssetCatalogSnapshot(),
+  );
+  // Copia locale o snapshot subito (nessuna attesa di rete, FR-65/NFR-22),
+  // poi la rete in parallelo.
+  await repository.loadCached();
+  unawaited(repository.refresh());
+  runApp(SeaForecastApp(locationRepository: repository));
 }
 
 class SeaForecastApp extends StatelessWidget {
   const SeaForecastApp({
     super.key,
+    required this.locationRepository,
     this.api,
     this.homeLocationStore,
     this.locationService,
   });
 
+  final LocationRepository locationRepository;
   final ForecastApi? api;
   final HomeLocationStore? homeLocationStore;
   final LocationService? locationService;
@@ -96,6 +113,7 @@ class SeaForecastApp extends StatelessWidget {
       home: ForecastScreen(
         api: forecastApi,
         homeLocationStore: locationStore,
+        locationRepository: locationRepository,
         locationService: locationService,
       ),
     );

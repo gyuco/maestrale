@@ -31,7 +31,8 @@ Python storico, FR-50) e aggiorna il cache KV con un Cron Trigger ogni 6 h (FR-4
 ```text
 worker/
 ├── src/index.ts              # app Hono + export default { fetch, scheduled }
-├── src/routes/               # GET /health e GET /forecast
+├── src/routes/               # GET /health, GET /forecast, GET|HEAD /locations
+├── src/catalog.ts            # unico accesso a ../locations.json: validazione, resolve, corpo/ETag di /locations
 ├── src/update.ts             # job di aggiornamento (13 località, merge con il cache)
 ├── src/forecast.ts           # costruzione della previsione per località
 ├── src/aggregate.ts          # aggregazioni giornaliere e arrotondamenti

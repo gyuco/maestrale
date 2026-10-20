@@ -46,9 +46,27 @@ Espressione (UTC): `30 0,6,12,18 * * *`, definita in `triggers.crons`.
 | 18:30 | 20:30 | 19:30 |
 
 Il cron non conosce fusi orari: l'intervallo resta di 6 h. Ad ogni slot gira l'handler `scheduled`
-(`worker/src/index.ts`): aggiorna le 13 località, fa merge con il cache precedente e scrive la KV
-`latest`. Se **nessuna** località si aggiorna la KV non viene toccata e l'handler risolve comunque
-(nessun ritentativo del cron).
+(`worker/src/index.ts`): aggiorna le località del catalogo con chiamate Open-Meteo a blocchi (ADR-0003),
+scrive un record `forecast:<slug>` per ogni località aggiornata e, per ultima, la chiave `meta`.
+**`latest` non viene più scritta** (FR-59). Una località che non si aggiorna conserva il proprio
+record precedente (FR-18). Se **nessuna** località si aggiorna la KV non viene toccata e l'handler
+risolve comunque (nessun ritentativo del cron).
+
+Parametri del job (variabili d'ambiente opzionali, default nel codice; si impostano in `vars` di
+`wrangler.jsonc` o dal dashboard, nessuna modifica di codice):
+
+| Variabile | Default | Significato |
+|---|---|---|
+| `OPEN_METEO_BLOCK_SIZE` | 50 | località per richiesta multi-coordinata (1..100) |
+| `FALLBACK_BREAKER_THRESHOLD` | 0.5 | interruttore: fallback per località saltato se richieste di blocco fallite / totali > soglia (FR-54, OQ-28) |
+| `UPDATE_MAX_SUBREQUESTS` | 45 | tetto di subrequest (Free); su Paid 9000 |
+| `UPDATE_BUDGET_SECONDS` | 720 | budget di durata dell'esecuzione (12 min su 15) |
+| `UPDATE_CONCURRENCY` | 4 | richieste Open-Meteo in volo (max 6) |
+| `OPEN_METEO_MAX_WEIGHT_PER_MIN` | 300 | chiamate pesate al minuto verso Open-Meteo (limite provider 600) |
+| `PAID_ALERT_SUBREQUESTS` | 40 | soglia dell'avviso `subrequests` (NFR-15 b) |
+| `PAID_ALERT_KV_WRITES_PER_DAY` | 700 | soglia dell'avviso `kv_writes_per_day` (NFR-15 c, OQ-29) |
+| `LOCATIONS_MAX_AGE_SECONDS` | 86400 | `max-age` del `Cache-Control` di `GET /locations` (FR-63) |
+| `LEGACY_LATEST_FALLBACK` | attivo | `false`/`0` disattiva il ripiego su `latest` di `/forecast` (solo dopo la dismissione, sotto) |
 
 Lancio manuale, in ordine di praticità:
 
@@ -68,7 +86,8 @@ Lancio manuale, in ordine di praticità:
 
 - **Produzione**: far girare il cron (sopra). Il primo aggiornamento ricostruisce tutto (OQ-23).
 - **Sviluppo, KV vuota o cron fallito sul piano Free**: seminare dallo snapshot di esempio
-  **[account]**:
+  **[account]**. Finché `meta` manca, il Worker serve da `latest` (modalità legacy, FR-59), quindi il
+  seed va su `latest`:
 
   ```bash
   npx wrangler kv key put --binding FORECASTS latest --path ../tests/fixtures/golden_forecasts.json --remote --preview false
@@ -77,9 +96,36 @@ Lancio manuale, in ordine di praticità:
   I dati sono **vecchi** (`generated_at` 2026-10-19T09:00Z): `/health` risulterà `degraded` e
   `stale: true` dopo 12 h, e l'app mostrerà quella data in "Aggiornato". `--preview false` è
   obbligatorio perché `id` e `preview_id` sono entrambi configurati (altrimenti wrangler si rifiuta).
-  In locale lo stesso comando con `--local` al posto di `--remote`.
-- **Leggere il cache**: `npx wrangler kv key get --binding FORECASTS latest --remote --preview false --text`.
-- Ripristino alla baseline: stesso `kv key put` dal golden, oppure aspettare il prossimo cron riuscito.
+  In locale lo stesso comando con `--local` al posto di `--remote`. **Non seminare `latest` quando
+  `meta` esiste già**: non verrebbe letta (a parte il ripiego per le località senza record).
+- **Leggere il cache** (nuovo layout): `npx wrangler kv key get --binding FORECASTS meta --remote --preview false --text`
+  e, per una località, `... forecast:cagliari ...`. `latest` è congelata (vedi *Migrazione e
+  dismissione di `latest`*).
+- Ripristino: aspettare il prossimo cron riuscito.
+
+## Migrazione e dismissione di `latest` (FR-59, FR-60, C-7)
+
+1. **Rilascio di migrazione con lo stesso catalogo (13 località)**: nessuna nuova località nello
+   stesso deploy. Finché il primo cron non gira, `/forecast` e `/health` servono da `latest` con la
+   logica precedente. La **prima esecuzione** del nuovo job (`meta` assente) scrive i record per
+   località e, per le località di `latest` che non riesce ad aggiornare, copia il dato di `latest` nel
+   record; poi scrive `meta`. Da quel momento nessuna località di `latest` risponde 404/503. In quella
+   esecuzione il job fa 1 lettura in più (`get latest`: 18 subrequest nominali invece di 17).
+2. **`latest` non viene mai scritta dal nuovo Worker** e resta com'era all'ultima esecuzione della
+   versione precedente. Annotare qui la **data del rilascio del cache per località** (inizio del
+   conteggio): _da compilare al deploy_.
+3. **Rollback** (sezione sotto): finché `latest` esiste, il ritorno alla versione precedente del Worker
+   (che legge `latest`) ripristina il servizio senza interventi sui dati; il suo cron riscrive `latest`
+   entro 6 h e nel frattempo `/health` può essere `degraded` per età del dato (atteso, FR-60). **Ogni
+   rollback fa ripartire il conteggio dei 14 giorni** dal rilascio successivo: annotare qui data e
+   motivo di ogni rollback.
+4. **Cancellazione di `latest`**: consentita solo se (a) sono trascorsi **almeno 14 giorni** dal
+   rilascio del cache per località **senza alcun rollback**, e (b) `/health` risponde `status: ok`
+   al momento della cancellazione. Procedura: rilascio che imposta `LEGACY_LATEST_FALLBACK=false` (poi
+   rimozione della modalità legacy dal codice, con i test riscritti sul nuovo layout), verifica di
+   `/health`, quindi **[account]**
+   `npx wrangler kv key delete --binding FORECASTS latest --remote --preview false`.
+   **Dopo la cancellazione il rollback alla versione v0.2 non è più supportato.**
 
 ## Rollback
 
@@ -88,6 +134,8 @@ Lancio manuale, in ordine di praticità:
    precedente (senza argomento torna alla precedente).
 3. Il rollback ripristina **solo il codice**, non la **KV**: il cache resta quello attuale. Se i dati
    sono sbagliati, riseminare dal golden (sopra) o attendere il prossimo cron.
+4. Rollback dal cache per località alla v0.2: vedi *Migrazione e dismissione di `latest`* (funziona
+   solo finché `latest` esiste; il conteggio dei 14 giorni riparte dal rilascio successivo).
 
 ## Osservabilità (con ciò che esiste)
 
@@ -95,11 +143,18 @@ Lancio manuale, in ordine di praticità:
 
 - `console.error("Aggiornamento fallito per <slug>: <messaggio>")` per ogni località fallita;
 - `console.error("Nessuna località aggiornata: cache KV non modificato")` se non scrive la KV;
-- `console.log` di un riepilogo JSON per ogni esecuzione, formato esatto:
+- `console.log` di un riepilogo JSON per ogni esecuzione (NFR-21), esempio (13 località, esecuzione
+  nominale con `meta` già presente):
 
   ```json
-  {"event":"forecast_update","updated":13,"failed":0,"generated_at":"2026-10-19T12:30:05+00:00","duration_ms":4210}
+  {"event":"forecast_update","updated":13,"failed":0,"generated_at":"2026-10-19T12:30:05+00:00","duration_ms":4210,"blocks":1,"block_requests":2,"block_failures":0,"fallback_breaker":false,"fallbacks":0,"subrequests":17,"kv_writes":14,"kv_deletes":0,"weight_used":26,"budget_exhausted":"none","paid_alerts":[]}
   ```
+
+  `fallback_breaker` = `true` indica che l'interruttore del fallback è scattato (le località
+  interessate hanno in `errors` il messaggio "interruttore del fallback attivo"). `budget_exhausted`
+  vale `none`, `duration` o `subrequests`. `paid_alerts` elenca i motivi per passare a Paid:
+  `subrequests` (> 40), `kv_writes_per_day` (scritture x 4 esecuzioni/giorno > 700),
+  `budget_subrequests` (tetto raggiunto).
 
   **`duration_ms` è tempo di orologio** (`Date.now()`), attesa di rete inclusa: **non è il CPU time**.
 
@@ -107,8 +162,7 @@ Dove guardare:
 
 - `npx wrangler tail --format json` **[account]**: log in tempo reale (cron compreso).
 - Dashboard Cloudflare -> Workers & Pages -> maestrale -> Logs / Metrics: Workers Logs e invocazioni;
-  **CPU time** e **subrequest** per invocazione si leggono qui (il job non logga il numero di
-  subrequest).
+  **CPU time** per invocazione si legge qui (il job logga le subrequest che conta, ma non il CPU time).
 - `GET /health` (sempre 200): `status` (`ok`|`degraded`), `stale` (dati più vecchi di 12 h),
   `update_errors` (località fallite con messaggio), `generated_at`, `locations`. Cache assente o
   illeggibile: `error` e `cache_path` (`kv:FORECASTS`).
@@ -120,13 +174,15 @@ Dove guardare:
 | CPU per invocazione | 10 ms | fino a 15 min per cron con intervallo >= 1 h |
 | Subrequest per invocazione | 50 | 10.000 |
 
-Fabbisogno del job: 26 subrequest nominali (13 località x 2 chiamate Open-Meteo), fino a 78 con i
-retry (3 tentativi), più 1 `get` e 1 `put` KV (2) se la piattaforma li conta come subrequest
-(da verificare con la misura). Con 2 tentativi: 52 + 2 = 54 (oltre 50); con 1 solo: 28.
+Fabbisogno del job con il cache per località e le chiamate a blocchi (ADR-0003 §5), N località e
+blocchi da 50: `2·ceil(N/50)` richieste Open-Meteo + 1 `get meta` + N `put` + 1 `put meta`; con 13
+località **17 subrequest** nominali (18 alla prima esecuzione), 21 con i retry dei blocchi. Il tetto
+`UPDATE_MAX_SUBREQUESTS` (45) fa sì che il caso peggiore (fallback con retry) non faccia mai fallire
+l'invocazione: le località non tentate finiscono in `errors` con il messaggio "budget di subrequest
+esaurito" e conservano il dato precedente. Su Free la soglia (b) di 40 subrequest si raggiunge a circa
+36 località; le 700 scritture KV/giorno a circa 174.
 
-**I retry restano a 3** (`DEFAULT_RETRIES = 3`, FR-17 "fino a 3 tentativi"): portare il caso peggiore
-sotto 50 richiede eliminare i retry, cioè cambiare un requisito, e renderli configurabili richiederebbe
-una variabile `vars`. Fuori scope di E01-S07; il numero è un input per la decisione su Paid.
+**I retry restano a 3** (`DEFAULT_RETRIES = 3`, FR-17 "fino a 3 tentativi").
 
 Misure su Free (da compilare dopo il deploy; il cron su Free probabilmente non completa, ed è una
 misura valida):
@@ -135,14 +191,32 @@ misura valida):
 |---|---|---|---|---|---|
 | da misurare | da misurare | da misurare | da misurare | da misurare | da misurare |
 
+## Modifica del catalogo località (FR-61, ADR-0004)
+
+`locations.json` alla radice è l'unica fonte modificata a mano (job, `/forecast` e `GET /locations`
+lo leggono da `worker/src/catalog.ts`). Processo: PR che modifica `locations.json` e rigenera lo
+snapshot dell'app (`node scripts/sync_app_catalog.mjs`) -> `npm test` nel Worker e `flutter test`
+nell'app (verificano duplicati, coordinate e sincronia dello snapshot) -> regola go/no-go sotto
+(oltre ~36 località sul piano Free serve prima Paid) -> `npx wrangler deploy`. Fino al cron successivo
+le località nuove sono in `/locations` ma `/forecast` risponde 404 (al più 6 h).
+
 ## Regola go/no-go per Paid
 
-Si passa a **Workers Paid prima di aprire l'app ad altri utenti**, e in ogni caso se almeno una misura
-su Free mostra:
+Regola NFR-15 (PRD v0.4, C-5 "Free ora, Paid alla soglia"). Si passa a **Workers Paid** appena si
+verifica almeno una delle condizioni seguenti, e comunque **prima** che un limite Free venga superato:
 
-- (a) esecuzione fallita per CPU o subrequest; oppure
-- (b) CPU > 7 ms o subrequest > 40 su una run nominale (margine ~30% sui limiti); oppure
-- (c) nessuna run completa nelle ultime 24 h.
+- (a) un'esecuzione del job fallisce per CPU, subrequest o quota KV;
+- (b) un'esecuzione nominale misura **CPU > 7 ms** o **subrequest > 40** (log `forecast_update`:
+  `subrequests`, `paid_alerts` contiene `subrequests`);
+- (c) le scritture KV giornaliere misurate o stimate superano **700/giorno** (log: `paid_alerts`
+  contiene `kv_writes_per_day`; soglia configurabile, OQ-29);
+- (d) nessuna esecuzione completa nelle ultime 24 h (`/health` `stale`);
+- (e) prima di aprire l'app ad altri utenti (decisione owner 2026-10-19);
+- (f) in ogni caso prima che il catalogo arrivi a ~500 località (NFR-19: 500 località solo su Paid).
+
+Una modifica che porterebbe a superare una soglia (per esempio aggiungere località al catalogo,
+FR-61) si rilascia **solo dopo** il passaggio a Paid. Al passaggio: abilitare Paid sull'account,
+impostare `UPDATE_MAX_SUBREQUESTS=9000`, poi ampliare il catalogo.
 
 Se tutte le misure rientrano e l'app resta personale si può restare su Free monitorando `/health`.
 Decisione del proprietario (2026-10-19): sul Free un cron che fallisce si **tollera e si misura**

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -11,6 +12,7 @@ import 'package:sardegna_mare_app/services/home_location_store.dart';
 import 'package:sardegna_mare_app/services/location_service.dart';
 
 import 'fixtures.dart';
+import 'support/catalog_fakes.dart';
 
 void main() {
   testWidgets('cerca e mostra la previsione giornaliera', (tester) async {
@@ -23,6 +25,7 @@ void main() {
 
     await tester.pumpWidget(
       SeaForecastApp(
+        locationRepository: await repositoryWith(sampleLocations),
         api: ForecastApi(baseUrl: 'http://api.test', client: client),
         homeLocationStore: homeLocationStore,
       ),
@@ -64,6 +67,7 @@ void main() {
 
     await tester.pumpWidget(
       SeaForecastApp(
+        locationRepository: await repositoryWith(sampleLocations),
         api: ForecastApi(baseUrl: 'http://api.test', client: client),
         homeLocationStore: homeLocationStore,
       ),
@@ -86,6 +90,7 @@ void main() {
 
     await tester.pumpWidget(
       SeaForecastApp(
+        locationRepository: await repositoryWith(sampleLocations),
         api: ForecastApi(baseUrl: 'http://api.test', client: client),
         homeLocationStore: _MemoryHomeLocationStore(),
       ),
@@ -120,6 +125,7 @@ void main() {
 
     await tester.pumpWidget(
       SeaForecastApp(
+        locationRepository: await repositoryWith(sampleLocations),
         api: ForecastApi(baseUrl: 'http://api.test', client: client),
         homeLocationStore: _MemoryHomeLocationStore(),
         locationService: const _FakeLocationService(),
@@ -131,8 +137,11 @@ void main() {
 
     expect(find.byKey(const Key('locations-map')), findsOneWidget);
     expect(find.byKey(const Key('map-location-search-field')), findsOneWidget);
-    final markerLayer = tester.widget<MarkerLayer>(find.byType(MarkerLayer));
-    expect(markerLayer.markers, hasLength(14));
+    final clusterLayer = tester.widget<MarkerClusterLayerWidget>(
+      find.byType(MarkerClusterLayerWidget),
+    );
+    expect(clusterLayer.options.markers, hasLength(sampleLocations.length));
+    expect(find.byKey(const Key('user-location-pin')), findsOneWidget);
     expect(find.byKey(const Key('user-location-pin')), findsOneWidget);
     final tileLayer = tester.widget<TileLayer>(find.byType(TileLayer));
     final tileProvider = tileLayer.tileProvider as NetworkTileProvider;
@@ -169,6 +178,7 @@ void main() {
 
     await tester.pumpWidget(
       SeaForecastApp(
+        locationRepository: await repositoryWith(sampleLocations),
         api: ForecastApi(baseUrl: 'http://api.test', client: client),
         homeLocationStore: _MemoryHomeLocationStore(),
       ),

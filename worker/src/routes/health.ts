@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
-import type { Bindings } from "../env";
-import { readForecastCache } from "../store";
+import type { AppEnv } from "../env";
+import { readForecastCache, readMeta, type ForecastMeta } from "../store";
 
 /**
  * Identificativo del cache in `/health` (OQ-19). In v0.1 era il percorso del
@@ -37,11 +37,45 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-export const healthRoutes = new Hono<{ Bindings: Bindings }>();
+export const healthRoutes = new Hono<AppEnv>();
 
 // GET /health — sempre 200 (FR-26): nessun caso d'errore della cache diventa un
 // codice HTTP d'errore, è il campo `status` a degradarsi.
 healthRoutes.get("/", async (c) => {
+  // Cache per località (FR-56): `/health` si ricava dal solo `meta`.
+  const meta = await readMeta(c.env.FORECASTS);
+  if (meta.status === "unreadable") {
+    return c.json({
+      status: "degraded",
+      error: meta.error,
+      cache_path: CACHE_IDENTIFIER,
+    });
+  }
+  if (meta.status === "ok") {
+    const value = meta.value ?? ({} as Partial<ForecastMeta>);
+    const generatedAt = typeof value.generated_at === "string" ? value.generated_at : null;
+    const generatedMs = parseUtc(generatedAt);
+    const ageHours = generatedMs === null ? null : (Date.now() - generatedMs) / 3_600_000;
+    const stale = ageHours === null || ageHours > maxAgeHours(c.env);
+    const errors = value.errors ?? {};
+    const count =
+      typeof value.locations === "number"
+        ? value.locations
+        : Array.isArray(value.slugs)
+          ? value.slugs.length
+          : 0;
+
+    return c.json({
+      status: stale || Object.keys(errors).length > 0 ? "degraded" : "ok",
+      generated_at: generatedAt,
+      age_hours: ageHours === null ? null : round2(ageHours),
+      stale,
+      locations: count,
+      update_errors: errors,
+    });
+  }
+
+  // `meta` assente: modalità legacy su `latest` (FR-59).
   const result = await readForecastCache(c.env.FORECASTS);
 
   if (result.status === "unreadable") {

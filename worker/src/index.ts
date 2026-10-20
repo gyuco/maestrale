@@ -1,9 +1,11 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import locations from "../../locations.json";
-import type { Bindings, CorsEnv } from "./env";
+import { loadCatalog, rawLocations } from "./catalog";
+import { updateConfigFromEnv } from "./config";
+import type { AppEnv, Bindings, CatalogEntry, CorsEnv } from "./env";
 import { forecastRoutes } from "./routes/forecast";
+import { locationsRoutes } from "./routes/locations";
 import { healthRoutes } from "./routes/health";
 import { runUpdate } from "./update";
 
@@ -31,8 +33,14 @@ function allowOrigin(origin: string, env: CorsEnv): string | null {
  * App Hono con le API di lettura. `createApp` esiste per i test (permette di
  * iniettare un ambiente diverso da quello reale del Worker).
  */
-export function createApp(): Hono<{ Bindings: Bindings }> {
-  const app = new Hono<{ Bindings: Bindings }>();
+export function createApp(catalog: readonly CatalogEntry[] = rawLocations as readonly CatalogEntry[]): Hono<AppEnv> {
+  const app = new Hono<AppEnv>();
+
+  // Il catalogo incluso nel Worker risolve nome -> slug senza leggere lo storage (FR-57).
+  app.use("*", async (c, next) => {
+    c.set("catalog", catalog);
+    await next();
+  });
 
   // Su Workers le origini arrivano dall'ambiente della richiesta, quindi vanno
   // risolte per-request (una funzione invece di una lista fissa).
@@ -52,6 +60,7 @@ export function createApp(): Hono<{ Bindings: Bindings }> {
 
   app.route("/health", healthRoutes);
   app.route("/forecast", forecastRoutes);
+  app.route("/locations", locationsRoutes);
 
   return app;
 }
@@ -70,7 +79,9 @@ async function scheduled(
   _ctx: ExecutionContext,
 ): Promise<void> {
   const started = Date.now();
-  const result = await runUpdate(env.FORECASTS, locations);
+  const result = await runUpdate(env.FORECASTS, loadCatalog(rawLocations), {
+    config: updateConfigFromEnv(env),
+  });
   for (const [slug, message] of Object.entries(result.errors)) {
     console.error(`Aggiornamento fallito per ${slug}: ${message}`);
   }
@@ -81,6 +92,17 @@ async function scheduled(
     failed,
     generated_at: result.generated_at,
     duration_ms: Date.now() - started,
+    blocks: result.metrics.blocks,
+    block_requests: result.metrics.block_requests,
+    block_failures: result.metrics.block_failures,
+    fallback_breaker: result.fallback_breaker,
+    fallbacks: result.metrics.fallbacks,
+    subrequests: result.metrics.subrequests,
+    kv_writes: result.metrics.kv_writes,
+    kv_deletes: result.metrics.kv_deletes,
+    weight_used: result.metrics.weight_used,
+    budget_exhausted: result.metrics.budget_exhausted,
+    paid_alerts: result.metrics.paid_alerts,
   });
   if (result.written) {
     console.log(line);

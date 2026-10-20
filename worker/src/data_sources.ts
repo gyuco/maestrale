@@ -21,8 +21,9 @@ export interface OpenMeteoResponse extends Coordinates {
  * hanno variabili giornaliere (nel catalogo attuale solo il meteo).
  */
 export interface RequestParams {
-  latitude: number;
-  longitude: number;
+  /** Numero (singola località) o lista separata da virgola (blocco, FR-53). */
+  latitude: number | string;
+  longitude: number | string;
   hourly: string;
   timezone: string;
   forecast_days: number;
@@ -50,8 +51,8 @@ export interface DataSourceSpec {
 export interface DataSource extends Omit<DataSourceSpec, "dailyVariables"> {
   readonly dailyVariables: readonly string[];
   requestParams(
-    latitude: number,
-    longitude: number,
+    latitude: number | string,
+    longitude: number | string,
     days: number,
     timezoneName: string,
   ): RequestParams;
@@ -73,8 +74,8 @@ function createDataSource(spec: DataSourceSpec): DataSource {
     ...spec,
     dailyVariables,
     requestParams(
-      latitude: number,
-      longitude: number,
+      latitude: number | string,
+      longitude: number | string,
       days: number,
       timezoneName: string,
     ): RequestParams {

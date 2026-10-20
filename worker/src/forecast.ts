@@ -123,6 +123,14 @@ function resolvedResponse(payload: Record<string, unknown>): OpenMeteoResponse {
   };
 }
 
+/** Risposte grezze dei due provider e istanti di ricezione, per una località. */
+export interface ProviderPayloads {
+  readonly marine: Record<string, unknown>;
+  readonly weather: Record<string, unknown>;
+  readonly marineFetchedAt: string;
+  readonly weatherFetchedAt: string;
+}
+
 /** Costruisce la previsione di una località (stessa struttura di `build_forecast`). */
 export async function buildForecast(
   name: string,
@@ -139,8 +147,6 @@ export async function buildForecast(
     retries: deps.retries,
     timeoutMs: deps.timeoutMs,
   };
-  const marineFields = [...MARINE_SOURCE.hourlyVariables];
-  const weatherFields = [...WEATHER_SOURCE.hourlyVariables];
 
   const marine = await fetchJson(
     MARINE_SOURCE.endpoint,
@@ -154,6 +160,35 @@ export async function buildForecast(
     fetchOptions,
   );
   const weatherFetchedAt = now();
+
+  return buildForecastFromPayloads(
+    name,
+    latitude,
+    longitude,
+    days,
+    timezoneName,
+    { marine, weather, marineFetchedAt, weatherFetchedAt },
+    now,
+  );
+}
+
+/**
+ * Parte pura di `buildForecast` (FR-53): aggrega le due risposte già scaricate,
+ * che arrivino da una chiamata singola o da un elemento di una chiamata a blocchi.
+ * Lancia se i dati non sono validi/aggregabili.
+ */
+export function buildForecastFromPayloads(
+  name: string,
+  latitude: number,
+  longitude: number,
+  days: number,
+  timezoneName: Timezone,
+  payloads: ProviderPayloads,
+  now: () => string = defaultNow,
+): BuiltForecast {
+  const { marine, weather, marineFetchedAt, weatherFetchedAt } = payloads;
+  const marineFields = [...MARINE_SOURCE.hourlyVariables];
+  const weatherFields = [...WEATHER_SOURCE.hourlyVariables];
 
   const marineDays = hourlyByDate(marine, marineFields);
   const weatherDays = hourlyByDate(weather, weatherFields);

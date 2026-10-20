@@ -1,7 +1,7 @@
 ---
 id: PRD
-status: draft        # draft | approved — only the user approves
-version: 0.2
+status: approved        # draft | approved — only the user approves
+version: 0.4
 owner: analyst
 ---
 
@@ -16,12 +16,26 @@ owner: analyst
 > requisiti legati alla CLI Python sono stati riscritti come comportamento del job di
 > aggiornamento o marcati come superati.
 >
+> La v0.3 recepisce due task my-planner dell'owner, collegati (il primo blocca il secondo):
+> **"Scalabilità del backend a ~500 località"** (`cmvfp0lzk0009711ssui58rjh`, scala decisa
+> dall'owner il 2026-10-19) e **"Catalogo località: un'unica fonte, servita da GET /locations"**
+> (`cmvfof5zz0005k8j3ga6i3hp1`). Le scelte di layout del cache (KV per località o D1) sono
+> demandate all'architect (ADR-0003).
+>
+> La v0.4 recepisce le **decisioni dell'owner del 2026-10-20** sulle domande aperte OQ-22,
+> OQ-24..OQ-27 (piano Workers, 404 troncato, forma del catalogo, snapshot nell'app, dismissione di
+> `latest`), sulla precedenza del catalogo nell'app (FR-65) e sull'interruttore del fallback (FR-54).
+>
 > **Legenda colonna "Fonte"**
 > - **T** — comportamento verificato da almeno un test automatico esistente (implementazione Python).
 > - **R** — comportamento dichiarato esplicitamente nel `README.md` (e presente nel codice).
 > - **D** — dedotto solo dalla lettura del codice; nessun test né documentazione lo fissa.
 > - **U** — deriva da una decisione esplicita dell'utente (2026-10-03: migrazione a Cloudflare).
-> - "mod. 0.2" indica un requisito riformulato in v0.2 per renderlo indipendente dal runtime.
+> - **P** — deriva da un task my-planner dell'owner (v0.3; id nel changelog). La scala di ~500
+>   località è una decisione esplicita dell'owner del 2026-10-19 (marcata **U**).
+> - "mod. 0.2" indica un requisito riformulato in v0.2 per renderlo indipendente dal runtime;
+>   "mod. 0.3" un requisito modificato in v0.3; "mod. 0.4" un requisito modificato in v0.4 su
+>   decisione dell'owner del 2026-10-20.
 >
 > Le **priorità** (`must` / `should` / `could`) sono una proposta dell'analista; vanno confermate
 > (OQ-16). Le scelte tecnologiche oltre a Workers + KV (framework, test runner, configurazione di
@@ -52,7 +66,7 @@ progetto** (OQ-2); i segnali sotto sono solo quelli già misurabili dal sistema.
 
 | # | Obiettivo | Segnale misurabile oggi |
 |---|---|---|
-| G-1 | Previsioni giornaliere a 7 giorni per tutte le località supportate | `GET /health` → `locations` = 13 e `update_errors` vuoto |
+| G-1 | Previsioni giornaliere a 7 giorni per tutte le località supportate | `GET /health` → `locations` = numero di voci del catalogo (oggi 13, fino a ~500: NFR-19) e `update_errors` vuoto |
 | G-2 | Dati sempre freschi | `GET /health` → `stale = false` (età cache ≤ soglia, default 12 h) |
 | G-3 | Servizio disponibile anche se il provider è giù | `/forecast` continua a rispondere 200 con l'ultimo dato valido dopo un aggiornamento fallito |
 | G-4 | Trasparenza sull'origine dei dati | Ogni risposta `/forecast` contiene `sources.sea` e `sources.weather` con licenza e cella risolta |
@@ -61,8 +75,8 @@ progetto** (OQ-2); i segnali sotto sono solo quelli già misurabili dal sistema.
 
 ## 3. Non-goals
 Escluso dal prodotto attuale (constatato nel codice; da confermare come scelta voluta, OQ-14):
-- **Località arbitrarie**: niente geocoding né previsioni per coordinate libere; solo le 13
-  località del catalogo.
+- **Località arbitrarie**: niente geocoding né previsioni per coordinate libere; solo le
+  località del catalogo (oggi 13, fino a ~500: NFR-19). *(mod. 0.3)*
 - **Previsioni orarie** o intra-giornaliere esposte all'utente: solo aggregati giornalieri.
 - **Storico / osservazioni reali**: nessun dato passato, nessuna boa o stazione.
 - **Copernicus Marine** come sorgente operativa: gli script in `legacy/` sono solo riferimento
@@ -72,7 +86,10 @@ Escluso dal prodotto attuale (constatato nel codice; da confermare come scelta v
   dalla gestione delle richieste HTTP.
 - **Notifiche/allerte**: il pulsante "Notifiche" esiste nell'app ma non fa nulla (OQ-8).
 - **Lingue diverse dall'italiano**.
-- **Funzionamento offline dell'app** (nessun cache lato client delle previsioni).
+- **Funzionamento offline dell'app per le previsioni** (nessun cache lato client delle
+  previsioni). *(mod. 0.3: il solo catalogo località è disponibile offline, FR-65.)*
+- **Fan-out del job su più invocazioni (es. Cloudflare Queues)** finché la misura di NFR-21 non
+  ne dimostra la necessità. *(v0.3)*
 - **Cambi funzionali durante la migrazione** (v0.2): la migrazione a Cloudflare non modifica il
   contratto API né l'app Flutter; eventuali evoluzioni vanno trattate separatamente.
 
@@ -104,11 +121,12 @@ Scenari principali:
 
 | ID | Requirement | Priority | Fonte |
 |---|---|---|---|
-| FR-1 | Il sistema shall supportare un catalogo chiuso di località costiere, versionato nel repository (oggi `locations.json`), in cui ogni voce ha `slug`, `name`, `latitude`, `longitude`. Il catalogo attuale contiene 13 località: Alghero, Arbatax, Cagliari, Carloforte, Chia, La Maddalena, Olbia, Oristano, Porto Torres, Santa Teresa Gallura, Siniscola, Torre dei Corsari, Villasimius. Slug e nomi restano invariati dopo la migrazione. | must | R, mod. 0.2 |
+| FR-1 | Il sistema shall supportare un catalogo chiuso di località costiere, gestito in un'unica fonte (FR-61; oggi `locations.json` nel repository), in cui ogni voce ha `slug`, `name`, `latitude`, `longitude`. Il catalogo deve poter contenere fino a ~500 località (NFR-19). Al 2026-10-20 contiene 13 località: Alghero, Arbatax, Cagliari, Carloforte, Chia, La Maddalena, Olbia, Oristano, Porto Torres, Santa Teresa Gallura, Siniscola, Torre dei Corsari, Villasimius. Slug e nomi esistenti restano invariati. | must | R, mod. 0.2, mod. 0.3 |
 | FR-2 | Il job di aggiornamento shall rifiutare l'esecuzione (errore registrato, nessuna modifica al cache) se una voce del catalogo manca di uno dei campi `slug`, `name`, `latitude`, `longitude`. | should | D, mod. 0.2 |
 | FR-3 | Per ogni località il sistema shall richiedere alla Open-Meteo Marine Weather API (`https://marine-api.open-meteo.com/v1/marine`) le variabili orarie `wave_height`, `wave_direction`, `wave_period`, `sea_surface_temperature` con `cell_selection=sea`, `models=best_match`, `timezone=Europe/Rome` e `forecast_days` pari al numero di giorni (FR-14). | must | T |
 | FR-4 | Per ogni località il sistema shall richiedere alla Open-Meteo Weather Forecast API (`https://api.open-meteo.com/v1/forecast`) le variabili orarie `temperature_2m`, `wind_speed_10m`, `wind_direction_10m`, `wind_gusts_10m` e giornaliere `weather_code`, `temperature_2m_min`, `temperature_2m_max`, `wind_speed_10m_max`, `wind_gusts_10m_max`, con `cell_selection=land`, `models=best_match`, `timezone=Europe/Rome`. | must | T |
 | FR-5 | Endpoint, variabili, selezione del modello e della cella, attribuzione, URL di documentazione e di licenza di ciascun provider shall essere dichiarati in un unico punto del codice backend (oggi `data_sources.py`) e da lì usati sia per costruire le richieste sia per la provenienza. | should | R, mod. 0.2 |
+| FR-61 | *(v0.3)* Unica fonte del catalogo: il job di aggiornamento, la risoluzione della località in `/forecast` (FR-22) e `GET /locations` (FR-62) shall usare lo stesso catalogo; aggiungere, rimuovere o rinominare una località richiede una sola modifica, in un solo punto, e non richiede modifiche al codice dell'app. *(mod. 0.4, OQ-25 risolta)* La fonte è il file versionato `locations.json` nel repository: ogni modifica del catalogo passa da commit e deploy; non esiste una modifica del catalogo a runtime. | must | P, mod. 0.4 |
 
 ### 5.2 Aggregazione giornaliera
 
@@ -145,27 +163,38 @@ Scenari principali:
 | ~~FR-21~~ | *(superato in v0.2)* Codici d'uscita 0/1/2 del processo CLI. Sostituito da FR-52 (esito dell'esecuzione osservabile). | — | — |
 | FR-49 | Il job di aggiornamento shall essere eseguito automaticamente sulla piattaforma Cloudflare ogni 6 ore, senza dipendere da server o scheduler esterni a Cloudflare. | must | U, R (frequenza) |
 | FR-52 | Ogni esecuzione del job shall rendere osservabile il proprio esito: località aggiornate, località fallite con messaggio d'errore, istante di completamento. Le località fallite sono esposte da `/health` in `update_errors` (FR-26); l'esito complessivo è registrato anche nei log della piattaforma. | should | D, mod. 0.2 |
+| FR-53 | *(v0.3)* Chiamate a blocchi: il job shall richiedere le previsioni a Open-Meteo con chiamate multi-coordinata, raggruppando le località in blocchi (una richiesta Marine e una Forecast per blocco, con gli stessi parametri di FR-3/FR-4). La dimensione massima del blocco è configurabile senza modificare il codice (valore: scelta dell'architect, entro il massimo ammesso dal provider). A parità di risposte del provider, la previsione prodotta per ogni località è identica a quella ottenuta con chiamate per singola località (FR-51). | must | P |
+| FR-54 | *(v0.3)* Retry per blocco e fallback per località: ogni richiesta di blocco shall essere ritentata secondo FR-17; se un blocco fallisce dopo tutti i tentativi (o la risposta non contiene dati validi per alcune località), il job shall richiedere singolarmente, sempre secondo FR-17, le sole località interessate. Una località che fallisce anche singolarmente è trattata come in FR-18. Il fallback rispetta il budget di durata dell'esecuzione (NFR-5, NFR-15): le località non tentate per esaurimento del budget risultano fallite con un messaggio d'errore esplicito in `errors[<slug>]`. *(mod. 0.4)* **Interruttore per guasto diffuso:** se in un'esecuzione falliscono dopo tutti i tentativi **più del 50%** delle richieste di blocco (Marine e Forecast contate separatamente; soglia proposta, da confermare: OQ-28), il job shall saltare il fallback per singola località per l'intera esecuzione: non invia alcuna richiesta singola, ogni località interessata da un blocco fallito conserva il dato precedente (FR-18) e riceve in `errors[<slug>]` un messaggio che indica l'attivazione dell'interruttore; le località dei blocchi riusciti sono aggiornate normalmente. La condizione è valutata dopo che tutte le richieste di blocco hanno esaurito i tentativi e prima di qualunque richiesta singola; con esattamente il 50% di blocchi falliti il fallback si esegue. Un blocco con dati non validi solo per alcune località non conta come fallito. L'attivazione è registrata nell'esito dell'esecuzione (FR-52). | must | P, mod. 0.4 |
+| FR-55 | *(v0.3)* Cache per località: il job shall memorizzare la previsione di ciascuna località come record indipendente e un record di metadati dell'esecuzione (`schema_version`, `generated_at`, `updated_locations`, `errors`, numero di località), così che l'aggiornamento o la lettura di una località non richieda di leggere o riscrivere le altre. Restano garantite FR-18 (dato precedente conservato), FR-19 (nessuna previsione di località parziale o mista) e NFR-14. Layout proposto dal task: Workers KV con chiavi `forecast:<slug>` e `meta`; alternativa: Cloudflare D1. Decisione demandata all'architect (ADR-0003). | must | P |
+| FR-59 | *(v0.3)* Migrazione dal cache unico `latest`: durante e dopo il passaggio al cache per località (FR-55), ogni località presente in `latest` shall restare servita da `/forecast` con 200 (con il dato di `latest` finché la nuova esecuzione non l'ha aggiornata); in nessun momento del passaggio `/forecast` risponde 404 o 503 per una località che `latest` contiene. Meccanismo (seed da `latest` o lettura di ripiego): scelta dell'architect. *(mod. 0.4, OQ-27 risolta)* Dopo il passaggio il job shall non scrivere più `latest` (nessuna doppia scrittura): `latest` resta con il contenuto dell'ultima esecuzione precedente al passaggio. | must | P, mod. 0.4 |
+| FR-60 | *(v0.3, mod. 0.4)* Rollback e dismissione di `latest`: la chiave `latest` shall restare presente e non modificata finché non sono soddisfatte entrambe le condizioni: (a) sono trascorsi almeno 14 giorni dal rilascio del cache per località senza alcun rollback (un rollback fa ripartire il conteggio dal rilascio successivo); (b) `/health` risponde `status = ok` al momento della cancellazione. Solo allora `latest` può essere cancellata. Finché `latest` esiste, il ritorno alla versione precedente del Worker (che legge `latest`) shall ripristinare un servizio funzionante senza interventi manuali sui dati; dopo il rollback `/health` può risultare `degraded` per età del dato (accettato, conseguenza dell'assenza di doppia scrittura, FR-59). Dopo la cancellazione di `latest` il rollback a quella versione non è più supportato. | must | P, mod. 0.4 |
 
 ### 5.5 API backend
 
 | ID | Requirement | Priority | Fonte |
 |---|---|---|---|
 | FR-22 | `GET /forecast?localita=<valore>` shall restituire 200 con la previsione completa (FR-12, FR-13, giorni FR-6..FR-11) della località il cui slug o nome normalizzato coincide con il valore normalizzato (minuscole, accenti rimossi, spazi/underscore → trattino). Es.: "Torre dei Corsari" e "torre-dei-corsari" sono equivalenti. | must | T |
-| FR-23 | Se la località non esiste nel cache, `/forecast` shall rispondere 404 con `detail.message` ("Localita '<valore>' non trovata") e `detail.available` = elenco ordinato dei nomi disponibili. | must | T (solo 404) |
+| FR-23 | Se la località non esiste nel cache, `/forecast` shall rispondere 404 con `detail.message` ("Localita '<valore>' non trovata") e `detail.available` = elenco ordinato dei nomi disponibili. *(mod. 0.3: con il catalogo fino a ~500 località `detail.available` è soggetto all'eccezione FR-58.)* | must | T (solo 404), mod. 0.3 |
 | FR-24 | Se il cache non è ancora stato popolato, `/forecast` shall rispondere 503 con `detail` = "Previsioni non ancora disponibili"; se il contenuto del cache non è valido, 503 con descrizione dell'errore in `detail`. | must | D, mod. 0.2 |
 | FR-25 | Un parametro `localita` assente o vuoto shall produrre un errore di validazione 422 con corpo JSON contenente il campo `detail`. | should | D, mod. 0.2 |
 | FR-26 | `GET /health` shall rispondere sempre 200 con `status` = `ok` oppure `degraded`. Con cache valido riporta `generated_at`, `age_hours` (2 decimali), `stale`, `locations` (numero), `update_errors`. `status` è `degraded` se l'età supera la soglia configurata (FR-28), se `generated_at` manca, se `errors` non è vuoto, se il cache è assente o non valido (in questi ultimi due casi con `error` e un identificativo del cache, in v0.1 `cache_path`: vedi OQ-19). | must | T (solo caso `ok`), mod. 0.2 |
 | FR-27 | Dopo il completamento di un aggiornamento, il backend shall servire i nuovi dati senza redeploy né riavvio, entro il ritardo di propagazione ammesso da NFR-16. | must | D, mod. 0.2 |
 | FR-28 | Senza modificare il codice, il backend shall essere configurabile per: soglia di dati vecchi in ore (default 12) e origini CORS consentite (default `*`, lista). CORS consente solo il metodo `GET` (più le preflight necessarie). La configurazione del percorso del cache (`FORECAST_CACHE_PATH` in v0.1) è superata: il collegamento a KV è scelta dell'architect. Nomi dei parametri: scelta dell'architect. | should | R, mod. 0.2 |
 | FR-29 | Il backend shall esporre la documentazione interattiva dell'API (in v0.1 OpenAPI generata da FastAPI su `/docs`). Mantenimento dopo la migrazione da confermare (OQ-20). | could | R, mod. 0.2 |
-| FR-50 | Parità di contratto: per gli stessi dati in cache, le risposte di `/forecast` e `/health` del backend su Cloudflare shall avere gli stessi codici HTTP, nomi di campo, tipi, arrotondamenti e semantica dell'implementazione Python al commit `181c2f3`, così che l'app Flutter esistente funzioni senza modifiche. Eccezioni ammesse solo se elencate esplicitamente in questo PRD (oggi: identificativo del cache in `/health`, OQ-19). | must | U |
+| FR-50 | Parità di contratto: per gli stessi dati in cache, le risposte di `/forecast` e `/health` del backend su Cloudflare shall avere gli stessi codici HTTP, nomi di campo, tipi, arrotondamenti e semantica dell'implementazione Python al commit `181c2f3`, così che l'app Flutter esistente funzioni senza modifiche. Eccezioni ammesse solo se elencate esplicitamente in questo PRD (oggi: identificativo del cache in `/health`, OQ-19; `detail.available` nel 404 di `/forecast`, FR-58). Nuovi endpoint additivi (FR-62) non costituiscono eccezione. | must | U, mod. 0.3 |
+| FR-56 | *(v0.3)* `/health` shall ricavare `generated_at`, `age_hours`, `stale`, `locations` e `update_errors` dal solo record di metadati (FR-55), senza leggere le previsioni delle singole località; contratto e semantica restano quelli di FR-26 e FR-50. | must | P |
+| FR-57 | *(v0.3)* `/forecast` shall servire una località leggendo solo il record di quella località (più, se necessario, il catalogo per risolvere nome → slug, FR-22), senza leggere le previsioni delle altre località; il numero di letture dello storage per richiesta non cresce con il numero di località. | must | P |
+| FR-58 | *(v0.3, mod. 0.4, OQ-24 risolta)* Eccezione esplicita a FR-50 per il 404 di `/forecast`: `detail.message` resta invariato (FR-23), mentre `detail.available` shall contenere solo i **primi 50 nomi** dell'elenco ordinato di FR-23, nello stesso formato (array di stringhe, nessun campo aggiuntivo). Con un catalogo di 50 località o meno la risposta è identica a FR-23. La dimensione del corpo del 404 non cresce quindi al crescere del catalogo oltre 50 località. L'app non usa `detail.available` (FR-33 usa solo `detail.message`). | must | P, mod. 0.4 |
+| FR-62 | *(v0.3)* `GET /locations` shall restituire 200 con l'intero catalogo (FR-61): per ogni località `slug`, `name`, `latitude`, `longitude`, ordinate per `name`. L'endpoint è in sola lettura (solo `GET`, più `HEAD` e le preflight necessarie), senza autenticazione, con la stessa configurazione CORS di FR-28, e non chiama mai i provider. Struttura dell'involucro JSON (es. campo di versione): scelta dell'architect. | must | P |
+| FR-63 | *(v0.3)* Cache HTTP di `/locations`: la risposta 200 shall includere un `Cache-Control` pubblico di lunga durata (valore configurabile senza modificare il codice; proposta 24 h, OQ-13) e un `ETag` che cambia se e solo se cambia il contenuto del catalogo; una richiesta con `If-None-Match` uguale all'`ETag` corrente riceve 304 senza corpo. | should | P |
+| FR-64 | *(v0.3)* Additività: l'introduzione di `/locations` shall lasciare invariati `/forecast` e `/health` (FR-50, salvo le eccezioni elencate). I test di parità esistenti restano verdi senza modifiche alle fixture. | must | P |
 | FR-51 | Parità di aggregazione: a parità di risposte Open-Meteo in ingresso, il nuovo job shall produrre previsioni giornaliere identiche a quelle dell'implementazione Python (FR-6..FR-13, esclusi gli istanti `fetched_at`/`generated_at`). La tolleranza ammessa sugli arrotondamenti va confermata (OQ-21). | must | U |
 
 ### 5.6 App Flutter — previsione
 
 | ID | Requirement | Priority | Fonte |
 |---|---|---|---|
-| FR-30 | L'app shall offrire un campo di ricerca con suggerimenti: digitando, mostra le località del catalogo il cui nome contiene il testo (senza distinzione maiuscole/minuscole); selezionando un suggerimento avvia la ricerca. | must | T |
+| FR-30 | L'app shall offrire un campo di ricerca con suggerimenti: digitando, mostra le località del catalogo (ottenuto dal repository, FR-67) il cui nome contiene il testo (senza distinzione maiuscole/minuscole); selezionando un suggerimento avvia la ricerca. | must | T |
 | FR-31 | Inviando il testo dal campo (tasto invio o pulsante "Cerca"), l'app shall richiedere `GET /forecast?localita=<testo ripulito da spazi>`; se il testo non corrisponde ad alcun suggerimento la richiesta è inviata comunque al backend. Testo vuoto: nessuna richiesta. | must | T |
 | FR-32 | Durante il caricamento l'app shall mostrare un indicatore di avanzamento e disabilitare il pulsante "Cerca". | should | D |
 | FR-33 | In caso di errore (HTTP ≠ 200, timeout di 15 s, risposta non valida) l'app shall mostrare la scheda "Previsioni non disponibili" con il messaggio del backend (`detail` testuale o `detail.message`) o un messaggio generico con il codice HTTP, e un pulsante "Riprova". | must | T (estrazione messaggio) |
@@ -188,12 +217,21 @@ Scenari principali:
 
 | ID | Requirement | Priority | Fonte |
 |---|---|---|---|
-| FR-43 | Dal pulsante "Apri mappa" l'app shall aprire una mappa (tile OpenStreetMap, attribuzione "OpenStreetMap contributors") con un pin per ciascuna delle 13 località, inquadrate tutte all'apertura (zoom 6–14). Se il testo di ricerca corrente coincide con nome o slug di una località, questa risulta già selezionata. | must | T |
+| FR-43 | Dal pulsante "Apri mappa" l'app shall aprire una mappa (tile OpenStreetMap, attribuzione "OpenStreetMap contributors") con un pin per ciascuna località del catalogo ottenuto dal repository (FR-67), inquadrate tutte all'apertura (zoom 6–14), con raggruppamento dei pin vicini secondo FR-68. Se il testo di ricerca corrente coincide con nome o slug di una località, questa risulta già selezionata. *(mod. 0.3: in v0.2 "13 località" fisse nell'app.)* | must | T, mod. 0.3 |
 | FR-44 | Toccando un pin, l'app shall evidenziarlo, centrare la mappa sulla località (zoom 10) e mostrare una scheda con il nome e il pulsante "Vedi meteo"; premendolo torna alla schermata previsioni e carica quella località. | must | T |
-| FR-45 | La mappa shall offrire una ricerca con suggerimenti; all'invio seleziona la località con nome/slug esatto o, in mancanza, la prima il cui nome contiene il testo; se nessuna corrisponde mostra "Località non trovata tra quelle disponibili." | should | D |
+| FR-45 | La mappa shall offrire una ricerca con suggerimenti sulle località del catalogo ottenuto dal repository (FR-67); all'invio seleziona la località con nome/slug esatto o, in mancanza, la prima il cui nome contiene il testo; se nessuna corrisponde mostra "Località non trovata tra quelle disponibili." | should | D, mod. 0.3 |
 | FR-46 | All'apertura della mappa e con il pulsante "La mia posizione", l'app shall tentare di localizzare l'utente: se i servizi di localizzazione sono spenti, il permesso è negato o la posizione non è ottenibile entro 15 s mostra un messaggio specifico; se il permesso è negato permanentemente offre il pulsante "Impostazioni"; se riesce mostra un marker "La tua posizione" e centra la mappa (zoom 12,5). | should | D |
 | FR-47 | Il pulsante "Mostra tutte le località" shall reinquadrare la mappa su tutte le località. | could | D |
 | FR-48 | L'URL del backend shall essere configurabile in fase di build con `--dart-define=API_BASE_URL=...` (default `http://localhost:8000`). | must | R |
+| FR-68 | *(v0.3)* Con molte località la mappa shall raggruppare i pin vicini in cluster che mostrano il numero di località contenute; toccando un cluster la mappa si avvicina fino a separarne i pin; ai livelli di zoom in cui i pin non si sovrappongono sono mostrati i pin singoli, con il comportamento di FR-44. Con 500 località la mappa resta utilizzabile secondo NFR-22. | should | P |
+
+### 5.9 App Flutter — catalogo località *(v0.3)*
+
+| ID | Requirement | Priority | Fonte |
+|---|---|---|---|
+| FR-65 | *(mod. 0.4, OQ-26 risolta)* L'app shall ottenere il catalogo tramite un unico componente (LocationRepository) che: (1) fornisce **subito**, senza attendere la rete, l'ultima copia locale salvata sul dispositivo oppure, se non esiste, lo **snapshot del catalogo incluso nell'app** (aggiornato a ogni release); (2) contemporaneamente richiede `GET /locations` (FR-62) con timeout di 15 s (NFR-6); (3) se la risposta di rete arriva con successo, sostituisce la copia locale salvata e il catalogo in uso, e ricerca e mappa (FR-67) usano da quel momento il nuovo catalogo; (4) se la rete fallisce, continua a usare la copia locale o lo snapshot, senza mostrare errori bloccanti. Ricerca e mappa sono quindi sempre utilizzabili, anche al primo avvio senza rete. | must | P, mod. 0.4 |
+| FR-66 | Quando possiede una copia locale con `ETag`, il LocationRepository shall inviare `If-None-Match`; su 304 mantiene la copia locale senza riscaricare il catalogo. | could | P |
+| FR-67 | Suggerimenti di ricerca (FR-30, FR-45), pin e inquadratura della mappa (FR-43, FR-47) e l'eventuale individuazione della località più vicina alla posizione dell'utente (OQ-10) shall usare esclusivamente il catalogo fornito dal LocationRepository; l'app non contiene più un elenco di località scritto nel codice (risolve R-1). | must | P |
 
 ## 6. Non-functional requirements
 Ogni target è marcato come **Vincolo** (imposto da decisione utente, provider o piattaforma: va
@@ -205,8 +243,8 @@ rispettato), **Attuale** (valore già presente nel prodotto, da preservare) o **
 | NFR-1 | Freschezza dati: il cache è considerato vecchio oltre una soglia configurabile; `/health` lo segnala come `degraded`. | **Attuale**: età cache ≤ 12 h — R |
 | NFR-2 | Frequenza di aggiornamento: il job gira automaticamente su Cloudflare (FR-49). *(mod. 0.2: in v0.1 era pianificato esternamente con cron.)* | **Attuale**: ogni 6 h (in v0.1 alle 02:30, 08:30, 14:30, 20:30); orari esatti e fuso: OQ-4 |
 | NFR-3 | Resilienza: un guasto del provider o di una singola località non rende indisponibile il servizio né cancella dati validi; il cache non è mai osservabile in stato parziale. *(mod. 0.2)* | **Attuale**: 0 risposte servite da dati parziali; località fallita servita con l'ultimo dato valido (FR-18, FR-19) |
-| NFR-4 | Prestazioni API: `/forecast` e `/health` servono dati letti dal cache, senza chiamare i provider. *(mod. 0.2)* | **Proposto**: p95 < 200 ms misurato dal client in Italia, con 13 località — da confermare (OQ-13) |
-| NFR-5 | Durata aggiornamento: 2 richieste provider per località. *(mod. 0.2)* | **Vincolo**: un'esecuzione completa deve stare nei limiti di durata/CPU della piattaforma (NFR-15). **Proposto**: < 5 min nel caso peggiore con retry (OQ-13) |
+| NFR-4 | Prestazioni API: `/forecast` e `/health` servono dati letti dal cache, senza chiamare i provider. *(mod. 0.2)* | **Proposto**: p95 < 200 ms misurato dal client in Italia, invariato con 13 e con 500 località (FR-57) — da confermare (OQ-13) *(mod. 0.3)* |
+| NFR-5 | Durata aggiornamento: 2 richieste provider per blocco di località (FR-53), più le eventuali richieste singole di fallback (FR-54). *(mod. 0.2, mod. 0.3)* | **Vincolo**: un'esecuzione completa deve stare nei limiti di durata/CPU della piattaforma (NFR-15). **Proposto**: < 5 min nel caso peggiore con retry (OQ-13) |
 | NFR-6 | Timeout: chiamate upstream 30 s × max 3 tentativi; chiamata app → backend 15 s; geolocalizzazione 15 s. | **Attuale**: valori fissi come indicato — D |
 | NFR-7 | Attribuzione e licenza: ogni risposta `/forecast` riporta attribuzione e URL licenza Open-Meteo; la mappa riporta l'attribuzione OpenStreetMap. | **Vincolo** (licenza Open-Meteo): 100% delle risposte `/forecast` con `sources.*.attribution` e `license_url` — T. Attribuzione Open-Meteo nell'UI dell'app: assente (OQ-9) |
 | NFR-8 | Nessun segreto richiesto: i provider sono usati senza API key. | **Attuale**: 0 credenziali applicative nella configurazione — R |
@@ -216,10 +254,14 @@ rispettato), **Attuale** (valore già presente nel prodotto, da preservare) o **
 | NFR-12 | Piattaforme/runtime: backend su **Cloudflare Workers in TypeScript** con cache su **Workers KV** (sostituisce Python/FastAPI/uvicorn e `data/forecasts.json`); app Flutter 3.x, Dart SDK ^3.11.5, configurazioni Android e iOS presenti. *(mod. 0.2)* | **Vincolo** (U) per il backend. Piattaforme target ufficiali dell'app: OQ-3 |
 | NFR-13 | Testabilità: backend e app hanno suite di test automatici eseguibili in locale senza accesso ai provider né all'account Cloudflare; client API, archivio preferenze e servizio di localizzazione dell'app restano iniettabili. Le suite coprono la parità FR-50/FR-51 con fixture. Test runner: scelta dell'architect. *(mod. 0.2)* | **Proposto**: suite backend e Flutter verdi su ogni modifica |
 | NFR-14 | Concorrenza: una lettura concorrente a un aggiornamento restituisce o la previsione precedente o la nuova, mai un misto. *(mod. 0.2: in v0.1 lock + rename atomico del file)* | **Vincolo**: rispettare il limite KV di 1 scrittura/s sulla stessa chiave |
-| NFR-15 | Limiti piattaforma Cloudflare: il job e l'API devono rispettare i limiti del piano Workers in uso per invocazione (subrequest, tempo CPU, durata, memoria 128 MB) e di Workers KV (valore ≤ 25 MiB, 1 scrittura/s per chiave, quote giornaliere di letture/scritture). Riferimento (doc Cloudflare, 2026-10): piano Free 50 subrequest e 10 ms CPU per invocazione, 1.000 scritture KV/giorno, 100.000 letture KV/giorno; piano Paid 10.000 subrequest, CPU fino a 30 s per cron con intervallo < 1 h e fino a 15 min con intervallo ≥ 1 h, durata cron max 15 min. Un'esecuzione completa richiede 26 chiamate provider nominali e fino a 78 con tutti i retry, cioè più del limite Free. | **Vincolo** (piattaforma). Scelta del piano: OQ-22 |
+| NFR-15 | Limiti piattaforma Cloudflare: il job e l'API devono rispettare i limiti del piano Workers in uso per invocazione (subrequest, tempo CPU, durata, memoria 128 MB) e di Workers KV (valore ≤ 25 MiB, 1 scrittura/s per chiave, quote giornaliere di letture/scritture). Riferimento (doc Cloudflare, 2026-10): piano Free 50 subrequest e 10 ms CPU per invocazione, 1.000 scritture KV/giorno, 100.000 letture KV/giorno; piano Paid 10.000 subrequest, CPU fino a 30 s per cron con intervallo < 1 h e fino a 15 min con intervallo ≥ 1 h, durata cron max 15 min. Con 13 località e chiamate singole un'esecuzione richiede 26 chiamate provider nominali e fino a 78 con tutti i retry, cioè più del limite Free. *(v0.3)* Con 500 località e blocchi da 50 (esempio): 20 chiamate nominali, 60 con i retry dei blocchi, fino a ~3.000 nel caso peggiore di fallback totale (FR-54); con il cache per località (FR-55) ~501 scritture KV per esecuzione, ~2.004 al giorno, oltre la quota Free di 1.000/giorno. *(mod. 0.4, OQ-22 risolta: "Free ora, Paid alla soglia", C-5)* Il servizio resta sul piano Free finché le misure (NFR-21) rientrano nei limiti Free; il passaggio a Paid avviene **prima** che un limite Free venga superato. **Regola go/no-go per Paid** (coerente con E01-S07 AC-7/AC-9): si passa a Paid appena si verifica almeno una delle condizioni seguenti: (a) un'esecuzione del job fallisce per CPU, subrequest o quota KV; (b) un'esecuzione nominale misura **CPU > 7 ms** o **subrequest > 40** (margine ~30% sui limiti di 10 ms e 50); (c) le scritture KV giornaliere misurate o stimate superano **700/giorno** (stesso margine sulla quota di 1.000; soglia proposta: OQ-29); (d) nessuna esecuzione completa nelle ultime 24 h; (e) prima di aprire l'app ad altri utenti (decisione owner 2026-10-19, E01-S07); (f) in ogni caso prima che il catalogo arrivi a ~500 località (NFR-19). Una modifica che porterebbe a superare una soglia (es. aggiunta di località al catalogo, FR-61) si rilascia solo dopo il passaggio a Paid. | **Vincolo** (piattaforma). **Vincolo** (U, 2026-10-20): piano Free con regola go/no-go per Paid come a sinistra |
 | NFR-16 | Consistenza: Workers KV è a consistenza eventuale; dopo un aggiornamento alcune location di Cloudflare possono servire ancora il dato precedente per un breve intervallo (la doc Cloudflare indica tipicamente fino a ~60 s). Accettabile dato l'intervallo di 6 h e la soglia di 12 h. | **Vincolo** (piattaforma) accettato. **Proposto**: nuovi dati visibili ovunque entro 5 min dalla fine del job |
-| NFR-17 | Uso corretto dei provider: il job limita le chiamate concorrenti verso Open-Meteo (sostituisce `--workers`, FR-16) e resta entro i limiti d'uso gratuiti di Open-Meteo. | **Attuale**: max 4 località in parallelo. Rischio limiti per IP condivisi Cloudflare: OQ-9 |
+| NFR-17 | Uso corretto dei provider: il job limita le chiamate concorrenti verso Open-Meteo (sostituisce `--workers`, FR-16) e resta entro i limiti d'uso gratuiti di Open-Meteo. | **Attuale**: max 4 località in parallelo. *(v0.3: con FR-53 il limite si applica alle richieste di blocco e di fallback in volo.)* Quota con 500 località: NFR-20. Rischio limiti per IP condivisi Cloudflare: OQ-9 |
 | NFR-18 | Osservabilità: esito e durata di ogni esecuzione del job e gli errori dell'API sono consultabili dall'operatore negli strumenti di log della piattaforma. | **Proposto**: log conservati per almeno 7 giorni; allerting: OQ-4 |
+| NFR-19 | *(v0.3)* Scala: il sistema (job, API, app) supporta un catalogo fino a ~500 località, decisione dell'owner del 2026-10-19. Il costo di `/forecast` e `/health` non cresce con il numero di località (FR-56, FR-57). *(mod. 0.4)* La crescita del catalogo verso 500 località è subordinata alla regola go/no-go di NFR-15: a quella scala il piano Paid è obbligatorio, e il passaggio avviene prima di raggiungerla. | **Vincolo** (U): 500 località, sul piano Paid (NFR-15). **Proposto**: esecuzione completa con 500 località < 5 min nominale e entro la durata massima cron del piano Paid (15 min, NFR-15) nel caso peggiore; ≤ 2 letture storage per richiesta API; `GET /locations` con 500 località < 100 KB non compresso |
+| NFR-20 | *(v0.3)* Quota Open-Meteo gratuita: il job resta entro i limiti d'uso gratuiti (doc Open-Meteo, 2026-10: 600 chiamate/min, 5.000/h, 10.000/giorno, 300.000/mese). Le richieste multi-coordinata sono conteggiate in modo pesato (circa una chiamata per località, più per molte variabili o lunghi intervalli): stima analista con 500 località, 2 API e 4 esecuzioni/giorno ≈ 4.000 chiamate pesate/giorno nominali, oltre 10.000 con retry e fallback diffusi (R-6, R-8). | **Vincolo** (provider): mai oltre 600 chiamate pesate/min (il job distribuisce le richieste nel tempo). **Proposto**: consumo nominale ≤ 50% della quota giornaliera; piano a pagamento Open-Meteo: OQ-9 |
+| NFR-21 | *(v0.3)* Misura prima del fan-out: ogni esecuzione del job registra durata, numero di blocchi, numero di fallback per località, subrequest totali e scritture sullo storage (estende NFR-18). Il fan-out su più invocazioni (es. Cloudflare Queues) è introdotto solo se la misura su 500 località supera la soglia indicata a destra. | **Proposto**: soglia = durata o CPU di un'esecuzione oltre il 50% del limite del piano (NFR-15) in almeno una esecuzione reale — da confermare (OQ-13) |
+| NFR-22 | *(v0.3)* Prestazioni app con 500 località: apertura della mappa, spostamento/zoom con cluster (FR-68) e suggerimenti di ricerca restano fluidi; il catalogo dalla copia locale o dallo snapshot è disponibile senza attendere la rete (FR-65). *(mod. 0.4)* | **Proposto**: mappa visualizzata < 1 s dopo "Apri mappa" con catalogo locale; suggerimenti < 100 ms per carattere digitato, su dispositivo di riferimento da definire (OQ-13) |
 
 ## 7. Constraints and assumptions
 **Decisioni utente (vincoli confermati, 2026-10-03)**
@@ -229,6 +271,18 @@ rispettato), **Attuale** (valore già presente nel prodotto, da preservare) o **
 - C-3 Hosting e HTTPS sono forniti da Cloudflare.
 - Restano all'architect: framework HTTP, test runner, configurazione di deploy, layout delle chiavi
   KV, meccanismo di pianificazione, strategia di rilascio.
+
+**Decisione owner (2026-10-19)**
+- C-4 Il prodotto deve scalare a un catalogo di ~500 località (NFR-19). Layout del cache per
+  località su KV o su D1: ADR-0003 (architect).
+
+**Decisioni owner (2026-10-20)**
+- C-5 Piano Cloudflare Workers: **Free ora, Paid alla soglia** secondo la regola go/no-go di
+  NFR-15 (OQ-22).
+- C-6 Catalogo località = file versionato `locations.json` nel repository (FR-61, OQ-25); l'app
+  include uno snapshot del catalogo (FR-65, OQ-26).
+- C-7 Nessuna doppia scrittura di `latest`; cancellazione dopo 14 giorni senza rollback e con
+  `/health` ok (FR-59, FR-60, OQ-27). `detail.available` nel 404 troncato a 50 nomi (FR-58, OQ-24).
 
 **Altri vincoli**
 - Sorgenti dati: solo Open-Meteo (Marine + Forecast), selezione modello `best_match`: il
@@ -245,18 +299,21 @@ rispettato), **Attuale** (valore già presente nel prodotto, da preservare) o **
 **Assunzioni (da confermare)**
 - A-1 L'elenco delle località cambia raramente e a mano.
 - A-2 L'app è destinata a smartphone (Android/iOS).
-- A-3 Il carico atteso è basso (nessun requisito di scalabilità nel codice).
+- A-3 Il traffico API atteso è basso. *(mod. 0.3: la scala del catalogo è invece un requisito,
+  NFR-19.)*
 - A-4 La migrazione non richiede di conservare il contenuto dell'attuale `data/forecasts.json`:
   il primo aggiornamento su Cloudflare ricostruisce il cache (OQ-23).
 
 **Incongruenze e rischi rilevati** (non sono requisiti, servono ad architect e planner)
-- R-1 L'elenco località è duplicato: `locations.json` (backend) e `app/lib/models/coastal_location.dart` (app). Non esiste un endpoint che esponga il catalogo (OQ-5).
+- R-1 L'elenco località è duplicato: `locations.json` (backend) e `app/lib/models/coastal_location.dart` (app). Non esiste un endpoint che esponga il catalogo (OQ-5). *(v0.3: indirizzato da FR-61, FR-62, FR-65, FR-67.)*
 - R-2 Il backend può emettere campi `null` (es. `state`, `water_temperature_mean_c`, direzioni) mentre il modello dati dell'app li richiede non nulli: una risposta con un `null` fa fallire la visualizzazione dell'intera località ("Risposta del server non valida"). Inoltre un giorno senza alcuna altezza d'onda valida fa fallire l'aggiornamento dell'intera località (OQ-6).
 - R-3 `/forecast` non comunica se il dato è vecchio e l'app mostra sempre il badge "Live" (OQ-7).
 - R-4 Molti campi calcolati (onda massima, periodo, direzione onde, raffiche, vento massimo, provenienza) non sono mostrati nell'app (OQ-11).
 - R-5 (v0.2) Arrotondamenti: Python `round()` arrotonda a pari sulla rappresentazione binaria (es. `round(0.125, 2) = 0.12`), mentre i metodi JavaScript comuni si comportano diversamente; senza attenzione FR-51 fallisce sui valori al limite (OQ-21).
-- R-6 (v0.2) Le chiamate in uscita da Cloudflare Workers partono da IP condivisi: i limiti per IP del piano gratuito Open-Meteo potrebbero essere raggiunti anche per traffico altrui, causando errori 429 (OQ-9).
-- R-7 (v0.2) Con il piano Workers Free il job non rientra nei limiti di subrequest nel caso peggiore e il budget di CPU di 10 ms è a rischio (NFR-15, OQ-22).
+- R-6 (v0.2) Le chiamate in uscita da Cloudflare Workers partono da IP condivisi: i limiti per IP del piano gratuito Open-Meteo potrebbero essere raggiunti anche per traffico altrui, causando errori 429 (OQ-9). *(v0.3: rischio aggravato con 500 località, NFR-20.)*
+- R-7 (v0.2) Con il piano Workers Free il job non rientra nei limiti di subrequest nel caso peggiore e il budget di CPU di 10 ms è a rischio (NFR-15, OQ-22). *(v0.3: con 500 località e cache per località anche la quota Free di scritture KV/giorno è superata.)* *(v0.4: mitigato dalla regola go/no-go di NFR-15, C-5: si resta su Free solo finché le misure restano sotto CPU 7 ms, 40 subrequest e 700 scritture KV/giorno; il rischio residuo è un superamento tra due misure, che si manifesta come esecuzione fallita, condizione (a), mentre `/forecast` continua a servire l'ultimo dato valido, FR-18.)*
+- R-8 (v0.3) Il peso esatto con cui Open-Meteo conteggia le richieste multi-coordinata (per località, variabili, giorni) non è verificato: la stima di NFR-20 va confermata con una misura reale. Inoltre retry e fallback per località (FR-54), in caso di guasto diffuso del provider, moltiplicano il consumo di quota proprio quando il provider è in difficoltà. *(v0.4: la seconda parte è mitigata dall'interruttore di FR-54, che con più del 50% dei blocchi falliti salta il fallback per singola località; soglia da confermare, OQ-28. Resta da verificare il peso delle richieste multi-coordinata.)*
+- R-9 (v0.3) Con record separati (FR-55) e consistenza eventuale (NFR-16), per un breve intervallo `/health` (dal record di metadati) e `/forecast` (dal record della località) possono riflettere esecuzioni diverse. Accettabile per lo stesso motivo di NFR-16, salvo diversa indicazione dell'owner.
 
 ## 8. Open questions
 | # | Question | Owner |
@@ -265,11 +322,11 @@ rispettato), **Attuale** (valore già presente nel prodotto, da preservare) o **
 | OQ-2 | Quali metriche di successo vogliamo (utenti attivi, ritenzione, sessioni/giorno, errori lato app, uptime)? Serve introdurre analytics/crash reporting nell'app? | Product owner |
 | OQ-3 | **Risolta in parte (v0.2):** hosting = Cloudflare Workers + Workers KV, HTTPS tramite Cloudflare. Restano aperte: valore delle origini CORS in produzione; dominio pubblico dell'API; piattaforme ufficiali dell'app (Android, iOS, web, desktop) e pubblicazione sugli store. | Product owner + architect |
 | OQ-4 | *(aggiornata v0.2)* L'aggiornamento ogni 6 h ora gira su Cloudflare (FR-49): gli orari attuali (02:30, 08:30, 14:30, 20:30) vanno mantenuti, e in quale fuso (UTC o Europe/Rome)? Chi viene avvisato, e come, quando `/health` è `degraded` o un'esecuzione ha località fallite? La soglia di 12 h è corretta? | Product owner (operatore) |
-| OQ-5 | L'elenco località deve restare duplicato nell'app oppure l'app deve ottenerlo dal backend (nuovo endpoint)? È previsto aggiungere località (e con quale processo)? | Product owner |
+| OQ-5 | L'elenco località deve restare duplicato nell'app oppure l'app deve ottenerlo dal backend (nuovo endpoint)? È previsto aggiungere località (e con quale processo)? *(v0.3: proposta di risoluzione dal task `cmvfof5zz0005k8j3ga6i3hp1`: l'app lo ottiene da `GET /locations`, FR-62/FR-65; la crescita a ~500 località è decisa, C-4. Resta aperto il processo di aggiunta, legato a OQ-25.)* *(v0.4: con OQ-25 risolta, aggiungere una località = modificare `locations.json`, commit e deploy, rispettando la regola go/no-go di NFR-15; proposta di chiusura, da confermare dall'owner.)* | Product owner |
 | OQ-6 | Comportamento atteso con dati mancanti dal provider: mostrare il giorno con "n.d." per i singoli campi, nascondere il giorno, o fallire come oggi? | Product owner |
 | OQ-7 | L'utente deve essere avvisato quando i dati sono vecchi (es. età > 12 h)? Il badge "Live" deve riflettere lo stato reale? `/forecast` deve esporre un indicatore di freschezza? | Product owner |
 | OQ-8 | Il pulsante "Notifiche" (oggi inattivo) va implementato (es. allerte mare mosso/vento), nascosto, o rimosso? | Product owner |
-| OQ-9 | Il prodotto è commerciale? In tal caso servono piano a pagamento Open-Meteo (con API key, che toglierebbe anche il rischio R-6 dei limiti per IP condivisi Cloudflare) e un fornitore di tile diverso da `tile.openstreetmap.org`. L'attribuzione Open-Meteo va mostrata anche nell'interfaccia dell'app? | Product owner |
+| OQ-9 | Il prodotto è commerciale? In tal caso servono piano a pagamento Open-Meteo (con API key, che toglierebbe anche il rischio R-6 dei limiti per IP condivisi Cloudflare) e un fornitore di tile diverso da `tile.openstreetmap.org`. L'attribuzione Open-Meteo va mostrata anche nell'interfaccia dell'app? *(v0.3: con 500 località il consumo stimato è ~40% della quota gratuita giornaliera in condizioni nominali e può superarla con retry/fallback diffusi, NFR-20, R-8: la scelta gratuito/a pagamento diventa più urgente.)* | Product owner |
 | OQ-10 | La località precompilata "Torre dei Corsari" è un default voluto per tutti gli utenti al primo avvio, oppure si preferisce la località più vicina alla posizione dell'utente? | Product owner |
 | OQ-11 | Quali dei campi già disponibili ma non mostrati (onda massima, periodo, direzione onde, raffiche, vento massimo, fonti/cella) devono comparire nell'app? | Product owner |
 | OQ-12 | Il materiale Copernicus in `legacy/` va conservato, rimosso, o è prevista una reintroduzione di Copernicus Marine come sorgente (anche alternativa/di fallback)? | Product owner |
@@ -282,11 +339,19 @@ rispettato), **Attuale** (valore già presente nel prodotto, da preservare) o **
 | OQ-19 | *(nuova v0.2)* In `/health`, il campo `cache_path` (percorso del file, privo di senso con KV) va mantenuto con un altro identificativo, rimosso o rinominato? L'app non lo usa. | Product owner + architect |
 | OQ-20 | *(nuova v0.2)* La documentazione interattiva su `/docs` (FR-29) va mantenuta nel backend su Cloudflare? | Product owner |
 | OQ-21 | *(nuova v0.2)* La parità di aggregazione (FR-51) deve essere esatta all'ultimo decimale, compresi i casi di arrotondamento al limite (R-5), o è ammessa una tolleranza (es. ±1 unità sull'ultima cifra)? | Product owner |
-| OQ-22 | *(nuova v0.2)* Piano Cloudflare: Workers Free o Paid? Con il piano Free il job rischia di superare i limiti di subrequest e di CPU (R-7). | Product owner |
+| OQ-22 | **Risolta (v0.4, decisione owner 2026-10-20):** piano Workers **Free ora, Paid alla soglia**, con regola go/no-go in NFR-15 (C-5). Testo originale: *(nuova v0.2)* Piano Cloudflare: Workers Free o Paid? Con il piano Free il job rischia di superare i limiti di subrequest e di CPU (R-7). **Proposta di chiusura (v0.3, da confermare dall'owner): piano Workers Paid**, perché con 500 località il piano Free non regge né le subrequest del caso peggiore (FR-54) né le scritture KV giornaliere del cache per località (NFR-15), indipendentemente dalla scelta KV/D1 di ADR-0003 per quanto riguarda CPU e subrequest. | Product owner |
 | OQ-23 | *(nuova v0.2)* Passaggio al nuovo backend: il backend Python resta attivo in parallelo durante la migrazione? Quando vanno rimossi `backend/`, `update_forecasts.py` e i test Python? Il cache attuale va migrato su KV o basta il primo aggiornamento (A-4)? | Product owner + architect |
+| OQ-24 | **Risolta (v0.4, decisione owner 2026-10-20):** `detail.available` troncato ai primi 50 nomi, stesso formato (FR-58). Testo originale: *(nuova v0.3)* 404 di `/forecast` (FR-58): `detail.available` va **troncato** (es. primi N nomi in ordine, con N da definire, ed eventualmente il totale) oppure **rimosso**? In alternativa si possono suggerire le località più simili al testo cercato. L'app non usa il campo; eventuali client terzi sì. | Product owner + architect |
+| OQ-25 | **Risolta (v0.4, decisione owner 2026-10-20):** file versionato `locations.json` (FR-61, C-6). Testo originale: *(nuova v0.3)* Fonte unica del catalogo (FR-61): **file versionato** nel repository (ogni modifica passa da commit e deploy, storico in git) oppure **tabella D1** (modifica senza deploy, serve un processo/strumento di modifica protetto, NFR-11)? Da coordinare con ADR-0003. | Product owner + architect |
+| OQ-26 | **Risolta (v0.4, decisione owner 2026-10-20):** snapshot del catalogo incluso nell'app, mostrato subito e sostituito dal catalogo di rete quando arriva (FR-65, C-6). Testo originale: *(nuova v0.3)* Primo avvio dell'app senza rete e senza copia locale (FR-65): includere nell'app uno **snapshot** del catalogo (funziona subito ma può essere obsoleto; va aggiornato a ogni release) oppure mostrare il messaggio **"Connessione necessaria"** con "Riprova"? | Product owner |
+| OQ-27 | **Risolta (v0.4, decisione owner 2026-10-20):** nessuna doppia scrittura di `latest`; cancellazione dopo 14 giorni senza rollback e con `/health` ok (FR-59, FR-60, C-7). Testo originale: *(nuova v0.3)* Migrazione da `latest` (FR-59, FR-60): durante la transizione il job deve continuare a scrivere anche `latest` (rollback con dati freschi) o basta conservarlo com'è (rollback con dati vecchi)? Dopo quanto tempo, o a quale condizione, `latest` può essere cancellato? | Product owner + architect |
+| OQ-28 | *(nuova v0.4)* Interruttore del fallback (FR-54): la soglia proposta "più del 50% delle richieste di blocco fallite, Marine e Forecast contate separatamente" va bene? Deve essere configurabile senza modificare il codice? | Product owner |
+| OQ-29 | *(nuova v0.4)* Regola go/no-go per Paid (NFR-15): la soglia proposta di **700 scritture KV/giorno** (stesso margine ~30% di CPU 7 ms e subrequest 40) va bene? Con il cache per località (FR-55) e 4 esecuzioni/giorno corrisponde a circa 170 località. | Product owner |
 
 ## Changelog
 | Date | Version | Change | Reason |
 |---|---|---|---|
 | 2026-10-03 | 0.1 | Prima stesura brownfield: 48 FR, 14 NFR, 16 domande aperte, ricostruiti dal codice al commit `181c2f3`. | Documentare il prodotto esistente prima di pianificare evoluzioni con il flusso gyukit. |
 | 2026-10-03 | 0.2 | Aggiunti FR-49 (aggiornamento automatico su Cloudflare ogni 6 h), FR-50 (parità contratto API), FR-51 (parità aggregazione), FR-52 (esito esecuzione osservabile); aggiunti NFR-15..NFR-18 (limiti Workers/KV, consistenza eventuale KV, concorrenza verso i provider, osservabilità). Riformulati in modo indipendente dal runtime FR-1, FR-2, FR-5, FR-14, FR-17, FR-19, FR-20, FR-24..FR-29 e NFR-2..NFR-5, NFR-11..NFR-14. Superati FR-15, FR-16, FR-21 (CLI Python). OQ-3 risolta in parte, OQ-4, OQ-9 e OQ-13 aggiornate, aggiunte OQ-17..OQ-23, rischi R-5..R-7, vincoli C-1..C-3, assunzione A-4, obiettivo G-6. | Migrazione a Cloudflare Workers, decisione utente 2026-10-03. |
+| 2026-10-20 | 0.3 | Aggiunti FR-53..FR-60 (chiamate Open-Meteo a blocchi, retry per blocco e fallback per località, cache per località + metadati, `/health` dai metadati, `/forecast` a costo costante, eccezione FR-50 per `detail.available` nel 404, migrazione e rollback da `latest`), FR-61..FR-68 (catalogo a fonte unica, `GET /locations` con Cache-Control/ETag/304, additività, LocationRepository rete → copia locale → snapshot, revalidazione condizionale, uso esclusivo del repository in ricerca/mappa/località più vicina, clustering della mappa); aggiunti NFR-19..NFR-22 (scala 500 località, quota Open-Meteo, misura prima del fan-out, prestazioni app). Modificati FR-1, FR-23, FR-30, FR-43, FR-45, FR-50, NFR-4, NFR-5, NFR-15, NFR-17, G-1, non-goal (località, offline, fan-out), A-3, R-1, R-6, R-7, OQ-5, OQ-9; proposta di chiusura di OQ-22 (piano Paid, decide l'owner); aggiunti C-4, R-8, R-9, OQ-24..OQ-27. Nessun ID rinumerato. | Task my-planner `cmvfp0lzk0009711ssui58rjh` (scalabilità a ~500 località, decisione owner 2026-10-19) e `cmvfof5zz0005k8j3ga6i3hp1` (catalogo da `GET /locations`), il primo blocca il secondo. |
+| 2026-10-20 | 0.4 | Risolte OQ-22, OQ-24, OQ-25, OQ-26, OQ-27. Modificati: NFR-15 (piano Free con regola go/no-go per Paid: esecuzione fallita, CPU > 7 ms, subrequest > 40, scritture KV > 700/giorno, nessuna run completa in 24 h, apertura ad altri utenti, prima di ~500 località), NFR-19 (500 località solo su Paid), NFR-22 (snapshot), FR-54 (interruttore: con > 50% dei blocchi falliti nessun fallback per località), FR-58 (`detail.available` = primi 50 nomi), FR-59 (nessuna scrittura di `latest`), FR-60 (cancellazione di `latest` dopo 14 giorni senza rollback e con `/health` ok), FR-61 (fonte = `locations.json` versionato), FR-65 (copia locale o snapshot subito, sostituita dal catalogo di rete). Aggiornati R-7, R-8, OQ-5. Aggiunti C-5..C-7, OQ-28, OQ-29. Nessun ID rinumerato. | Decisioni dell'owner del 2026-10-20 sulle domande aperte della v0.3. |

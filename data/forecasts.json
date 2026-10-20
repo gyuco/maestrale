@@ -1,0 +1,3363 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-23T08:57:49.546767+00:00",
+  "updated_locations": [
+    "alghero",
+    "arbatax",
+    "cagliari",
+    "carloforte",
+    "chia",
+    "la-maddalena",
+    "olbia",
+    "oristano",
+    "porto-torres",
+    "santa-teresa-gallura",
+    "siniscola",
+    "torre-dei-corsari",
+    "villasimius"
+  ],
+  "errors": {},
+  "locations": {
+    "carloforte": {
+      "location": {
+        "name": "Carloforte",
+        "latitude": 39.1,
+        "longitude": 8.28,
+        "slug": "carloforte"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 39.125,
+          "longitude": 8.291672
+        },
+        "weather": {
+          "latitude": 39.125,
+          "longitude": 8.25,
+          "elevation_m": 9.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:47.294362+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 39.1,
+            "longitude": 8.28
+          },
+          "resolved_cell": {
+            "latitude": 39.125,
+            "longitude": 8.291672,
+            "elevation_m": 9.0
+          },
+          "fetched_at": "2026-08-23T08:57:46.867703+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 39.1,
+            "longitude": 8.28
+          },
+          "resolved_cell": {
+            "latitude": 39.125,
+            "longitude": 8.25,
+            "elevation_m": 9.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.293504+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.76,
+            "wave_height_max_m": 0.98,
+            "wave_period_mean_s": 5.05,
+            "wave_direction_mean_deg": 289.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.9,
+            "air_temperature_min_c": 26.8,
+            "air_temperature_max_c": 31.8,
+            "weather_code": 1,
+            "wind_speed_mean_kmh": 7.9,
+            "wind_speed_max_kmh": 19.4,
+            "wind_gust_mean_kmh": 14.7,
+            "wind_gust_max_kmh": 31.7,
+            "wind_direction_mean_deg": 38.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.42,
+            "wave_height_max_m": 0.56,
+            "wave_period_mean_s": 3.62,
+            "wave_direction_mean_deg": 101.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 28.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.6,
+            "air_temperature_min_c": 27.1,
+            "air_temperature_max_c": 30.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 10.1,
+            "wind_speed_max_kmh": 30.0,
+            "wind_gust_mean_kmh": 19.3,
+            "wind_gust_max_kmh": 49.0,
+            "wind_direction_mean_deg": 135.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.53,
+            "wave_height_max_m": 0.68,
+            "wave_period_mean_s": 3.5,
+            "wave_direction_mean_deg": 181.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.1,
+            "air_temperature_min_c": 27.7,
+            "air_temperature_max_c": 30.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 16.6,
+            "wind_speed_max_kmh": 31.7,
+            "wind_gust_mean_kmh": 30.7,
+            "wind_gust_max_kmh": 50.4,
+            "wind_direction_mean_deg": 297.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.68,
+            "wave_height_max_m": 0.92,
+            "wave_period_mean_s": 4.52,
+            "wave_direction_mean_deg": 210.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.0,
+            "air_temperature_min_c": 26.4,
+            "air_temperature_max_c": 34.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.9,
+            "wind_speed_max_kmh": 23.1,
+            "wind_gust_mean_kmh": 21.7,
+            "wind_gust_max_kmh": 38.2,
+            "wind_direction_mean_deg": 131.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.58,
+            "wave_height_max_m": 0.76,
+            "wave_period_mean_s": 3.71,
+            "wave_direction_mean_deg": 153.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 32.4,
+            "air_temperature_min_c": 29.9,
+            "air_temperature_max_c": 34.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 17.1,
+            "wind_speed_max_kmh": 29.6,
+            "wind_gust_mean_kmh": 31.0,
+            "wind_gust_max_kmh": 45.7,
+            "wind_direction_mean_deg": 134.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.58,
+            "wave_height_max_m": 0.68,
+            "wave_period_mean_s": 4.22,
+            "wave_direction_mean_deg": 212.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 29.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.4,
+            "air_temperature_min_c": 27.4,
+            "air_temperature_max_c": 31.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 12.9,
+            "wind_speed_max_kmh": 20.9,
+            "wind_gust_mean_kmh": 24.8,
+            "wind_gust_max_kmh": 36.7,
+            "wind_direction_mean_deg": 322.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.64,
+            "wave_height_max_m": 0.7,
+            "wave_period_mean_s": 5.11,
+            "wave_direction_mean_deg": 273.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 29.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.5,
+            "air_temperature_min_c": 25.6,
+            "air_temperature_max_c": 29.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 15.5,
+            "wind_speed_max_kmh": 23.2,
+            "wind_gust_mean_kmh": 28.4,
+            "wind_gust_max_kmh": 39.2,
+            "wind_direction_mean_deg": 334.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "arbatax": {
+      "location": {
+        "name": "Arbatax",
+        "latitude": 39.92,
+        "longitude": 9.72,
+        "slug": "arbatax"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 39.791664,
+          "longitude": 9.791672
+        },
+        "weather": {
+          "latitude": 39.9375,
+          "longitude": 9.6875,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:47.292403+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 39.92,
+            "longitude": 9.72
+          },
+          "resolved_cell": {
+            "latitude": 39.791664,
+            "longitude": 9.791672,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:46.857330+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 39.92,
+            "longitude": 9.72
+          },
+          "resolved_cell": {
+            "latitude": 39.9375,
+            "longitude": 9.6875,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.291550+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.23,
+            "wave_height_max_m": 0.44,
+            "wave_period_mean_s": 3.25,
+            "wave_direction_mean_deg": 135.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.9,
+            "air_temperature_min_c": 24.7,
+            "air_temperature_max_c": 30.3,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 6.7,
+            "wind_speed_max_kmh": 12.5,
+            "wind_gust_mean_kmh": 12.9,
+            "wind_gust_max_kmh": 22.7,
+            "wind_direction_mean_deg": 204.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.33,
+            "wave_height_max_m": 0.44,
+            "wave_period_mean_s": 3.63,
+            "wave_direction_mean_deg": 133.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.6,
+            "air_temperature_min_c": 24.3,
+            "air_temperature_max_c": 30.3,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.3,
+            "wind_speed_max_kmh": 12.5,
+            "wind_gust_mean_kmh": 16.4,
+            "wind_gust_max_kmh": 41.8,
+            "wind_direction_mean_deg": 205.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.4,
+            "wave_height_max_m": 0.48,
+            "wave_period_mean_s": 3.59,
+            "wave_direction_mean_deg": 140.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.3,
+            "air_temperature_min_c": 26.5,
+            "air_temperature_max_c": 31.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.3,
+            "wind_speed_max_kmh": 14.8,
+            "wind_gust_mean_kmh": 18.8,
+            "wind_gust_max_kmh": 48.2,
+            "wind_direction_mean_deg": 33.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.35,
+            "wave_height_max_m": 0.48,
+            "wave_period_mean_s": 3.75,
+            "wave_direction_mean_deg": 116.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.5,
+            "air_temperature_min_c": 26.5,
+            "air_temperature_max_c": 30.4,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 6.4,
+            "wind_speed_max_kmh": 11.8,
+            "wind_gust_mean_kmh": 12.7,
+            "wind_gust_max_kmh": 20.9,
+            "wind_direction_mean_deg": 138.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.23,
+            "wave_height_max_m": 0.34,
+            "wave_period_mean_s": 2.92,
+            "wave_direction_mean_deg": 136.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.7,
+            "air_temperature_min_c": 26.4,
+            "air_temperature_max_c": 31.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 4.9,
+            "wind_speed_max_kmh": 10.4,
+            "wind_gust_mean_kmh": 17.4,
+            "wind_gust_max_kmh": 32.4,
+            "wind_direction_mean_deg": 198.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.43,
+            "wave_height_max_m": 0.52,
+            "wave_period_mean_s": 3.66,
+            "wave_direction_mean_deg": 137.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.8,
+            "air_temperature_min_c": 28.1,
+            "air_temperature_max_c": 34.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.4,
+            "wind_speed_max_kmh": 13.4,
+            "wind_gust_mean_kmh": 24.7,
+            "wind_gust_max_kmh": 59.0,
+            "wind_direction_mean_deg": 172.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.29,
+            "wave_height_max_m": 0.44,
+            "wave_period_mean_s": 3.31,
+            "wave_direction_mean_deg": 105.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 29.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.3,
+            "air_temperature_min_c": 24.4,
+            "air_temperature_max_c": 30.5,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.2,
+            "wind_speed_max_kmh": 16.5,
+            "wind_gust_mean_kmh": 27.8,
+            "wind_gust_max_kmh": 49.0,
+            "wind_direction_mean_deg": 177.0,
+            "wind_name": "Ostro"
+          }
+        }
+      ]
+    },
+    "cagliari": {
+      "location": {
+        "name": "Cagliari",
+        "latitude": 39.17,
+        "longitude": 9.15,
+        "slug": "cagliari"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 39.208336,
+          "longitude": 9.125015
+        },
+        "weather": {
+          "latitude": 39.25,
+          "longitude": 9.125,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:47.290909+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 39.17,
+            "longitude": 9.15
+          },
+          "resolved_cell": {
+            "latitude": 39.208336,
+            "longitude": 9.125015,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:46.858632+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 39.17,
+            "longitude": 9.15
+          },
+          "resolved_cell": {
+            "latitude": 39.25,
+            "longitude": 9.125,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.289880+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.3,
+            "wave_height_max_m": 0.48,
+            "wave_period_mean_s": 3.55,
+            "wave_direction_mean_deg": 144.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.5,
+            "air_temperature_min_c": 25.5,
+            "air_temperature_max_c": 33.9,
+            "weather_code": 1,
+            "wind_speed_mean_kmh": 8.1,
+            "wind_speed_max_kmh": 18.8,
+            "wind_gust_mean_kmh": 19.7,
+            "wind_gust_max_kmh": 41.8,
+            "wind_direction_mean_deg": 145.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.27,
+            "wave_height_max_m": 0.4,
+            "wave_period_mean_s": 3.52,
+            "wave_direction_mean_deg": 131.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.2,
+            "air_temperature_min_c": 24.4,
+            "air_temperature_max_c": 31.5,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.7,
+            "wind_speed_max_kmh": 17.7,
+            "wind_gust_mean_kmh": 21.9,
+            "wind_gust_max_kmh": 40.7,
+            "wind_direction_mean_deg": 157.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.32,
+            "wave_height_max_m": 0.4,
+            "wave_period_mean_s": 3.38,
+            "wave_direction_mean_deg": 149.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.7,
+            "air_temperature_min_c": 26.8,
+            "air_temperature_max_c": 36.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 14.0,
+            "wind_speed_max_kmh": 23.6,
+            "wind_gust_mean_kmh": 34.0,
+            "wind_gust_max_kmh": 53.6,
+            "wind_direction_mean_deg": 306.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.29,
+            "wave_height_max_m": 0.42,
+            "wave_period_mean_s": 3.61,
+            "wave_direction_mean_deg": 149.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.0,
+            "air_temperature_min_c": 23.6,
+            "air_temperature_max_c": 34.1,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.3,
+            "wind_speed_max_kmh": 16.6,
+            "wind_gust_mean_kmh": 22.7,
+            "wind_gust_max_kmh": 40.0,
+            "wind_direction_mean_deg": 213.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.21,
+            "wave_height_max_m": 0.28,
+            "wave_period_mean_s": 3.14,
+            "wave_direction_mean_deg": 139.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.6,
+            "air_temperature_min_c": 27.5,
+            "air_temperature_max_c": 35.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 10.1,
+            "wind_speed_max_kmh": 17.7,
+            "wind_gust_mean_kmh": 24.5,
+            "wind_gust_max_kmh": 37.8,
+            "wind_direction_mean_deg": 190.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.27,
+            "wave_height_max_m": 0.34,
+            "wave_period_mean_s": 3.58,
+            "wave_direction_mean_deg": 150.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 30.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 31.5,
+            "air_temperature_min_c": 27.6,
+            "air_temperature_max_c": 37.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.2,
+            "wind_speed_max_kmh": 21.2,
+            "wind_gust_mean_kmh": 24.3,
+            "wind_gust_max_kmh": 42.5,
+            "wind_direction_mean_deg": 345.0,
+            "wind_name": "Tramontana"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.15,
+            "wave_height_max_m": 0.26,
+            "wave_period_mean_s": 3.43,
+            "wave_direction_mean_deg": 182.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 30.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.3,
+            "air_temperature_min_c": 24.1,
+            "air_temperature_max_c": 33.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 15.5,
+            "wind_speed_max_kmh": 19.9,
+            "wind_gust_mean_kmh": 35.4,
+            "wind_gust_max_kmh": 44.3,
+            "wind_direction_mean_deg": 328.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "alghero": {
+      "location": {
+        "name": "Alghero",
+        "latitude": 40.56,
+        "longitude": 8.26,
+        "slug": "alghero"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 40.541664,
+          "longitude": 8.291672
+        },
+        "weather": {
+          "latitude": 40.625,
+          "longitude": 8.25,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:47.296976+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 40.56,
+            "longitude": 8.26
+          },
+          "resolved_cell": {
+            "latitude": 40.541664,
+            "longitude": 8.291672,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:46.864189+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 40.56,
+            "longitude": 8.26
+          },
+          "resolved_cell": {
+            "latitude": 40.625,
+            "longitude": 8.25,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.296324+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.57,
+            "wave_height_max_m": 0.86,
+            "wave_period_mean_s": 5.17,
+            "wave_direction_mean_deg": 294.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 27.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.3,
+            "air_temperature_min_c": 20.5,
+            "air_temperature_max_c": 34.3,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 9.2,
+            "wind_speed_max_kmh": 17.6,
+            "wind_gust_mean_kmh": 19.1,
+            "wind_gust_max_kmh": 34.6,
+            "wind_direction_mean_deg": 33.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.23,
+            "wave_height_max_m": 0.34,
+            "wave_period_mean_s": 3.49,
+            "wave_direction_mean_deg": 256.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 27.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.1,
+            "air_temperature_min_c": 25.8,
+            "air_temperature_max_c": 31.0,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.3,
+            "wind_speed_max_kmh": 14.3,
+            "wind_gust_mean_kmh": 19.4,
+            "wind_gust_max_kmh": 46.4,
+            "wind_direction_mean_deg": 182.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.34,
+            "wave_height_max_m": 0.38,
+            "wave_period_mean_s": 3.47,
+            "wave_direction_mean_deg": 210.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 27.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.5,
+            "air_temperature_min_c": 26.8,
+            "air_temperature_max_c": 30.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 10.3,
+            "wind_speed_max_kmh": 20.1,
+            "wind_gust_mean_kmh": 23.6,
+            "wind_gust_max_kmh": 44.3,
+            "wind_direction_mean_deg": 221.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.46,
+            "wave_height_max_m": 0.52,
+            "wave_period_mean_s": 4.87,
+            "wave_direction_mean_deg": 239.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.2,
+            "air_temperature_min_c": 23.2,
+            "air_temperature_max_c": 35.9,
+            "weather_code": 45,
+            "wind_speed_mean_kmh": 5.4,
+            "wind_speed_max_kmh": 12.7,
+            "wind_gust_mean_kmh": 15.0,
+            "wind_gust_max_kmh": 28.4,
+            "wind_direction_mean_deg": 60.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.82,
+            "wave_height_max_m": 0.96,
+            "wave_period_mean_s": 4.33,
+            "wave_direction_mean_deg": 199.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 28.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.8,
+            "air_temperature_min_c": 27.5,
+            "air_temperature_max_c": 37.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.4,
+            "wind_speed_max_kmh": 18.7,
+            "wind_gust_mean_kmh": 26.1,
+            "wind_gust_max_kmh": 46.8,
+            "wind_direction_mean_deg": 128.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.5,
+            "wave_height_max_m": 0.66,
+            "wave_period_mean_s": 4.45,
+            "wave_direction_mean_deg": 233.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.2,
+            "air_temperature_min_c": 26.0,
+            "air_temperature_max_c": 31.3,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.2,
+            "wind_speed_max_kmh": 15.3,
+            "wind_gust_mean_kmh": 22.7,
+            "wind_gust_max_kmh": 38.2,
+            "wind_direction_mean_deg": 233.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.62,
+            "wave_height_max_m": 0.66,
+            "wave_period_mean_s": 5.29,
+            "wave_direction_mean_deg": 260.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 25.5,
+            "air_temperature_min_c": 21.5,
+            "air_temperature_max_c": 29.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.8,
+            "wind_speed_max_kmh": 18.3,
+            "wind_gust_mean_kmh": 17.9,
+            "wind_gust_max_kmh": 35.3,
+            "wind_direction_mean_deg": 331.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "chia": {
+      "location": {
+        "name": "Chia",
+        "latitude": 38.87,
+        "longitude": 8.84,
+        "slug": "chia"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 38.875,
+          "longitude": 8.875015
+        },
+        "weather": {
+          "latitude": 38.9375,
+          "longitude": 8.8125,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.020788+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 38.87,
+            "longitude": 8.84
+          },
+          "resolved_cell": {
+            "latitude": 38.875,
+            "longitude": 8.875015,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.675357+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 38.87,
+            "longitude": 8.84
+          },
+          "resolved_cell": {
+            "latitude": 38.9375,
+            "longitude": 8.8125,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.019955+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.77,
+            "wave_height_max_m": 0.92,
+            "wave_period_mean_s": 4.44,
+            "wave_direction_mean_deg": 89.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 29.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.2,
+            "air_temperature_min_c": 27.3,
+            "air_temperature_max_c": 31.9,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 18.8,
+            "wind_speed_max_kmh": 29.0,
+            "wind_gust_mean_kmh": 41.0,
+            "wind_gust_max_kmh": 57.2,
+            "wind_direction_mean_deg": 77.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.48,
+            "wave_height_max_m": 0.74,
+            "wave_period_mean_s": 3.56,
+            "wave_direction_mean_deg": 103.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 28.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.0,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 32.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.9,
+            "wind_speed_max_kmh": 15.0,
+            "wind_gust_mean_kmh": 26.4,
+            "wind_gust_max_kmh": 50.0,
+            "wind_direction_mean_deg": 89.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.57,
+            "wave_height_max_m": 0.8,
+            "wave_period_mean_s": 3.48,
+            "wave_direction_mean_deg": 175.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 28.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.5,
+            "air_temperature_min_c": 27.9,
+            "air_temperature_max_c": 33.0,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 14.9,
+            "wind_speed_max_kmh": 30.6,
+            "wind_gust_mean_kmh": 39.3,
+            "wind_gust_max_kmh": 62.3,
+            "wind_direction_mean_deg": 326.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.62,
+            "wave_height_max_m": 0.8,
+            "wave_period_mean_s": 4.17,
+            "wave_direction_mean_deg": 147.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.8,
+            "air_temperature_min_c": 25.4,
+            "air_temperature_max_c": 33.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 12.1,
+            "wind_speed_max_kmh": 24.0,
+            "wind_gust_mean_kmh": 29.1,
+            "wind_gust_max_kmh": 50.8,
+            "wind_direction_mean_deg": 70.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.45,
+            "wave_height_max_m": 0.66,
+            "wave_period_mean_s": 3.53,
+            "wave_direction_mean_deg": 117.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 32.1,
+            "air_temperature_min_c": 29.0,
+            "air_temperature_max_c": 34.5,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 16.7,
+            "wind_speed_max_kmh": 21.3,
+            "wind_gust_mean_kmh": 42.7,
+            "wind_gust_max_kmh": 50.8,
+            "wind_direction_mean_deg": 84.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.57,
+            "wave_height_max_m": 0.78,
+            "wave_period_mean_s": 3.79,
+            "wave_direction_mean_deg": 196.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 29.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 31.0,
+            "air_temperature_min_c": 27.6,
+            "air_temperature_max_c": 33.1,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 14.0,
+            "wind_speed_max_kmh": 21.9,
+            "wind_gust_mean_kmh": 32.3,
+            "wind_gust_max_kmh": 45.4,
+            "wind_direction_mean_deg": 325.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.55,
+            "wave_height_max_m": 0.7,
+            "wave_period_mean_s": 5.23,
+            "wave_direction_mean_deg": 264.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 29.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.7,
+            "air_temperature_min_c": 25.4,
+            "air_temperature_max_c": 32.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.4,
+            "wind_speed_max_kmh": 22.2,
+            "wind_gust_mean_kmh": 28.1,
+            "wind_gust_max_kmh": 41.4,
+            "wind_direction_mean_deg": 310.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "la-maddalena": {
+      "location": {
+        "name": "La Maddalena",
+        "latitude": 41.22,
+        "longitude": 9.4,
+        "slug": "la-maddalena"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 41.291664,
+          "longitude": 9.4583435
+        },
+        "weather": {
+          "latitude": 41.1875,
+          "longitude": 9.3125,
+          "elevation_m": 126.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.044186+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 41.22,
+            "longitude": 9.4
+          },
+          "resolved_cell": {
+            "latitude": 41.291664,
+            "longitude": 9.4583435,
+            "elevation_m": 126.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.691069+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 41.22,
+            "longitude": 9.4
+          },
+          "resolved_cell": {
+            "latitude": 41.1875,
+            "longitude": 9.3125,
+            "elevation_m": 126.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.043691+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.36,
+            "wave_height_max_m": 0.56,
+            "wave_period_mean_s": 3.66,
+            "wave_direction_mean_deg": 318.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 25.3,
+            "air_temperature_min_c": 19.2,
+            "air_temperature_max_c": 29.7,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 10.7,
+            "wind_speed_max_kmh": 19.5,
+            "wind_gust_mean_kmh": 19.8,
+            "wind_gust_max_kmh": 33.5,
+            "wind_direction_mean_deg": 121.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.24,
+            "wave_height_max_m": 0.4,
+            "wave_period_mean_s": 2.53,
+            "wave_direction_mean_deg": 58.0,
+            "wave_direction_name": "Grecale",
+            "water_temperature_mean_c": 28.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.5,
+            "air_temperature_min_c": 23.4,
+            "air_temperature_max_c": 31.1,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.1,
+            "wind_speed_max_kmh": 19.1,
+            "wind_gust_mean_kmh": 20.3,
+            "wind_gust_max_kmh": 49.0,
+            "wind_direction_mean_deg": 108.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.41,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 3.09,
+            "wave_direction_mean_deg": 204.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.5,
+            "air_temperature_min_c": 25.6,
+            "air_temperature_max_c": 30.5,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 15.8,
+            "wind_speed_max_kmh": 26.5,
+            "wind_gust_mean_kmh": 30.2,
+            "wind_gust_max_kmh": 45.7,
+            "wind_direction_mean_deg": 271.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.28,
+            "wave_height_max_m": 0.4,
+            "wave_period_mean_s": 3.28,
+            "wave_direction_mean_deg": 156.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.7,
+            "air_temperature_min_c": 23.0,
+            "air_temperature_max_c": 29.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.3,
+            "wind_speed_max_kmh": 20.2,
+            "wind_gust_mean_kmh": 22.2,
+            "wind_gust_max_kmh": 36.7,
+            "wind_direction_mean_deg": 123.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.35,
+            "wave_height_max_m": 0.46,
+            "wave_period_mean_s": 3.22,
+            "wave_direction_mean_deg": 115.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.3,
+            "air_temperature_min_c": 25.9,
+            "air_temperature_max_c": 34.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 12.1,
+            "wind_speed_max_kmh": 29.6,
+            "wind_gust_mean_kmh": 30.6,
+            "wind_gust_max_kmh": 49.0,
+            "wind_direction_mean_deg": 85.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.49,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 3.39,
+            "wave_direction_mean_deg": 229.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.3,
+            "air_temperature_min_c": 24.8,
+            "air_temperature_max_c": 32.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 12.7,
+            "wind_speed_max_kmh": 24.1,
+            "wind_gust_mean_kmh": 30.7,
+            "wind_gust_max_kmh": 50.4,
+            "wind_direction_mean_deg": 284.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.66,
+            "wave_height_max_m": 0.72,
+            "wave_period_mean_s": 3.36,
+            "wave_direction_mean_deg": 270.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 25.2,
+            "air_temperature_min_c": 23.0,
+            "air_temperature_max_c": 28.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 20.8,
+            "wind_speed_max_kmh": 28.0,
+            "wind_gust_mean_kmh": 40.4,
+            "wind_gust_max_kmh": 53.6,
+            "wind_direction_mean_deg": 285.0,
+            "wind_name": "Ponente"
+          }
+        }
+      ]
+    },
+    "olbia": {
+      "location": {
+        "name": "Olbia",
+        "latitude": 40.92,
+        "longitude": 9.58,
+        "slug": "olbia"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 41.041664,
+          "longitude": 9.625015
+        },
+        "weather": {
+          "latitude": 40.875,
+          "longitude": 9.5625,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.023718+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 40.92,
+            "longitude": 9.58
+          },
+          "resolved_cell": {
+            "latitude": 41.041664,
+            "longitude": 9.625015,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.674988+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 40.92,
+            "longitude": 9.58
+          },
+          "resolved_cell": {
+            "latitude": 40.875,
+            "longitude": 9.5625,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.022835+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.16,
+            "wave_height_max_m": 0.2,
+            "wave_period_mean_s": 2.87,
+            "wave_direction_mean_deg": 6.0,
+            "wave_direction_name": "Tramontana",
+            "water_temperature_mean_c": 29.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.2,
+            "air_temperature_min_c": 20.5,
+            "air_temperature_max_c": 30.7,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 8.9,
+            "wind_speed_max_kmh": 18.7,
+            "wind_gust_mean_kmh": 17.1,
+            "wind_gust_max_kmh": 32.8,
+            "wind_direction_mean_deg": 131.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.21,
+            "wave_height_max_m": 0.36,
+            "wave_period_mean_s": 2.64,
+            "wave_direction_mean_deg": 120.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.0,
+            "air_temperature_min_c": 23.7,
+            "air_temperature_max_c": 32.3,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.0,
+            "wind_speed_max_kmh": 22.3,
+            "wind_gust_mean_kmh": 20.1,
+            "wind_gust_max_kmh": 49.7,
+            "wind_direction_mean_deg": 150.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.28,
+            "wave_height_max_m": 0.36,
+            "wave_period_mean_s": 3.2,
+            "wave_direction_mean_deg": 121.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.8,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 36.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.2,
+            "wind_speed_max_kmh": 21.8,
+            "wind_gust_mean_kmh": 23.1,
+            "wind_gust_max_kmh": 38.9,
+            "wind_direction_mean_deg": 300.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.22,
+            "wave_height_max_m": 0.3,
+            "wave_period_mean_s": 3.52,
+            "wave_direction_mean_deg": 111.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 28.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.8,
+            "air_temperature_min_c": 23.6,
+            "air_temperature_max_c": 31.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 10.6,
+            "wind_speed_max_kmh": 21.1,
+            "wind_gust_mean_kmh": 21.9,
+            "wind_gust_max_kmh": 40.0,
+            "wind_direction_mean_deg": 138.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.39,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 3.26,
+            "wave_direction_mean_deg": 134.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.0,
+            "air_temperature_min_c": 25.7,
+            "air_temperature_max_c": 34.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.3,
+            "wind_speed_max_kmh": 24.5,
+            "wind_gust_mean_kmh": 23.6,
+            "wind_gust_max_kmh": 43.2,
+            "wind_direction_mean_deg": 103.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.32,
+            "wave_height_max_m": 0.4,
+            "wave_period_mean_s": 3.51,
+            "wave_direction_mean_deg": 116.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.8,
+            "air_temperature_min_c": 26.5,
+            "air_temperature_max_c": 34.4,
+            "weather_code": 80,
+            "wind_speed_mean_kmh": 7.1,
+            "wind_speed_max_kmh": 19.7,
+            "wind_gust_mean_kmh": 23.6,
+            "wind_gust_max_kmh": 40.3,
+            "wind_direction_mean_deg": 274.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.29,
+            "wave_height_max_m": 0.42,
+            "wave_period_mean_s": 3.11,
+            "wave_direction_mean_deg": 346.0,
+            "wave_direction_name": "Tramontana",
+            "water_temperature_mean_c": 29.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.5,
+            "air_temperature_min_c": 23.5,
+            "air_temperature_max_c": 30.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 18.6,
+            "wind_speed_max_kmh": 29.2,
+            "wind_gust_mean_kmh": 33.7,
+            "wind_gust_max_kmh": 50.4,
+            "wind_direction_mean_deg": 283.0,
+            "wind_name": "Ponente"
+          }
+        }
+      ]
+    },
+    "oristano": {
+      "location": {
+        "name": "Oristano",
+        "latitude": 39.87,
+        "longitude": 8.45,
+        "slug": "oristano"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 39.875,
+          "longitude": 8.4583435
+        },
+        "weather": {
+          "latitude": 39.9375,
+          "longitude": 8.4375,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.045147+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 39.87,
+            "longitude": 8.45
+          },
+          "resolved_cell": {
+            "latitude": 39.875,
+            "longitude": 8.4583435,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:47.675630+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 39.87,
+            "longitude": 8.45
+          },
+          "resolved_cell": {
+            "latitude": 39.9375,
+            "longitude": 8.4375,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.044770+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.5,
+            "wave_height_max_m": 0.8,
+            "wave_period_mean_s": 4.89,
+            "wave_direction_mean_deg": 299.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.3,
+            "air_temperature_min_c": 24.1,
+            "air_temperature_max_c": 33.2,
+            "weather_code": 1,
+            "wind_speed_mean_kmh": 8.8,
+            "wind_speed_max_kmh": 19.6,
+            "wind_gust_mean_kmh": 16.6,
+            "wind_gust_max_kmh": 33.5,
+            "wind_direction_mean_deg": 71.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.21,
+            "wave_height_max_m": 0.32,
+            "wave_period_mean_s": 3.55,
+            "wave_direction_mean_deg": 296.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.1,
+            "air_temperature_min_c": 24.7,
+            "air_temperature_max_c": 31.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.7,
+            "wind_speed_max_kmh": 21.6,
+            "wind_gust_mean_kmh": 22.0,
+            "wind_gust_max_kmh": 54.4,
+            "wind_direction_mean_deg": 140.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.28,
+            "wave_height_max_m": 0.36,
+            "wave_period_mean_s": 3.1,
+            "wave_direction_mean_deg": 211.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.5,
+            "air_temperature_min_c": 26.6,
+            "air_temperature_max_c": 30.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.0,
+            "wind_speed_max_kmh": 21.1,
+            "wind_gust_mean_kmh": 22.4,
+            "wind_gust_max_kmh": 37.4,
+            "wind_direction_mean_deg": 257.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.4,
+            "wave_height_max_m": 0.42,
+            "wave_period_mean_s": 4.73,
+            "wave_direction_mean_deg": 244.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.9,
+            "air_temperature_min_c": 23.6,
+            "air_temperature_max_c": 34.2,
+            "weather_code": 45,
+            "wind_speed_mean_kmh": 6.5,
+            "wind_speed_max_kmh": 15.6,
+            "wind_gust_mean_kmh": 15.4,
+            "wind_gust_max_kmh": 25.6,
+            "wind_direction_mean_deg": 72.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.49,
+            "wave_height_max_m": 0.66,
+            "wave_period_mean_s": 3.6,
+            "wave_direction_mean_deg": 202.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 31.8,
+            "air_temperature_min_c": 28.7,
+            "air_temperature_max_c": 35.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.5,
+            "wind_speed_max_kmh": 18.8,
+            "wind_gust_mean_kmh": 27.9,
+            "wind_gust_max_kmh": 47.9,
+            "wind_direction_mean_deg": 134.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.36,
+            "wave_height_max_m": 0.54,
+            "wave_period_mean_s": 4.33,
+            "wave_direction_mean_deg": 240.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.0,
+            "air_temperature_min_c": 27.1,
+            "air_temperature_max_c": 30.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.6,
+            "wind_speed_max_kmh": 17.3,
+            "wind_gust_mean_kmh": 22.2,
+            "wind_gust_max_kmh": 33.8,
+            "wind_direction_mean_deg": 297.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.55,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 5.11,
+            "wave_direction_mean_deg": 267.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 29.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.7,
+            "air_temperature_min_c": 24.3,
+            "air_temperature_max_c": 28.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 13.4,
+            "wind_speed_max_kmh": 23.8,
+            "wind_gust_mean_kmh": 25.0,
+            "wind_gust_max_kmh": 39.6,
+            "wind_direction_mean_deg": 333.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "santa-teresa-gallura": {
+      "location": {
+        "name": "Santa Teresa Gallura",
+        "latitude": 41.24,
+        "longitude": 9.18,
+        "slug": "santa-teresa-gallura"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 41.291664,
+          "longitude": 9.2083435
+        },
+        "weather": {
+          "latitude": 41.1875,
+          "longitude": 9.1875,
+          "elevation_m": 87.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.715859+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 41.24,
+            "longitude": 9.18
+          },
+          "resolved_cell": {
+            "latitude": 41.291664,
+            "longitude": 9.2083435,
+            "elevation_m": 87.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.374491+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 41.24,
+            "longitude": 9.18
+          },
+          "resolved_cell": {
+            "latitude": 41.1875,
+            "longitude": 9.1875,
+            "elevation_m": 87.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.715255+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.55,
+            "wave_height_max_m": 0.8,
+            "wave_period_mean_s": 4.48,
+            "wave_direction_mean_deg": 323.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.1,
+            "air_temperature_min_c": 19.9,
+            "air_temperature_max_c": 31.2,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 12.1,
+            "wind_speed_max_kmh": 21.0,
+            "wind_gust_mean_kmh": 25.4,
+            "wind_gust_max_kmh": 41.8,
+            "wind_direction_mean_deg": 116.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.26,
+            "wave_height_max_m": 0.36,
+            "wave_period_mean_s": 2.74,
+            "wave_direction_mean_deg": 53.0,
+            "wave_direction_name": "Grecale",
+            "water_temperature_mean_c": 28.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.4,
+            "air_temperature_min_c": 24.1,
+            "air_temperature_max_c": 32.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.9,
+            "wind_speed_max_kmh": 17.1,
+            "wind_gust_mean_kmh": 25.9,
+            "wind_gust_max_kmh": 50.0,
+            "wind_direction_mean_deg": 93.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.44,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 3.07,
+            "wave_direction_mean_deg": 246.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.7,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 29.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 14.5,
+            "wind_speed_max_kmh": 23.2,
+            "wind_gust_mean_kmh": 31.4,
+            "wind_gust_max_kmh": 45.4,
+            "wind_direction_mean_deg": 269.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.38,
+            "wave_height_max_m": 0.56,
+            "wave_period_mean_s": 3.31,
+            "wave_direction_mean_deg": 200.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 28.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.6,
+            "air_temperature_min_c": 23.8,
+            "air_temperature_max_c": 31.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 12.9,
+            "wind_speed_max_kmh": 22.4,
+            "wind_gust_mean_kmh": 29.3,
+            "wind_gust_max_kmh": 46.8,
+            "wind_direction_mean_deg": 114.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.44,
+            "wave_height_max_m": 0.62,
+            "wave_period_mean_s": 3.31,
+            "wave_direction_mean_deg": 87.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 28.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.2,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 36.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 14.5,
+            "wind_speed_max_kmh": 29.8,
+            "wind_gust_mean_kmh": 38.1,
+            "wind_gust_max_kmh": 60.1,
+            "wind_direction_mean_deg": 84.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.43,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 3.54,
+            "wave_direction_mean_deg": 235.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.6,
+            "air_temperature_min_c": 25.0,
+            "air_temperature_max_c": 33.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 12.7,
+            "wind_speed_max_kmh": 24.1,
+            "wind_gust_mean_kmh": 31.4,
+            "wind_gust_max_kmh": 50.4,
+            "wind_direction_mean_deg": 280.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.62,
+            "wave_height_max_m": 0.7,
+            "wave_period_mean_s": 3.96,
+            "wave_direction_mean_deg": 272.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 25.4,
+            "air_temperature_min_c": 23.3,
+            "air_temperature_max_c": 28.5,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 20.8,
+            "wind_speed_max_kmh": 28.0,
+            "wind_gust_mean_kmh": 40.4,
+            "wind_gust_max_kmh": 53.6,
+            "wind_direction_mean_deg": 285.0,
+            "wind_name": "Ponente"
+          }
+        }
+      ]
+    },
+    "siniscola": {
+      "location": {
+        "name": "Siniscola",
+        "latitude": 40.6,
+        "longitude": 9.78,
+        "slug": "siniscola"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 40.458336,
+          "longitude": 9.875015
+        },
+        "weather": {
+          "latitude": 40.5625,
+          "longitude": 9.75,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.793408+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 40.6,
+            "longitude": 9.78
+          },
+          "resolved_cell": {
+            "latitude": 40.458336,
+            "longitude": 9.875015,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.372709+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 40.6,
+            "longitude": 9.78
+          },
+          "resolved_cell": {
+            "latitude": 40.5625,
+            "longitude": 9.75,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.791668+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.19,
+            "wave_height_max_m": 0.32,
+            "wave_period_mean_s": 3.13,
+            "wave_direction_mean_deg": 112.0,
+            "wave_direction_name": "Levante",
+            "water_temperature_mean_c": 29.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.8,
+            "air_temperature_min_c": 22.5,
+            "air_temperature_max_c": 30.4,
+            "weather_code": 1,
+            "wind_speed_mean_kmh": 8.6,
+            "wind_speed_max_kmh": 14.1,
+            "wind_gust_mean_kmh": 15.6,
+            "wind_gust_max_kmh": 24.5,
+            "wind_direction_mean_deg": 199.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.34,
+            "wave_height_max_m": 0.52,
+            "wave_period_mean_s": 3.32,
+            "wave_direction_mean_deg": 150.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.9,
+            "air_temperature_min_c": 24.1,
+            "air_temperature_max_c": 31.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.0,
+            "wind_speed_max_kmh": 21.1,
+            "wind_gust_mean_kmh": 20.8,
+            "wind_gust_max_kmh": 35.6,
+            "wind_direction_mean_deg": 185.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.49,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 3.62,
+            "wave_direction_mean_deg": 148.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.6,
+            "air_temperature_min_c": 25.8,
+            "air_temperature_max_c": 34.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.9,
+            "wind_speed_max_kmh": 20.1,
+            "wind_gust_mean_kmh": 19.4,
+            "wind_gust_max_kmh": 38.5,
+            "wind_direction_mean_deg": 144.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.38,
+            "wave_height_max_m": 0.52,
+            "wave_period_mean_s": 3.98,
+            "wave_direction_mean_deg": 138.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.9,
+            "air_temperature_min_c": 25.3,
+            "air_temperature_max_c": 30.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 10.4,
+            "wind_speed_max_kmh": 21.0,
+            "wind_gust_mean_kmh": 20.1,
+            "wind_gust_max_kmh": 36.0,
+            "wind_direction_mean_deg": 185.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.44,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 3.0,
+            "wave_direction_mean_deg": 150.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.7,
+            "air_temperature_min_c": 27.2,
+            "air_temperature_max_c": 32.7,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.0,
+            "wind_speed_max_kmh": 19.0,
+            "wind_gust_mean_kmh": 26.0,
+            "wind_gust_max_kmh": 35.3,
+            "wind_direction_mean_deg": 168.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.5,
+            "wave_height_max_m": 0.6,
+            "wave_period_mean_s": 3.73,
+            "wave_direction_mean_deg": 145.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.8,
+            "air_temperature_min_c": 25.2,
+            "air_temperature_max_c": 33.8,
+            "weather_code": 81,
+            "wind_speed_mean_kmh": 6.1,
+            "wind_speed_max_kmh": 12.6,
+            "wind_gust_mean_kmh": 25.0,
+            "wind_gust_max_kmh": 36.7,
+            "wind_direction_mean_deg": 192.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.34,
+            "wave_height_max_m": 0.46,
+            "wave_period_mean_s": 3.57,
+            "wave_direction_mean_deg": 122.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.6,
+            "air_temperature_min_c": 21.0,
+            "air_temperature_max_c": 32.1,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.9,
+            "wind_speed_max_kmh": 17.1,
+            "wind_gust_mean_kmh": 30.9,
+            "wind_gust_max_kmh": 37.1,
+            "wind_direction_mean_deg": 284.0,
+            "wind_name": "Ponente"
+          }
+        }
+      ]
+    },
+    "porto-torres": {
+      "location": {
+        "name": "Porto Torres",
+        "latitude": 40.87,
+        "longitude": 8.37,
+        "slug": "porto-torres"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 40.958336,
+          "longitude": 8.375015
+        },
+        "weather": {
+          "latitude": 40.8125,
+          "longitude": 8.375,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.674066+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 40.87,
+            "longitude": 8.37
+          },
+          "resolved_cell": {
+            "latitude": 40.958336,
+            "longitude": 8.375015,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.347620+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 40.87,
+            "longitude": 8.37
+          },
+          "resolved_cell": {
+            "latitude": 40.8125,
+            "longitude": 8.375,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.672920+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.58,
+            "wave_height_max_m": 0.72,
+            "wave_period_mean_s": 4.37,
+            "wave_direction_mean_deg": 328.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.2
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.5,
+            "air_temperature_min_c": 21.6,
+            "air_temperature_max_c": 31.0,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 9.2,
+            "wind_speed_max_kmh": 18.1,
+            "wind_gust_mean_kmh": 20.0,
+            "wind_gust_max_kmh": 38.2,
+            "wind_direction_mean_deg": 56.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.29,
+            "wave_height_max_m": 0.58,
+            "wave_period_mean_s": 3.21,
+            "wave_direction_mean_deg": 15.0,
+            "wave_direction_name": "Tramontana",
+            "water_temperature_mean_c": 28.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.4,
+            "air_temperature_min_c": 23.0,
+            "air_temperature_max_c": 34.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 5.0,
+            "wind_speed_max_kmh": 10.0,
+            "wind_gust_mean_kmh": 15.3,
+            "wind_gust_max_kmh": 55.1,
+            "wind_direction_mean_deg": 194.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.33,
+            "wave_height_max_m": 0.42,
+            "wave_period_mean_s": 2.95,
+            "wave_direction_mean_deg": 283.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.9,
+            "air_temperature_min_c": 26.4,
+            "air_temperature_max_c": 31.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 10.2,
+            "wind_speed_max_kmh": 17.7,
+            "wind_gust_mean_kmh": 24.0,
+            "wind_gust_max_kmh": 38.2,
+            "wind_direction_mean_deg": 241.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.41,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 3.8,
+            "wave_direction_mean_deg": 313.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 27.5,
+            "air_temperature_min_c": 22.5,
+            "air_temperature_max_c": 31.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.7,
+            "wind_speed_max_kmh": 15.1,
+            "wind_gust_mean_kmh": 21.5,
+            "wind_gust_max_kmh": 36.4,
+            "wind_direction_mean_deg": 81.0,
+            "wind_name": "Levante"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.56,
+            "wave_height_max_m": 0.7,
+            "wave_period_mean_s": 4.06,
+            "wave_direction_mean_deg": 49.0,
+            "wave_direction_name": "Grecale",
+            "water_temperature_mean_c": 28.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 31.2,
+            "air_temperature_min_c": 25.9,
+            "air_temperature_max_c": 42.2,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.5,
+            "wind_speed_max_kmh": 18.8,
+            "wind_gust_mean_kmh": 32.3,
+            "wind_gust_max_kmh": 48.6,
+            "wind_direction_mean_deg": 157.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.38,
+            "wave_height_max_m": 0.48,
+            "wave_period_mean_s": 4.02,
+            "wave_direction_mean_deg": 268.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.3,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 31.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.6,
+            "wind_speed_max_kmh": 15.7,
+            "wind_gust_mean_kmh": 23.6,
+            "wind_gust_max_kmh": 37.8,
+            "wind_direction_mean_deg": 239.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.42,
+            "wave_height_max_m": 0.48,
+            "wave_period_mean_s": 4.94,
+            "wave_direction_mean_deg": 270.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 28.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.0,
+            "air_temperature_min_c": 24.1,
+            "air_temperature_max_c": 27.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.4,
+            "wind_speed_max_kmh": 19.2,
+            "wind_gust_mean_kmh": 21.8,
+            "wind_gust_max_kmh": 35.6,
+            "wind_direction_mean_deg": 299.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "torre-dei-corsari": {
+      "location": {
+        "name": "Torre dei Corsari",
+        "latitude": 39.688153,
+        "longitude": 8.450613,
+        "slug": "torre-dei-corsari"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 39.708336,
+          "longitude": 8.4583435
+        },
+        "weather": {
+          "latitude": 39.6875,
+          "longitude": 8.5,
+          "elevation_m": 0.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:48.790512+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 39.688153,
+            "longitude": 8.450613
+          },
+          "resolved_cell": {
+            "latitude": 39.708336,
+            "longitude": 8.4583435,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.377765+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 39.688153,
+            "longitude": 8.450613
+          },
+          "resolved_cell": {
+            "latitude": 39.6875,
+            "longitude": 8.5,
+            "elevation_m": 0.0
+          },
+          "fetched_at": "2026-08-23T08:57:48.770981+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.6,
+            "wave_height_max_m": 0.98,
+            "wave_period_mean_s": 5.15,
+            "wave_direction_mean_deg": 299.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.5,
+            "air_temperature_min_c": 23.6,
+            "air_temperature_max_c": 35.3,
+            "weather_code": 1,
+            "wind_speed_mean_kmh": 9.3,
+            "wind_speed_max_kmh": 15.1,
+            "wind_gust_mean_kmh": 24.1,
+            "wind_gust_max_kmh": 37.8,
+            "wind_direction_mean_deg": 145.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.24,
+            "wave_height_max_m": 0.36,
+            "wave_period_mean_s": 3.74,
+            "wave_direction_mean_deg": 298.0,
+            "wave_direction_name": "Maestrale",
+            "water_temperature_mean_c": 28.5
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.5,
+            "air_temperature_min_c": 24.1,
+            "air_temperature_max_c": 32.3,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 8.4,
+            "wind_speed_max_kmh": 18.7,
+            "wind_gust_mean_kmh": 22.7,
+            "wind_gust_max_kmh": 51.5,
+            "wind_direction_mean_deg": 165.0,
+            "wind_name": "Ostro"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.28,
+            "wave_height_max_m": 0.38,
+            "wave_period_mean_s": 3.25,
+            "wave_direction_mean_deg": 223.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.7,
+            "air_temperature_min_c": 26.1,
+            "air_temperature_max_c": 31.1,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.9,
+            "wind_speed_max_kmh": 23.2,
+            "wind_gust_mean_kmh": 32.0,
+            "wind_gust_max_kmh": 55.1,
+            "wind_direction_mean_deg": 237.0,
+            "wind_name": "Libeccio"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.45,
+            "wave_height_max_m": 0.5,
+            "wave_period_mean_s": 4.94,
+            "wave_direction_mean_deg": 245.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.6
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.6,
+            "air_temperature_min_c": 22.9,
+            "air_temperature_max_c": 36.3,
+            "weather_code": 45,
+            "wind_speed_mean_kmh": 6.8,
+            "wind_speed_max_kmh": 13.6,
+            "wind_gust_mean_kmh": 21.8,
+            "wind_gust_max_kmh": 56.2,
+            "wind_direction_mean_deg": 127.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.45,
+            "wave_height_max_m": 0.66,
+            "wave_period_mean_s": 3.93,
+            "wave_direction_mean_deg": 214.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 28.7
+          },
+          "weather": {
+            "air_temperature_mean_c": 33.9,
+            "air_temperature_min_c": 29.8,
+            "air_temperature_max_c": 39.6,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 16.8,
+            "wind_speed_max_kmh": 22.7,
+            "wind_gust_mean_kmh": 47.4,
+            "wind_gust_max_kmh": 59.4,
+            "wind_direction_mean_deg": 120.0,
+            "wind_name": "Scirocco"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.38,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 4.58,
+            "wave_direction_mean_deg": 241.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 29.0
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.1,
+            "air_temperature_min_c": 27.1,
+            "air_temperature_max_c": 31.1,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.2,
+            "wind_speed_max_kmh": 17.3,
+            "wind_gust_mean_kmh": 24.1,
+            "wind_gust_max_kmh": 49.4,
+            "wind_direction_mean_deg": 295.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.62,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 5.39,
+            "wave_direction_mean_deg": 265.0,
+            "wave_direction_name": "Ponente",
+            "water_temperature_mean_c": 29.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 26.7,
+            "air_temperature_min_c": 24.3,
+            "air_temperature_max_c": 28.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 13.4,
+            "wind_speed_max_kmh": 23.8,
+            "wind_gust_mean_kmh": 25.0,
+            "wind_gust_max_kmh": 39.6,
+            "wind_direction_mean_deg": 333.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    },
+    "villasimius": {
+      "location": {
+        "name": "Villasimius",
+        "latitude": 39.1,
+        "longitude": 9.52,
+        "slug": "villasimius"
+      },
+      "cells": {
+        "marine": {
+          "latitude": 39.125,
+          "longitude": 9.541672
+        },
+        "weather": {
+          "latitude": 39.125,
+          "longitude": 9.5,
+          "elevation_m": 27.0
+        }
+      },
+      "timezone": "Europe/Rome",
+      "generated_at": "2026-08-23T08:57:49.546162+00:00",
+      "sources": {
+        "sea": {
+          "id": "open_meteo_marine",
+          "provider": "Open-Meteo",
+          "service": "Marine Weather API",
+          "endpoint": "https://marine-api.open-meteo.com/v1/marine",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "wave_height",
+              "wave_direction",
+              "wave_period",
+              "sea_surface_temperature"
+            ],
+            "daily": []
+          },
+          "requested_coordinates": {
+            "latitude": 39.1,
+            "longitude": 9.52
+          },
+          "resolved_cell": {
+            "latitude": 39.125,
+            "longitude": 9.541672,
+            "elevation_m": 27.0
+          },
+          "fetched_at": "2026-08-23T08:57:49.066098+00:00",
+          "attribution": "Marine data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs/marine-weather-api",
+          "license_url": "https://open-meteo.com/en/terms"
+        },
+        "weather": {
+          "id": "open_meteo_weather",
+          "provider": "Open-Meteo",
+          "service": "Weather Forecast API",
+          "endpoint": "https://api.open-meteo.com/v1/forecast",
+          "model_selection": "best_match, scelto dinamicamente dal provider",
+          "variables": {
+            "hourly": [
+              "temperature_2m",
+              "wind_speed_10m",
+              "wind_direction_10m",
+              "wind_gusts_10m"
+            ],
+            "daily": [
+              "weather_code",
+              "temperature_2m_min",
+              "temperature_2m_max",
+              "wind_speed_10m_max",
+              "wind_gusts_10m_max"
+            ]
+          },
+          "requested_coordinates": {
+            "latitude": 39.1,
+            "longitude": 9.52
+          },
+          "resolved_cell": {
+            "latitude": 39.125,
+            "longitude": 9.5,
+            "elevation_m": 27.0
+          },
+          "fetched_at": "2026-08-23T08:57:49.545125+00:00",
+          "attribution": "Weather data by Open-Meteo.com",
+          "documentation_url": "https://open-meteo.com/en/docs",
+          "license_url": "https://open-meteo.com/en/terms"
+        }
+      },
+      "daily": [
+        {
+          "date": "2026-08-23",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.49,
+            "wave_height_max_m": 0.62,
+            "wave_period_mean_s": 3.91,
+            "wave_direction_mean_deg": 139.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 28.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.6,
+            "air_temperature_min_c": 27.2,
+            "air_temperature_max_c": 30.2,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 19.2,
+            "wind_speed_max_kmh": 25.5,
+            "wind_gust_mean_kmh": 33.2,
+            "wind_gust_max_kmh": 43.9,
+            "wind_direction_mean_deg": 55.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.35,
+            "wave_height_max_m": 0.56,
+            "wave_period_mean_s": 3.62,
+            "wave_direction_mean_deg": 121.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.1
+          },
+          "weather": {
+            "air_temperature_mean_c": 28.4,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 30.8,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.9,
+            "wind_speed_max_kmh": 14.5,
+            "wind_gust_mean_kmh": 20.9,
+            "wind_gust_max_kmh": 45.0,
+            "wind_direction_mean_deg": 65.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-25",
+          "sea": {
+            "state": "Mosso",
+            "wave_height_mean_m": 0.53,
+            "wave_height_max_m": 0.82,
+            "wave_period_mean_s": 3.56,
+            "wave_direction_mean_deg": 162.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 29.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 30.9,
+            "air_temperature_min_c": 27.5,
+            "air_temperature_max_c": 35.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 11.0,
+            "wind_speed_max_kmh": 27.6,
+            "wind_gust_mean_kmh": 24.9,
+            "wind_gust_max_kmh": 47.5,
+            "wind_direction_mean_deg": 265.0,
+            "wind_name": "Ponente"
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.5,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 3.72,
+            "wave_direction_mean_deg": 141.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.3
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.1,
+            "air_temperature_min_c": 26.3,
+            "air_temperature_max_c": 31.0,
+            "weather_code": 2,
+            "wind_speed_mean_kmh": 17.6,
+            "wind_speed_max_kmh": 32.2,
+            "wind_gust_mean_kmh": 31.8,
+            "wind_gust_max_kmh": 55.8,
+            "wind_direction_mean_deg": 33.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.29,
+            "wave_height_max_m": 0.4,
+            "wave_period_mean_s": 3.49,
+            "wave_direction_mean_deg": 146.0,
+            "wave_direction_name": "Scirocco",
+            "water_temperature_mean_c": 29.4
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.9,
+            "air_temperature_min_c": 28.2,
+            "air_temperature_max_c": 31.9,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 17.1,
+            "wind_speed_max_kmh": 29.0,
+            "wind_gust_mean_kmh": 32.6,
+            "wind_gust_max_kmh": 48.6,
+            "wind_direction_mean_deg": 49.0,
+            "wind_name": "Grecale"
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.48,
+            "wave_height_max_m": 0.64,
+            "wave_period_mean_s": 3.66,
+            "wave_direction_mean_deg": 166.0,
+            "wave_direction_name": "Ostro",
+            "water_temperature_mean_c": 29.8
+          },
+          "weather": {
+            "air_temperature_mean_c": 31.2,
+            "air_temperature_min_c": 25.8,
+            "air_temperature_max_c": 37.3,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 9.1,
+            "wind_speed_max_kmh": 18.0,
+            "wind_gust_mean_kmh": 33.1,
+            "wind_gust_max_kmh": 42.8,
+            "wind_direction_mean_deg": 319.0,
+            "wind_name": "Maestrale"
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "sea": {
+            "state": "Poco mosso",
+            "wave_height_mean_m": 0.35,
+            "wave_height_max_m": 0.54,
+            "wave_period_mean_s": 4.48,
+            "wave_direction_mean_deg": 233.0,
+            "wave_direction_name": "Libeccio",
+            "water_temperature_mean_c": 29.9
+          },
+          "weather": {
+            "air_temperature_mean_c": 29.3,
+            "air_temperature_min_c": 23.8,
+            "air_temperature_max_c": 34.4,
+            "weather_code": 3,
+            "wind_speed_mean_kmh": 7.9,
+            "wind_speed_max_kmh": 12.1,
+            "wind_gust_mean_kmh": 31.4,
+            "wind_gust_max_kmh": 64.8,
+            "wind_direction_mean_deg": 302.0,
+            "wind_name": "Maestrale"
+          }
+        }
+      ]
+    }
+  }
+}
