@@ -88,6 +88,41 @@ LineChartBarData _line(List<FlSpot> spots, Color color, double width) =>
       dotData: FlDotData(show: spots.length <= 31 && width > 0),
     );
 
+String _n(double v) => v.toStringAsFixed(1).replaceAll('.', ',');
+
+/// Etichetta per screen reader: periodo e riepilogo min/max/media, senza
+/// leggere ogni punto. I valori assenti (`nullSpot`) sono ignorati; `n.d.` se
+/// non ce n'e' nessuno.
+String historyChartSemanticsLabel(HistorySeries s) {
+  String stats(String name, List<FlSpot> spots) {
+    final ys = [
+      for (final p in spots)
+        if (p != FlSpot.nullSpot) p.y,
+    ];
+    if (ys.isEmpty) return '$name: n.d.';
+    final avg = ys.reduce((a, b) => a + b) / ys.length;
+    return '$name: min ${_n(ys.reduce((a, b) => a < b ? a : b))}, '
+        'max ${_n(ys.reduce((a, b) => a > b ? a : b))}, media ${_n(avg)}';
+  }
+
+  final lows = [
+    for (final p in s.bandMin)
+      if (p != FlSpot.nullSpot) p.y,
+  ];
+  final highs = [
+    for (final p in s.bandMax)
+      if (p != FlSpot.nullSpot) p.y,
+  ];
+  final band = lows.isEmpty || highs.isEmpty
+      ? 'Aria min-max: n.d.'
+      : 'Aria min-max: da ${_n(lows.reduce((a, b) => a < b ? a : b))} '
+            'a ${_n(highs.reduce((a, b) => a > b ? a : b))}';
+  return 'Grafico delle temperature in gradi, '
+      'dal ${s.labelAt(0)} al ${s.labelAt(s.length - 1)}. '
+      '${stats('Aria media', s.airMean)}. $band. '
+      '${stats('Mare medio', s.seaMean)}.';
+}
+
 /// Grafico a linee: aria media, banda min/max dell'aria, mare medio.
 class HistoryChart extends StatelessWidget {
   const HistoryChart({super.key, required this.series, this.height = 220});
@@ -100,11 +135,16 @@ class HistoryChart extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: height,
-          child: LineChart(
-            buildHistoryChartData(series),
-            duration: Duration.zero,
+        Semantics(
+          label: historyChartSemanticsLabel(series),
+          image: true,
+          excludeSemantics: true,
+          child: SizedBox(
+            height: height,
+            child: LineChart(
+              buildHistoryChartData(series),
+              duration: Duration.zero,
+            ),
           ),
         ),
         const SizedBox(height: 8),

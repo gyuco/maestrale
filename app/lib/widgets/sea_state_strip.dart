@@ -50,6 +50,18 @@ List<String> presentSeaStates(Iterable<String?> states) {
   return [for (final r in (ranks.toList()..sort())) seaStateLabels[r]];
 }
 
+/// Etichetta per screen reader: conteggio per stato (in ordine di rango) e
+/// `n.d.` per i periodi senza stato.
+String seaStateSemanticsLabel(List<String?> states) {
+  final parts = <String>[];
+  for (final l in presentSeaStates(states)) {
+    parts.add('$l ${states.where((s) => s == l).length}');
+  }
+  final unknown = states.where((s) => seaStateRank(s) == null).length;
+  if (unknown > 0) parts.add('n.d. $unknown');
+  return parts.isEmpty ? 'Stato del mare: n.d.' : 'Stato del mare: ${parts.join(', ')}';
+}
+
 /// Fascia dello stato del mare: una cella per giorno/mese, allineata
 /// all'asse x del grafico (la cella i e' centrata su x = i), disegnata da un
 /// solo [CustomPainter].
@@ -64,9 +76,14 @@ class SeaStateStrip extends StatelessWidget {
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: CustomPaint(
-        key: const Key('sea-state-strip'),
-        painter: SeaStatePainter(states),
+      child: Semantics(
+        label: seaStateSemanticsLabel(states),
+        image: true,
+        excludeSemantics: true,
+        child: CustomPaint(
+          key: const Key('sea-state-strip'),
+          painter: SeaStatePainter(states),
+        ),
       ),
     );
   }

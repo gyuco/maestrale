@@ -280,9 +280,14 @@ Decisione del proprietario (2026-10-19): sul Free un cron che fallisce si **toll
 ## Passi futuri
 
 - Custom domain (`routes`) invece di `workers.dev`.
-- Workers Builds (deploy da GitHub dal dashboard) e una CI con `npm test`, `npm run typecheck`,
-  `node --test scripts/*.test.mjs` e Flutter. Il remoto `origin` (github.com/gyuco/maestrale) esiste,
-  la CI non è ancora configurata.
+- CI su GitHub Actions (`.github/workflows/ci.yml`, epic E04, storia E04-S01): su push e pull
+  request verso `develop` e `main` esegue tre job (`worker`: `npm ci`, `npm run typecheck`,
+  `npm test`; `scripts`: `node --test scripts/*.test.mjs`; `app`: `flutter pub get`,
+  `flutter analyze`, `flutter test`). **Stato: pianificata, non ancora implementata.** Il remoto
+  `origin` (github.com/gyuco/maestrale) esiste.
+- Deploy automatico del Worker su `main` dopo CI verde (E04-S02, **bloccata** in attesa che E04-S01
+  sia completata e che l'owner scelga tra Workers Builds dal dashboard e GitHub Actions con
+  `wrangler-action`; le migrazioni D1 `migrations apply --remote` devono precedere il deploy).
 - CORS ristretto: oggi `CORS_ORIGINS` vale `*` (nessuna `vars` definita).
 - Passaggio a Workers Paid secondo la regola sopra.
 

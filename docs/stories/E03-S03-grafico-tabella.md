@@ -120,6 +120,7 @@ test `app/test/history_series_test.dart`, `history_chart_test.dart`, `history_ta
 - R-2 di E03-S02: il test AC-8 in `history_screen_test.dart` ora scorre davvero la tabella e verifica che la nota resti ferma; stesso controllo con 366 elementi in `history_screen_content_test.dart`.
 - Fuori scope (non fatto): date picker in italiano (R-1 E03-S02). `forecast_screen.dart` non toccato.
 - Test: `history_series_test`, `history_chart_test`, `history_table_test` (tabella, fascia, colori), `history_screen_content_test`. Nota TDD: serie e test di AC-1 scritti nello stesso passo dell'implementazione. Verifica: `flutter analyze` pulito, `flutter test` 106 verdi.
+- R-1 (review) risolto: `Semantics` in italiano su `HistoryChart` (`historyChartSemanticsLabel`: periodo, min/max/media aria e mare, banda, n.d.) e `SeaStateStrip` (`seaStateSemanticsLabel`: conteggi per stato, n.d.); test in `history_chart_test.dart` e `sea_state_strip_semantics_test.dart`.
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->

@@ -25,6 +25,7 @@ job, punto 8), §4 (modello dati), §5 (interfaccia `/history` e configurazione)
 | E02-S03 | `GET /history` con granularità `day` (validazione, 404, 503) | E02-S02 | ready |
 | E02-S04 | `GET /history` con granularità `month`, `Cache-Control` e rifinitura errori | E02-S03 | ready |
 | E02-S05 | Documentazione API, README e runbook (setup D1, attivazione, `d1_size`) | E02-S02, E02-S04 | ready |
+| E02-S06 | Debito tecnico trasversale (nessun FR): migrazione test runner a `@cloudflare/vitest-plugin` | — | ready |
 
 Ordine di esecuzione: S01, S02, S03, S04, S05 (sequenziale; S03 dipende da S02 perché estende
 `history.ts` e `history_store.ts` creati lì).
@@ -38,4 +39,5 @@ fixture). FR-82: S05.
 - Backfill dello storico, grandezze diverse da FR-69, giorni di previsione successivi al giorno 0.
 - Cancellazione automatica di righe (OQ-36), replica di lettura D1, cache al bordo con Cache API.
 - Schermata e client nell'app (epic E03).
-- Migrazione del pool di test al nuovo plugin (TODO E01-S08): qui si usa il pool in uso.
+- Migrazione del pool di test al nuovo plugin (TODO E01-S08): le storie S01-S05 usano il pool in uso;
+  la migrazione è la storia indipendente E02-S06 (debito tecnico, senza FR).

@@ -29,6 +29,7 @@ HistorySeries series(List<HistoryDay> items, {int count = 8}) =>
     );
 
 void main() {
+  semanticsTests();
   testWidgets('AC-2 LineChart con serie, limiti espliciti, nessuna curva', (
     tester,
   ) async {
@@ -167,5 +168,43 @@ void main() {
     // Dentro l'interruzione (indici 3..5) niente riempimento.
     expect(at(xOf(4), yMid), isNot(band));
     expect(at(xOf(5), yMid), isNot(band));
+  });
+}
+
+void semanticsTests() {
+  testWidgets('R-1 grafico: etichetta semantica italiana con periodo e valori',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    final s = series([
+      d(1, lo: 10, hi: 20, mean: 14, sea: 18),
+      d(2, lo: 11, hi: 21, mean: 16),
+      d(8, lo: 13, hi: 23, mean: 18, sea: 20),
+    ]);
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: HistoryChart(series: s))),
+    );
+    final label = tester
+        .getSemantics(find.bySemanticsLabel(RegExp('^Grafico')))
+        .label;
+    expect(label, contains('dal 01/10 al 08/10'));
+    expect(label, contains('Aria media: min 14,0, max 18,0, media 16,0'));
+    expect(label, contains('Aria min-max: da 10,0 a 23,0'));
+    expect(label, contains('Mare medio: min 18,0, max 20,0, media 19,0'));
+    handle.dispose();
+  });
+
+  testWidgets('R-1 grafico: n.d. quando non ci sono valori', (tester) async {
+    final handle = tester.ensureSemantics();
+    final s = series([d(1), d(2)], count: 2);
+    await tester.pumpWidget(
+      MaterialApp(home: Scaffold(body: HistoryChart(series: s))),
+    );
+    final label = tester
+        .getSemantics(find.bySemanticsLabel(RegExp('^Grafico')))
+        .label;
+    expect(label, contains('Aria media: n.d.'));
+    expect(label, contains('Aria min-max: n.d.'));
+    expect(label, contains('Mare medio: n.d.'));
+    handle.dispose();
   });
 }
