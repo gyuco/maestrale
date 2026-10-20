@@ -25,5 +25,16 @@
       "id": "7b1c0444535542408cc05fa9dd59536b",
       "preview_id": "b6b83416188441aea18ce2846ccad5d6"
     }
+  ],
+  "d1_databases": [
+    {
+      "binding": "HISTORY",
+      "database_name": "maestrale-history",
+      // TODO operatore: sostituire con l'id reale dopo
+      //   npx wrangler d1 create maestrale-history --location=weur
+      // L'id non e' un segreto. Vedi docs/runbook.md (E02-S05).
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
   ]
 }

@@ -336,7 +336,14 @@ describe("scheduled", () => {
     mockProvider();
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    await trigger();
+    // Orologio fisso su un giorno presente nelle fixture (giorno 0 = 2026-10-19 Europe/Rome).
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-19T09:00:00Z"));
+    try {
+      await trigger();
+    } finally {
+      vi.useRealTimers();
+    }
 
     const meta = (await readJson("meta"))!;
     expect(meta["slugs"]).toHaveLength(13);
@@ -353,12 +360,14 @@ describe("scheduled", () => {
       block_failures: 0,
       fallback_breaker: false,
       fallbacks: 0,
-      subrequests: 18,
       kv_writes: 14,
       kv_deletes: 0,
       budget_exhausted: "none",
       paid_alerts: [],
     });
+    // 18 + 1 istruzione D1 dello storico (E02-S02); orologio fissato su un giorno 0 presente nelle fixture.
+    expect(lines[0]!["history_queries"]).toBe(1);
+    expect(lines[0]!["subrequests"]).toBe(19);
     expect(lines[0]!["duration_ms"]).toBeTypeOf("number");
     expect(lines[0]!["weight_used"]).toBe(26);
   });

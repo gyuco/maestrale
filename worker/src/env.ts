@@ -11,6 +11,8 @@ import type { UpdateEnv } from "./config";
  * i tipi.
  */
 export interface Bindings extends Env, UpdateEnv {
+  /** D1 `maestrale-history` (storico giornaliero, ADR-0002); assenza a runtime gestita da E02-S02/S03. */
+  HISTORY: D1Database;
   /** Origini CORS consentite, separate da virgola (default `*`). */
   CORS_ORIGINS?: string;
   /** Soglia di dati vecchi in ore (default `12`). */
@@ -23,6 +25,10 @@ export interface Bindings extends Env, UpdateEnv {
   LEGACY_LATEST_FALLBACK?: string;
   /** `max-age` in secondi del `Cache-Control` di `GET /locations` (default 86400, FR-63). */
   LOCATIONS_MAX_AGE_SECONDS?: string;
+  /** `max-age` breve di `/history` se `to` >= oggi Europe/Rome (default 900, FR-79). */
+  HISTORY_MAX_AGE_SHORT_SECONDS?: string;
+  /** `max-age` lungo di `/history` se l'intervallo è interamente nel passato (default 86400). */
+  HISTORY_MAX_AGE_LONG_SECONDS?: string;
 }
 
 /** Voce del catalogo incluso nel Worker (nome -> slug senza leggere lo storage, FR-57). */

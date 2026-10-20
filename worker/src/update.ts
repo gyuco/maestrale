@@ -32,6 +32,8 @@ import {
   REQUEST_TIMEOUT_MS,
   type SleepFn,
 } from "./open_meteo";
+import { dayZeroRow, romeDate, type HistoryRow } from "./history";
+import type { HistoryWriter } from "./history_store";
 import { CACHE_KEY, META_KEY, readForecastCache, readMeta, recordKey, type ForecastMeta } from "./store";
 import type { Forecast } from "./types";
 
@@ -47,6 +49,8 @@ export interface UpdateDeps extends Pick<ForecastDeps, "fetchImpl" | "sleep" | "
   readonly nowMs?: () => number;
   /** Sovrascrive i parametri di `config.ts` (di norma letti dall'ambiente). */
   readonly config?: Partial<UpdateConfig>;
+  /** Scrittore dello storico D1 (ADR-0002 §2.7); assente = nessuno storico. */
+  readonly history?: HistoryWriter;
 }
 
 export const BREAKER_MESSAGE =
@@ -74,6 +78,21 @@ export interface UpdateMetrics {
   budget_exhausted: "none" | "duration" | "subrequests";
   /** Motivi per cui conviene passare a Paid (NFR-15 b, c). */
   paid_alerts: string[];
+  /** Data Europe/Rome del giorno 0 (assente senza `deps.history` o senza località aggiornate). */
+  history_date?: string;
+  /** Righe di storico scritte. */
+  history_rows: number;
+  /** Istruzioni D1 eseguite (contate come subrequest). */
+  history_queries: number;
+  /** Righe non scritte per errore D1 (FR-72). */
+  history_failed: number;
+  history_error?: string;
+  /** Località aggiornate senza il giorno 0 nella previsione (FR-70). */
+  history_missing_day0: string[];
+  /** `meta.rows_written` riportato da D1 (indici inclusi), se presente. */
+  d1_rows_written?: number;
+  /** `meta.size_after` riportato da D1, in byte, se presente. */
+  d1_size_bytes?: number;
 }
 
 /** Esito del job: il payload logico più `written` (false = KV non toccata). */
@@ -261,13 +280,15 @@ export async function runUpdate(
     legacyLocations = isRecord(locations) ? locations : {};
   }
   const removed = previousSlugs.filter((slug) => !catalogSlugs.has(slug));
+  const startIso = deps.history ? now() : undefined;
+  const historyQueries = deps.history ? Math.ceil(catalog.length / config.historyWriteBatchRows) : 0;
   const budget = new RunBudget(
     config,
     nowMs,
     sleep,
     startMs,
     kvReads,
-    catalog.length + removed.length + 1,
+    catalog.length + removed.length + 1 + historyQueries,
   );
 
   // --- Fase blocchi -------------------------------------------------------
@@ -463,13 +484,68 @@ export async function runUpdate(
     written = true;
   }
 
-  const subrequests = budget.subrequests + kvWrites + kvDeletes;
+  // --- Storico D1 dopo la pubblicazione del cache (ADR-0002 §2; FR-70..FR-72) ---
+  const history: Pick<
+    UpdateMetrics,
+    | "history_date"
+    | "history_rows"
+    | "history_queries"
+    | "history_failed"
+    | "history_error"
+    | "history_missing_day0"
+    | "d1_rows_written"
+    | "d1_size_bytes"
+  > = { history_rows: 0, history_queries: 0, history_failed: 0, history_missing_day0: [] };
+  let d1SizeAfter: number | undefined;
+  if (deps.history && written) {
+    const writer = deps.history;
+    const rows: HistoryRow[] = [];
+    try {
+      const date = romeDate(new Date(startIso!));
+      history.history_date = date;
+      for (const slug of updated) {
+        const row = dayZeroRow(slug, forecasts.get(slug)!, date);
+        if (row === null) {
+          history.history_missing_day0.push(slug);
+        } else {
+          rows.push(row);
+        }
+      }
+      if (rows.length > 0) {
+        const outcome = await writer.write(rows, config.historyWriteBatchRows);
+        history.history_queries = outcome.queries;
+        if (outcome.ok) {
+          history.history_rows = outcome.rows_written;
+          d1SizeAfter = outcome.size_after;
+          history.d1_rows_written = outcome.rows_written_meta;
+          history.d1_size_bytes = outcome.size_after;
+        } else {
+          history.history_failed = outcome.rows_failed;
+          history.history_error = outcome.error;
+        }
+      }
+    } catch (cause) {
+      // Il writer non dovrebbe lanciare; in ogni caso il cache resta intatto (FR-72).
+      history.history_failed = rows.length;
+      history.history_error = describe(cause);
+    }
+    if (history.history_error !== undefined) {
+      console.error(
+        `Scrittura storico fallita (${history.history_failed} righe non scritte): ${history.history_error}`,
+      );
+    }
+  }
+
+  const subrequests = budget.subrequests + kvWrites + kvDeletes + history.history_queries;
   const paidAlerts: string[] = [];
   if (subrequests > config.paidAlertSubrequests) {
     paidAlerts.push("subrequests");
   }
   if (kvWrites * config.runsPerDay > config.paidAlertKvWritesPerDay) {
     paidAlerts.push("kv_writes_per_day");
+  }
+  if (d1SizeAfter !== undefined && d1SizeAfter > config.paidAlertD1SizeMb * 1024 * 1024) {
+    paidAlerts.push("d1_size");
   }
   if (budget.exhausted === "subrequests") {
     paidAlerts.push("budget_subrequests");
@@ -492,6 +568,7 @@ export async function runUpdate(
       weight_used: budget.weightUsed,
       budget_exhausted: budget.exhausted,
       paid_alerts: paidAlerts,
+      ...history,
     },
   };
 }

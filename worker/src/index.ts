@@ -5,8 +5,10 @@ import { loadCatalog, rawLocations } from "./catalog";
 import { updateConfigFromEnv } from "./config";
 import type { AppEnv, Bindings, CatalogEntry, CorsEnv } from "./env";
 import { forecastRoutes } from "./routes/forecast";
+import { historyRoutes } from "./routes/history";
 import { locationsRoutes } from "./routes/locations";
 import { healthRoutes } from "./routes/health";
+import { d1HistoryWriter } from "./history_store";
 import { runUpdate } from "./update";
 
 /**
@@ -61,6 +63,7 @@ export function createApp(catalog: readonly CatalogEntry[] = rawLocations as rea
   app.route("/health", healthRoutes);
   app.route("/forecast", forecastRoutes);
   app.route("/locations", locationsRoutes);
+  app.route("/history", historyRoutes);
 
   return app;
 }
@@ -81,6 +84,7 @@ async function scheduled(
   const started = Date.now();
   const result = await runUpdate(env.FORECASTS, loadCatalog(rawLocations), {
     config: updateConfigFromEnv(env),
+    history: d1HistoryWriter(env.HISTORY),
   });
   for (const [slug, message] of Object.entries(result.errors)) {
     console.error(`Aggiornamento fallito per ${slug}: ${message}`);
@@ -103,6 +107,14 @@ async function scheduled(
     weight_used: result.metrics.weight_used,
     budget_exhausted: result.metrics.budget_exhausted,
     paid_alerts: result.metrics.paid_alerts,
+    history_date: result.metrics.history_date,
+    history_rows: result.metrics.history_rows,
+    history_queries: result.metrics.history_queries,
+    history_failed: result.metrics.history_failed,
+    history_error: result.metrics.history_error,
+    history_missing_day0: result.metrics.history_missing_day0,
+    d1_rows_written: result.metrics.d1_rows_written,
+    d1_size_bytes: result.metrics.d1_size_bytes,
   });
   if (result.written) {
     console.log(line);

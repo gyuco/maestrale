@@ -22,7 +22,7 @@ function availableNames(names: string[]): string[] {
   return names.sort().slice(0, AVAILABLE_LIMIT);
 }
 
-function notFound(c: Context<AppEnv>, localita: string, names: string[]): Response {
+export function notFound(c: Context<AppEnv>, localita: string, names: string[]): Response {
   return c.json(
     {
       detail: {

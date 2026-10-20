@@ -44,6 +44,12 @@ const SEA_STATE_LIMITS: readonly (readonly [number, string])[] = [
   [14.0, "Molto grosso"],
 ];
 
+/** Etichette della scala Douglas (FR-10) dalla più calma alla più agitata. */
+export const SEA_STATE_LABELS: readonly string[] = [
+  ...SEA_STATE_LIMITS.map(([, label]) => label),
+  "Tempestoso",
+];
+
 /** Rosa dei venti a 8 settori (FR-11). */
 const WIND_ROSE: readonly string[] = [
   "Tramontana",
