@@ -11,6 +11,7 @@ import '../services/home_location_store.dart';
 import '../services/location_repository.dart';
 import '../services/location_service.dart';
 import 'coastal_map_screen.dart';
+import 'disclaimer_screen.dart';
 import 'history_screen.dart';
 
 const _navy = Color(0xFF123B56);
@@ -222,6 +223,7 @@ class _ForecastScreenState extends State<ForecastScreen>
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
                   sliver: SliverToBoxAdapter(child: _body()),
                 ),
+                SliverToBoxAdapter(child: _disclaimerFooter()),
               ],
             ),
           ),
@@ -240,6 +242,48 @@ class _ForecastScreenState extends State<ForecastScreen>
           name: forecast.location.name,
           api: widget.historyApi,
         ),
+      ),
+    );
+  }
+
+  void _openDisclaimer() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const DisclaimerScreen()),
+    );
+  }
+
+  /// Nota sempre visibile a fondo pagina: fonte dei dati e collegamento alla
+  /// pagina informativa (FR-122, NFR-7).
+  Widget _disclaimerFooter() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: Column(
+        children: [
+          TextButton.icon(
+            key: const Key('open-disclaimer-button'),
+            onPressed: _openDisclaimer,
+            icon: const Icon(Icons.info_outline_rounded, size: 18),
+            label: const Text('Fonti dei dati e uso responsabile'),
+            style: TextButton.styleFrom(
+              foregroundColor: _navy,
+              textStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'Dati meteo: Open-Meteo · Mappa: OpenStreetMap contributors',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFF628393),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
