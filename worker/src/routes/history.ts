@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { loadCatalog, resolve } from "../catalog";
+import { resolve } from "../catalog";
 import type { AppEnv } from "../env";
 import { historyCacheConfigFromEnv } from "../config";
 import { cacheControlFor, parseHistoryParams, romeDate } from "../history";
@@ -23,7 +23,10 @@ historyRoutes.get("/", async (c) => {
   }
   const { localita, granularity, from, to } = parsed.value;
 
-  const catalog = loadCatalog(c.get("catalog"));
+  const catalog = c.get("catalog");
+  if (catalog === null) {
+    return c.json({ detail: "Catalogo temporaneamente non disponibile" }, 503);
+  }
   const entry = resolve(catalog, localita);
   if (entry === null) {
     return notFound(c, localita, catalog.map((item) => item.name));

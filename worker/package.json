@@ -6,14 +6,17 @@
   "description": "Backend Maestrale su Cloudflare Workers (Hono + Workers KV)",
   "scripts": {
     "dev": "wrangler dev",
-    "test": "vitest run",
+    "test": "vitest run && vitest run -c vitest.admin.config.ts",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test:worker": "vitest run",
+    "test:admin": "vitest run -c vitest.admin.config.ts"
   },
   "dependencies": {
-    "hono": "^4.13.13"
+    "hono": "^4.13.13",
+    "jose": "^6.2.15"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.23.0",

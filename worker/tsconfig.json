@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "module": "ES2022",
     "moduleResolution": "Bundler",
-    "types": ["@cloudflare/vitest-pool-workers/types"],
+    "types": [
+      "@cloudflare/vitest-pool-workers/types"
+    ],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -13,7 +17,17 @@
     "skipLibCheck": true,
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx"
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "worker-configuration.d.ts", "vitest.config.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "test/**/*.ts",
+    "test-admin/**/*.ts",
+    "worker-configuration.d.ts",
+    "vitest.config.ts",
+    "vitest.admin.config.ts"
+  ]
 }

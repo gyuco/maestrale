@@ -32,6 +32,14 @@
       "database_name": "maestrale-history",
       "database_id": "1c206759-9f7b-4eef-859d-69d250b1697e",
       "migrations_dir": "migrations"
+    },
+    {
+      // Catalogo e registri del backoffice (ADR-0006/0008/0009).
+      // L'id e' un segnaposto: va sostituito con quello di `wrangler d1 create maestrale-core`.
+      "binding": "CORE",
+      "database_name": "maestrale-core",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations-core"
     }
   ]
 }

@@ -41,7 +41,7 @@ describe("GET /locations (FR-62..FR-64, ADR-0004)", () => {
   });
 
   it("usa LOCATIONS_MAX_AGE_SECONDS se valido, altrimenti il default", async () => {
-    const app = createApp();
+    const app = createApp(locations);
     const custom = await app.request(URL_LOCATIONS, {}, { LOCATIONS_MAX_AGE_SECONDS: "600" });
     const invalid = await app.request(URL_LOCATIONS, {}, { LOCATIONS_MAX_AGE_SECONDS: "abc" });
 
@@ -57,7 +57,7 @@ describe("GET /locations (FR-62..FR-64, ADR-0004)", () => {
   });
 
   it("rispetta CORS_ORIGINS", async () => {
-    const app = createApp();
+    const app = createApp(locations);
     const env = { CORS_ORIGINS: "https://ok.example" };
     const allowed = await app.request(URL_LOCATIONS, { headers: { Origin: "https://ok.example" } }, env);
     const denied = await app.request(URL_LOCATIONS, { headers: { Origin: "https://no.example" } }, env);

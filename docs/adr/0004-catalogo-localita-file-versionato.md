@@ -1,10 +1,14 @@
 ---
 id: ADR-0004
-status: accepted     # proposed | accepted | superseded by ADR-XXXX
+status: superseded by ADR-0006     # proposed | accepted | superseded by ADR-XXXX
 date: 2026-10-20
 ---
 
 # ADR-0004: Catalogo località come file versionato incluso nel Worker ed endpoint `GET /locations`
+
+> **Superato da ADR-0006** (proposto il 2026-11-02, PRD v0.7): il catalogo passa al database con
+> cache e `locations.json` resta solo il seed iniziale (OQ-45). Questa decisione resta la storia del
+> perché la v0.4 sceglieva il file; se ADR-0006 non viene approvato, torna valida.
 
 Allineato al PRD v0.4: la fonte del catalogo è decisa dall'owner (OQ-25 risolta, C-6: file
 versionato `locations.json`), così come lo snapshot nell'app (OQ-26 risolta). Coordinato con

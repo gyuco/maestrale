@@ -1,6 +1,8 @@
 import { cloudflareTest, readD1Migrations } from "@cloudflare/vitest-pool-workers";
 import { defineConfig } from "vitest/config";
 
+import seedLocations from "../locations.json";
+
 // Da 0.18 il package esporta il plugin `cloudflareTest`; `defineWorkersConfig`
 // (citato nella storia) è stato rimosso. Il Worker viene caricato dalla stessa
 // configurazione usata dal deploy, così i binding (KV `FORECASTS`) sono quelli
@@ -15,9 +17,12 @@ import { defineConfig } from "vitest/config";
 // Migrazioni di `migrations/` lette in Node e passate ai test come binding di
 // sola prova `TEST_MIGRATIONS`; le applica `test/setup/apply-migrations.ts`.
 const migrations = await readD1Migrations("./migrations");
+const coreMigrations = await readD1Migrations("./migrations-core");
+
 
 export default defineConfig({
   test: {
+    include: ["test/**/*.test.ts"],
     setupFiles: ["./test/setup/apply-migrations.ts"],
   },
   plugins: [
@@ -25,8 +30,15 @@ export default defineConfig({
     // altrimenti i test resterebbero verdi anche rimuovendo il binding dal Worker.
     cloudflareTest({
       wrangler: { configPath: "./wrangler.jsonc" },
-      // Il binding D1 `HISTORY` arriva da `wrangler.jsonc`; qui solo le migrazioni.
-      miniflare: { bindings: { TEST_MIGRATIONS: migrations } },
+      // I binding D1 `HISTORY` e `CORE` arrivano da `wrangler.jsonc`; qui solo le
+      // migrazioni dei due database e il catalogo di seed, letti in Node.
+      miniflare: {
+        bindings: {
+          TEST_MIGRATIONS: migrations,
+          TEST_MIGRATIONS_CORE: coreMigrations,
+          TEST_LOCATIONS_JSON: JSON.stringify(seedLocations),
+        },
+      },
     }),
   ],
 });

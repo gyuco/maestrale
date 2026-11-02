@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { Hono } from "hono";
 
-import { loadCatalog, resolve } from "../catalog";
+import { resolve } from "../catalog";
 import type { AppEnv, CatalogEntry } from "../env";
 import { slugify } from "../slugify";
 import {
@@ -96,7 +96,10 @@ forecastRoutes.get("/", async (c) => {
     return c.json({ detail: "Il parametro 'localita' è obbligatorio" }, 422);
   }
 
-  const catalog = loadCatalog(c.get("catalog"));
+  const catalog = c.get("catalog");
+  if (catalog === null) {
+    return c.json({ detail: "Catalogo temporaneamente non disponibile" }, 503);
+  }
   const entry = resolve(catalog, localita);
 
   if (entry === null) {

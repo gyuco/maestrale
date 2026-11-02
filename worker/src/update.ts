@@ -34,6 +34,13 @@ import {
 } from "./open_meteo";
 import { dayZeroRow, romeDate, type HistoryRow } from "./history";
 import type { HistoryWriter } from "./history_store";
+import {
+  computeOutcome,
+  newRunId,
+  type RunFailure,
+  type RunRecord,
+  type RunsWriter,
+} from "./runs_store";
 import { CACHE_KEY, META_KEY, readForecastCache, readMeta, recordKey, type ForecastMeta } from "./store";
 import type { Forecast } from "./types";
 
@@ -51,6 +58,17 @@ export interface UpdateDeps extends Pick<ForecastDeps, "fetchImpl" | "sleep" | "
   readonly config?: Partial<UpdateConfig>;
   /** Scrittore dello storico D1 (ADR-0002 §2.7); assente = nessuno storico. */
   readonly history?: HistoryWriter;
+  /** Registro delle esecuzioni (ADR-0008); assente = nessun registro. */
+  readonly runs?: RunsWriter;
+  /** Versione del catalogo letta all'inizio (FR-102), per il registro. */
+  readonly catalogVersion?: number;
+  /** Origine e ambito dell'esecuzione, per il registro (FR-105). */
+  readonly run?: {
+    readonly origin?: "pianificata" | "su-richiesta";
+    readonly scope?: "tutte" | "singola";
+    readonly scopeSlug?: string | null;
+    readonly triggeredBy?: string | null;
+  };
 }
 
 export const BREAKER_MESSAGE =
@@ -254,7 +272,50 @@ export async function runUpdate(
   rawLocations: readonly unknown[],
   deps: UpdateDeps = {},
 ): Promise<UpdateResult> {
-  const catalog = validateLocations(rawLocations);
+  const startedAt = (deps.now ?? ((): string => new Date().toISOString()))();
+  let catalog: CatalogLocation[];
+  try {
+    catalog = validateLocations(rawLocations);
+  } catch (error) {
+    if (deps.runs !== undefined) {
+      const reason = error instanceof Error ? error.message : String(error);
+      await safeRun(() =>
+        deps.runs!.reject(
+          {
+            id: newRunId(startedAt),
+            origin: deps.run?.origin ?? "pianificata",
+            scope: deps.run?.scope ?? "tutte",
+            scopeSlug: deps.run?.scopeSlug ?? null,
+            triggeredBy: deps.run?.triggeredBy ?? null,
+            catalogVersion: deps.catalogVersion ?? 0,
+            catalogSize: 0,
+            startedAt,
+          },
+          reason,
+          startedAt,
+        ),
+      );
+    }
+    throw error;
+  }
+
+  const runRecord: RunRecord | undefined =
+    deps.runs === undefined
+      ? undefined
+      : {
+          id: newRunId(startedAt),
+          origin: deps.run?.origin ?? "pianificata",
+          scope: deps.run?.scope ?? "tutte",
+          scopeSlug: deps.run?.scopeSlug ?? null,
+          triggeredBy: deps.run?.triggeredBy ?? null,
+          catalogVersion: deps.catalogVersion ?? 0,
+          catalogSize: catalog.length,
+          startedAt,
+        };
+  if (runRecord !== undefined) {
+    await safeRun(() => deps.runs!.start(runRecord));
+  }
+
   const config = resolveUpdateConfig(deps.config);
   const now = deps.now ?? ((): string => new Date().toISOString());
   const nowMs = deps.nowMs ?? ((): number => Date.now());
@@ -551,24 +612,63 @@ export async function runUpdate(
     paidAlerts.push("budget_subrequests");
   }
 
+  const metrics: UpdateMetrics = {
+    blocks: chunks.length,
+    block_requests: blockRequests,
+    block_failures: blockFailures,
+    fallbacks,
+    subrequests,
+    kv_writes: kvWrites,
+    kv_deletes: kvDeletes,
+    weight_used: budget.weightUsed,
+    budget_exhausted: budget.exhausted,
+    paid_alerts: paidAlerts,
+    ...history,
+  };
+
+  if (runRecord !== undefined) {
+    const failures: RunFailure[] = Object.entries(errors).map(([slug, message]) => ({
+      slug,
+      message,
+      kind: message.startsWith("Aggiornamento non tentato") ? "not_attempted" : "failed",
+    }));
+    const notAttempted = failures.filter((failure) => failure.kind === "not_attempted").length;
+    await safeRun(() =>
+      deps.runs!.finish(runRecord, {
+        finishedAt: now(),
+        durationMs: nowMs() - startMs,
+        outcome: computeOutcome(updated.length, Object.keys(errors).length),
+        updatedCount: updated.length,
+        failedCount: Object.keys(errors).length,
+        notAttemptedCount: notAttempted,
+        failures,
+        breaker,
+        breakerBlocksFailed: blockFailures,
+        breakerBlocksTotal: blockRequests,
+        metrics,
+        historyRows: history.history_rows,
+        historyError: history.history_error ?? null,
+      }),
+    );
+  }
+
   return {
     written,
     generated_at: generatedAt,
     updated_locations: [...updated].sort(),
     errors,
     fallback_breaker: breaker,
-    metrics: {
-      blocks: chunks.length,
-      block_requests: blockRequests,
-      block_failures: blockFailures,
-      fallbacks,
-      subrequests,
-      kv_writes: kvWrites,
-      kv_deletes: kvDeletes,
-      weight_used: budget.weightUsed,
-      budget_exhausted: budget.exhausted,
-      paid_alerts: paidAlerts,
-      ...history,
-    },
+    metrics,
   };
+}
+
+/** Un errore del registro resta nel log e non tocca cache, storico o `/health` (FR-111). */
+async function safeRun(action: () => Promise<void>): Promise<void> {
+  try {
+    await action();
+  } catch (error) {
+    console.error(
+      `Registro delle esecuzioni non aggiornato: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }

@@ -39,7 +39,7 @@ async function request(
   path: string,
   options: { catalog?: Parameters<typeof createApp>[0]; kv?: KVNamespace; extraEnv?: object } = {},
 ): Promise<Response> {
-  const app = createApp(options.catalog);
+  const app = createApp(options.catalog ?? locations);
   return app.request(path, {}, { FORECASTS: options.kv ?? env.FORECASTS, ...options.extraEnv });
 }
 

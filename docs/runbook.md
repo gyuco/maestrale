@@ -1,7 +1,7 @@
 ---
 id: RUNBOOK
 status: draft
-updated: 2026-10-20
+updated: 2026-11-02
 ---
 
 # Runbook — Maestrale (Cloudflare Worker)
@@ -14,8 +14,8 @@ dipende dall'account).
 
 ## Deploy
 
-Prerequisiti: Node.js 22+, `cd worker && npm ci`, account Cloudflare (piano **Free** per lo
-sviluppo; nessun custom domain).
+Prerequisiti: Node.js 22+, `cd worker && npm ci`, account Cloudflare (piano **Paid**; il
+backoffice richiede un custom domain `admin.<dominio>`).
 
 1. **[account]** `npx wrangler login` (autorizzazione nel browser).
 2. **[account]** Crea i namespace KV e annota i due id (non sono segreti):
@@ -222,12 +222,15 @@ Dove guardare:
   `update_errors` (località fallite con messaggio), `generated_at`, `locations`. Cache assente o
   illeggibile: `error` e `cache_path` (`kv:FORECASTS`).
 
-## Limiti piano Free e misure
+## Limiti di piattaforma e misure
 
 | Limite | Free | Paid |
 |---|---|---|
 | CPU per invocazione | 10 ms | fino a 15 min per cron con intervallo >= 1 h |
 | Subrequest per invocazione | 50 | 10.000 |
+
+> Nota: dal 2026-11-01 il servizio è sul piano **Paid** (vedi *Piano Workers Paid* più sotto); i
+> riferimenti al piano Free in questa sezione restano come storia e come margine.
 
 Fabbisogno del job con il cache per località e le chiamate a blocchi (ADR-0003 §5), N località e
 blocchi da 50: `2·ceil(N/50)` richieste Open-Meteo + 1 `get meta` + N `put` + 1 `put meta`; con 13
@@ -246,36 +249,62 @@ misura valida):
 |---|---|---|---|---|---|
 | da misurare | da misurare | da misurare | da misurare | da misurare | da misurare |
 
-## Modifica del catalogo località (FR-61, ADR-0004)
+## Catalogo località e backoffice (FR-61, FR-92..FR-121, ADR-0006..ADR-0010)
 
-`locations.json` alla radice è l'unica fonte modificata a mano (job, `/forecast` e `GET /locations`
-lo leggono da `worker/src/catalog.ts`). Processo: PR che modifica `locations.json` e rigenera lo
-snapshot dell'app (`node scripts/sync_app_catalog.mjs`) -> `npm test` nel Worker e `flutter test`
-nell'app (verificano duplicati, coordinate e sincronia dello snapshot) -> regola go/no-go sotto
-(oltre ~35 località sul piano Free serve prima Paid) -> `npx wrangler deploy`. Fino al cron successivo
-le località nuove sono in `/locations` ma `/forecast` risponde 404 (al più 6 h).
+Il catalogo vive nel database D1 `maestrale-core` (binding `CORE`) ed è letto tramite la cache KV
+`catalog:current`. `locations.json` alla radice è **solo il seed** della migrazione iniziale
+(FR-104): dopo l'attivazione non è più letto da job, API o backoffice, e modificarlo non ha effetto.
 
-## Regola go/no-go per Paid
+### Primo rilascio del backoffice
+1. **[account]** `npx wrangler d1 create maestrale-core --location=weur`, annota `database_id`.
+2. Metti l'id in `worker/wrangler.jsonc` e `worker/wrangler.admin.jsonc` (binding `CORE`).
+3. `node scripts/seed_catalog.mjs` genera `worker/migrations-core/0002_seed_locations.sql` dalle 13
+   voci di `locations.json` (tutte attive).
+4. **[account]** `npx wrangler d1 migrations apply maestrale-core --remote`.
+5. **[account]** `npx wrangler deploy` (Worker pubblico; ora legge il catalogo da `CORE`).
+6. **[account]** `npx wrangler deploy -c wrangler.admin.jsonc` (Worker `maestrale-admin`).
+7. **[account]** Crea l'applicazione **Cloudflare Access** sull'hostname `admin.<dominio>`: policy
+   `Allow` con le email degli 1–3 amministratori, identity provider Google/GitHub o codice monouso,
+   sessione 8 h. Annota il team domain (`ACCESS_TEAM_DOMAIN`, es. `https://<team>.cloudflareaccess.com`)
+   e l'audience (`ACCESS_AUD`) nelle `vars` del Worker admin.
+8. Verifica: `https://admin.<dominio>/catalogo` apre il login Access; una richiesta senza JWT
+   risponde 401; `GET /locations` pubblica serve le stesse 13 località di prima (FR-104).
 
-Regola NFR-15 (PRD v0.4, C-5 "Free ora, Paid alla soglia"). Si passa a **Workers Paid** appena si
-verifica almeno una delle condizioni seguenti, e comunque **prima** che un limite Free venga superato:
+### Modifica del catalogo
+Dal backoffice (area **Catalogo**). Effetto immediato su `/locations` e sulla risoluzione di
+`/forecast`/`/history` (FR-101); i dati delle previsioni arrivano dalla prima esecuzione del job o da
+"Esegui ora". Non modificare `locations.json`: non ha effetto.
 
-- (a) un'esecuzione del job fallisce per CPU, subrequest o quota KV;
-- (b) un'esecuzione nominale misura **CPU > 7 ms** o **subrequest > 40** (log `forecast_update`:
-  `subrequests`, `paid_alerts` contiene `subrequests`);
-- (c) le scritture KV giornaliere misurate o stimate superano **700/giorno** (log: `paid_alerts`
-  contiene `kv_writes_per_day`; soglia configurabile, OQ-29);
-- (d) nessuna esecuzione completa nelle ultime 24 h (`/health` `stale`);
-- (e) prima di aprire l'app ad altri utenti (decisione owner 2026-10-19);
-- (f) in ogni caso prima che il catalogo arrivi a ~500 località (NFR-19: 500 località solo su Paid).
+### Revoca di un amministratore (FR-94)
+1. **[account]** Rimuovi l'email dalla policy dell'applicazione Access.
+2. **[account]** Revoca le sessioni attive dell'utente in Access.
+Effetto entro 15 minuti (NFR-27). L'elenco degli amministratori non è nel backoffice.
 
-Una modifica che porterebbe a superare una soglia (per esempio aggiungere località al catalogo,
-FR-61) si rilascia **solo dopo** il passaggio a Paid. Al passaggio: abilitare Paid sull'account,
-impostare `UPDATE_MAX_SUBREQUESTS=9000`, poi ampliare il catalogo.
+### Backup e ripristino (FR-121)
+- **Time Travel** (finestra 30 giorni): `npx wrangler d1 time-travel info maestrale-core
+  --timestamp=<RFC3339>` restituisce il bookmark; `npx wrangler d1 time-travel restore maestrale-core
+  --bookmark=<bookmark>` ripristina.
+- **Export periodico** (almeno mensile, e prima di ogni migrazione): `npx wrangler d1 export
+  maestrale-core --remote --output backup-YYYY-MM-DD.sql`. Conserva gli export per almeno 24 mesi
+  (NFR-29), fuori dal database (R2 o repository privato).
+- **Ripristino da export**: crea un database nuovo, applica l'export, aggiorna `database_id` nei due
+  `wrangler` config, riapplica le migrazioni mancanti, deploy.
+- Il backoffice non offre export/import (non-goal): il backup è operativo.
 
-Se tutte le misure rientrano e l'app resta personale si può restare su Free monitorando `/health`.
-Decisione del proprietario (2026-10-19): sul Free un cron che fallisce si **tollera e si misura**
-(nessuna disattivazione; ogni 6 h una run fallita nei log, `/health` diventa `stale` dopo 12 h).
+### "Esegui ora" e dispatcher (ADR-0009)
+- Il cron `* * * * *` sul Worker pubblico è il dispatcher: senza, le richieste restano `pending` e la
+  cache del catalogo non viene riparata.
+- Controllo: `npx wrangler d1 execute maestrale-core --remote --command "SELECT * FROM run_requests
+  WHERE status='pending'"`; `SELECT * FROM job_lock`.
+- Il dispatcher ripara `catalog:current` se `catalog_meta.version` diverge, chiude le esecuzioni
+  `running` oltre `JOB_MAX_DURATION_SECONDS + 60` come "non completata" (FR-107) ed elimina i registri
+  oltre 90 giorni e le operazioni oltre 24 mesi.
+
+## Piano Workers Paid
+
+Dal 2026-11-01 il servizio è sul piano **Workers Paid** (decisione owner, PRD v0.6.1/NFR-15): la
+regola go/no-go Free→Paid non si applica più e non va implementata. `UPDATE_MAX_SUBREQUESTS` vale
+`9000`. Gli avvisi `paid_alerts` restano solo come segnalazione nei log (NFR-21), senza blocchi.
 
 ## Passi futuri
 
@@ -289,7 +318,6 @@ Decisione del proprietario (2026-10-19): sul Free un cron che fallisce si **toll
   sia completata e che l'owner scelga tra Workers Builds dal dashboard e GitHub Actions con
   `wrangler-action`; le migrazioni D1 `migrations apply --remote` devono precedere il deploy).
 - CORS ristretto: oggi `CORS_ORIGINS` vale `*` (nessuna `vars` definita).
-- Passaggio a Workers Paid secondo la regola sopra.
 
 ## Rigenerare le fixture / baseline Python
 

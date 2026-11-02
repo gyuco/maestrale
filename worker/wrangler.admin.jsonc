@@ -1,0 +1,30 @@
+{
+  // Worker separato del backoffice (ADR-0007): origine propria, SSR, Cloudflare
+  // Access. Nessun binding HISTORY né Open-Meteo: qui si toccano solo catalogo,
+  // registri e cache del catalogo.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "maestrale-admin",
+  "main": "src/admin/index.tsx",
+  "compatibility_date": "2026-08-22",
+  "observability": { "enabled": true },
+  "kv_namespaces": [
+    {
+      "binding": "FORECASTS",
+      "id": "7b1c0444535542408cc05fa9dd59536b",
+      "preview_id": "b6b83416188441aea18ce2846ccad5d6"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "CORE",
+      "database_name": "maestrale-core",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations-core"
+    }
+  ],
+  "vars": {
+    "ADMIN_ORIGIN": "https://admin.example.com",
+    "ACCESS_TEAM_DOMAIN": "https://team.cloudflareaccess.com",
+    "ACCESS_AUD": ""
+  }
+}

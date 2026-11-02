@@ -1,14 +1,15 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import { loadCatalog, rawLocations } from "./catalog";
+import { getCatalog, loadCatalog, locationsDocument } from "./catalog";
 import { updateConfigFromEnv } from "./config";
-import type { AppEnv, Bindings, CatalogEntry, CorsEnv } from "./env";
+import type { AppEnv, Bindings, CorsEnv } from "./env";
 import { forecastRoutes } from "./routes/forecast";
 import { historyRoutes } from "./routes/history";
 import { locationsRoutes } from "./routes/locations";
 import { healthRoutes } from "./routes/health";
 import { d1HistoryWriter } from "./history_store";
+import { d1RunsWriter } from "./runs_store";
 import { runUpdate } from "./update";
 
 /**
@@ -35,12 +36,32 @@ function allowOrigin(origin: string, env: CorsEnv): string | null {
  * App Hono con le API di lettura. `createApp` esiste per i test (permette di
  * iniettare un ambiente diverso da quello reale del Worker).
  */
-export function createApp(catalog: readonly CatalogEntry[] = rawLocations as readonly CatalogEntry[]): Hono<AppEnv> {
+export function createApp(injectedCatalog?: readonly unknown[]): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
 
-  // Il catalogo incluso nel Worker risolve nome -> slug senza leggere lo storage (FR-57).
+  // Catalogo: iniettato nei test, oppure risolto dalla cache KV/D1 a runtime
+  // (FR-61, ADR-0006). Se non è disponibile le route rispondono 503 (FR-120).
   app.use("*", async (c, next) => {
-    c.set("catalog", catalog);
+    if (injectedCatalog !== undefined) {
+      try {
+        c.set("catalog", loadCatalog(injectedCatalog));
+        c.set("catalogDocument", await locationsDocument(injectedCatalog));
+      } catch (error) {
+        c.set("catalog", null);
+        c.set("catalogUnavailable", false);
+        c.set("catalogError", error instanceof Error ? error.message : String(error));
+      }
+    } else {
+      const loaded = await getCatalog(c.env);
+      if (loaded.status === "ok") {
+        c.set("catalog", loaded.snapshot.locations);
+        c.set("catalogDocument", { body: loaded.snapshot.body, etag: loaded.snapshot.etag });
+      } else {
+        c.set("catalog", null);
+        c.set("catalogUnavailable", true);
+        c.set("catalogError", loaded.error);
+      }
+    }
     await next();
   });
 
@@ -82,9 +103,16 @@ async function scheduled(
   _ctx: ExecutionContext,
 ): Promise<void> {
   const started = Date.now();
-  const result = await runUpdate(env.FORECASTS, loadCatalog(rawLocations), {
+  const loaded = await getCatalog(env);
+  if (loaded.status === "unavailable") {
+    throw new Error(`Catalogo non disponibile: ${loaded.error}`);
+  }
+  const result = await runUpdate(env.FORECASTS, loaded.snapshot.locations, {
     config: updateConfigFromEnv(env),
     history: d1HistoryWriter(env.HISTORY),
+    runs: d1RunsWriter(env.CORE),
+    catalogVersion: loaded.snapshot.catalogVersion,
+    run: { origin: "pianificata", scope: "tutte" },
   });
   for (const [slug, message] of Object.entries(result.errors)) {
     console.error(`Aggiornamento fallito per ${slug}: ${message}`);

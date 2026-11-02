@@ -42,7 +42,7 @@ afterEach(() => {
 });
 
 async function get(url: string, bindings: Record<string, unknown> = env as never, init?: RequestInit) {
-  return createApp().request(url, init, bindings);
+  return createApp(locations).request(url, init, bindings);
 }
 
 describe("GET /history day", () => {

@@ -58,6 +58,7 @@ Endpoint (sola lettura, solo `GET`):
 
 ```text
 GET /health
+GET /locations
 GET /forecast?localita=Torre%20dei%20Corsari
 GET /history?localita=Cagliari&from=2026-10-14&to=2026-10-20
 ```
@@ -123,6 +124,17 @@ non disponibile (`detail`: "Storico temporaneamente non disponibile").
 
 `Cache-Control` (solo sulla 200): `public, max-age=900` (15 min) se `to` e' oggi o futuro
 (Europe/Rome), `public, max-age=86400` (24 h) se l'intervallo e' interamente nel passato.
+
+### Backoffice di amministrazione
+
+Applicazione web separata sull'origine `admin.<dominio>`, davanti a **Cloudflare Access** (FR-93,
+FR-118): gestione del catalogo località (aggiunta, modifica, disattivazione, riattivazione), elenco e
+dettaglio delle esecuzioni del job, registro delle operazioni e "Esegui ora". Il catalogo vive nel
+database D1 `maestrale-core` ed è servito tramite cache (`GET /locations`); `locations.json` è solo il
+seed della migrazione iniziale (FR-104). Codici: 401/403 senza un'identità valida (FR-93), 409 per una
+modifica concorrente (FR-103), 503 se il catalogo non è disponibile (FR-120). Dettagli in
+[`docs/architecture.md`](docs/architecture.md) (ADR-0006..ADR-0010) e
+[`docs/runbook.md`](docs/runbook.md) (primo rilascio, revoca, backup e ripristino).
 
 Il job di aggiornamento gira come Cron Trigger `30 0,6,12,18 * * *` (UTC). Dettagli,
 deploy, rollback, osservabilità e limiti del piano Cloudflare:
