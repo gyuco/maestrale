@@ -40,7 +40,7 @@ class ForecastScreen extends StatefulWidget {
 
 class _ForecastScreenState extends State<ForecastScreen>
     with SingleTickerProviderStateMixin {
-  final _locationController = TextEditingController(text: 'Torre dei Corsari');
+  final _locationController = TextEditingController();
   final _searchFocusNode = FocusNode();
   late final AnimationController _weatherAnimation;
   Forecast? _forecast;
@@ -48,6 +48,7 @@ class _ForecastScreenState extends State<ForecastScreen>
   String? _error;
   bool _loading = false;
   bool _savingHomeLocation = false;
+  bool _canSearch = false;
 
   @override
   void initState() {
@@ -56,7 +57,13 @@ class _ForecastScreenState extends State<ForecastScreen>
       vsync: this,
       duration: const Duration(seconds: 5),
     )..forward();
+    _locationController.addListener(_onLocationChanged);
     _restoreHomeLocation();
+  }
+
+  void _onLocationChanged() {
+    final canSearch = _locationController.text.trim().isNotEmpty;
+    if (canSearch != _canSearch) setState(() => _canSearch = canSearch);
   }
 
   @override
@@ -88,6 +95,16 @@ class _ForecastScreenState extends State<ForecastScreen>
     }
   }
 
+  /// Con il campo vuoto non si avvia una ricerca: si porta il focus sul campo
+  /// così l'utente sceglie una località (FR-34).
+  void _startSearch() {
+    if (_locationController.text.trim().isEmpty) {
+      _searchFocusNode.requestFocus();
+      return;
+    }
+    _search();
+  }
+
   Future<void> _restoreHomeLocation() async {
     try {
       final savedLocation = (await widget.homeLocationStore.load())?.trim();
@@ -98,10 +115,8 @@ class _ForecastScreenState extends State<ForecastScreen>
           : resolveSavedHomeLocation(savedLocation, catalog);
       if (slug == null) {
         // Preferenza non risolvibile: resta invariata e si ritenta (OQ-54).
-        setState(() {
-          _homeLocation = savedLocation;
-          _locationController.text = savedLocation;
-        });
+        _locationController.text = savedLocation;
+        setState(() => _homeLocation = savedLocation);
         await _search();
         return;
       }
@@ -112,10 +127,8 @@ class _ForecastScreenState extends State<ForecastScreen>
         await widget.homeLocationStore.save(slug);
       }
       if (!mounted) return;
-      setState(() {
-        _homeLocation = slug;
-        _locationController.text = location.name;
-      });
+      _locationController.text = location.name;
+      setState(() => _homeLocation = slug);
       await _search(query: slug);
     } on Object {
       // Una preferenza non disponibile non deve impedire l'uso dell'app.
@@ -350,7 +363,7 @@ class _ForecastScreenState extends State<ForecastScreen>
                   padding: const EdgeInsets.all(5),
                   child: IconButton.filled(
                     key: const Key('search-button'),
-                    onPressed: _loading ? null : _search,
+                    onPressed: (_loading || !_canSearch) ? null : _search,
                     tooltip: 'Cerca',
                     style: IconButton.styleFrom(
                       backgroundColor: _ocean,
@@ -445,7 +458,7 @@ class _ForecastScreenState extends State<ForecastScreen>
 
     final forecast = _forecast;
     if (forecast == null) {
-      return _WelcomeCard(animation: _weatherAnimation, onExplore: _search);
+      return _WelcomeCard(animation: _weatherAnimation, onExplore: _startSearch);
     }
 
     return RefreshIndicator(

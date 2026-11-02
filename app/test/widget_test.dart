@@ -34,6 +34,11 @@ void main() {
     expect(find.byKey(const Key('open-map-button')), findsOneWidget);
     expect(find.text('Come sarà il mare?'), findsOneWidget);
 
+    await tester.enterText(
+      find.byKey(const Key('location-search-field')),
+      'Torre dei Corsari',
+    );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('search-button')));
     await tester.pumpAndSettle();
 
@@ -52,6 +57,68 @@ void main() {
 
     expect(homeLocationStore.value, 'torre-dei-corsari');
     expect(find.text('Stabilisci come pagina iniziale'), findsNothing);
+  });
+
+  testWidgets('all avvio il campo è vuoto e non parte nessuna richiesta', (
+    tester,
+  ) async {
+    var requests = 0;
+    final client = MockClient((request) async {
+      requests++;
+      return http.Response(jsonEncode(forecastFixture), 200);
+    });
+
+    await tester.pumpWidget(
+      SeaForecastApp(
+        locationRepository: await repositoryWith(sampleLocations),
+        api: ForecastApi(baseUrl: 'http://api.test', client: client),
+        homeLocationStore: _MemoryHomeLocationStore(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('location-search-field')),
+    );
+    expect(field.controller!.text, isEmpty);
+    final searchButton = tester.widget<IconButton>(
+      find.byKey(const Key('search-button')),
+    );
+    expect(searchButton.onPressed, isNull);
+    expect(requests, 0);
+
+    await tester.tap(find.text('Scopri le previsioni'));
+    await tester.pumpAndSettle();
+
+    expect(requests, 0);
+    expect(
+      tester.widget<TextField>(
+        find.byKey(const Key('location-search-field')),
+      ).focusNode!.hasFocus,
+      isTrue,
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('location-search-field')),
+      'Alghero',
+    );
+    await tester.pump();
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('search-button')))
+          .onPressed,
+      isNotNull,
+    );
+
+    await tester.enterText(find.byKey(const Key('location-search-field')), '');
+    await tester.pump();
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('search-button')))
+          .onPressed,
+      isNull,
+    );
+    expect(requests, 0);
   });
 
   testWidgets('carica e cerca automaticamente la localita iniziale', (
@@ -185,6 +252,11 @@ void main() {
         homeLocationStore: _MemoryHomeLocationStore(),
       ),
     );
+    await tester.enterText(
+      find.byKey(const Key('location-search-field')),
+      'Torre dei Corsari',
+    );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('search-button')));
     await tester.pumpAndSettle();
 

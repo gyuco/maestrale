@@ -48,6 +48,11 @@ void main() {
     expect(find.byKey(const Key('open-history-button')), findsNothing);
     expect(find.byTooltip('Storico'), findsNothing);
 
+    await tester.enterText(
+      find.byKey(const Key('location-search-field')),
+      'Torre dei Corsari',
+    );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('search-button')));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Storico'), findsOneWidget);
@@ -64,6 +69,11 @@ void main() {
 
   testWidgets('AC-1 nessun comando in caricamento o errore', (tester) async {
     await _pump(tester, (_) async => http.Response('{"detail":"giu"}', 503));
+    await tester.enterText(
+      find.byKey(const Key('location-search-field')),
+      'Torre dei Corsari',
+    );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('search-button')));
     await tester.pump(); // caricamento in corso
     expect(find.byTooltip('Storico'), findsNothing);
