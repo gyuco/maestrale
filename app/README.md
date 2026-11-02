@@ -58,6 +58,32 @@ Il client usa i blocchi `location`, `daily[].sea` e `daily[].weather` restituiti
 dal backend. L'URL è centralizzato in `lib/config/api_config.dart` e il parsing in
 `lib/models/forecast.dart`.
 
+## Icone
+
+Le icone di tutte le piattaforme sono generate da due master versionati:
+
+- `assets/images/maestrale_app_icon.png` — artwork opaco 1254×1254;
+- `assets/images/maestrale_app_icon_foreground.png` — cut-out RGBA usato come foreground dell'icona adattiva Android.
+
+Per rigenerare Android (adaptive, monochrome e legacy), iOS, macOS, Web (favicon e PWA) e Windows:
+
+```bash
+# dalla radice del repository
+python3 -m pip install pillow   # una volta sola
+python3 scripts/generate_app_icons.py
+```
+
+Lo script è idempotente e sovrascrive gli asset di piattaforma: non modificare a mano i PNG generati.
+
+Su macOS l'icona è compilata da Xcode dentro il bundle e il Dock può mantenerne una copia in cache. Se dopo la rigenerazione (e una nuova build) il Dock mostra ancora la vecchia icona, riavvia l'app e forza l'aggiornamento:
+
+```bash
+killall Dock
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f \
+  "$(pwd)/build/macos/Build/Products/Debug/Maestrale.app"
+open "$(pwd)/build/macos/Build/Products/Debug/Maestrale.app"
+```
+
 ## Verifiche
 
 ```bash
