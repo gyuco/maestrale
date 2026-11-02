@@ -9,6 +9,7 @@ import { historyRoutes } from "./routes/history";
 import { locationsRoutes } from "./routes/locations";
 import { healthRoutes } from "./routes/health";
 import { d1HistoryWriter } from "./history_store";
+import { dispatch } from "./dispatch";
 import { d1RunsWriter } from "./runs_store";
 import { runUpdate } from "./update";
 
@@ -98,10 +99,16 @@ const app = createApp();
  * inutilmente) e il cache non viene toccato.
  */
 async function scheduled(
-  _controller: ScheduledController,
+  controller: ScheduledController,
   env: Bindings,
   _ctx: ExecutionContext,
 ): Promise<void> {
+  // Cron del dispatcher (ADR-0009): riparazione, watchdog, retention, "Esegui ora".
+  if (controller.cron === "* * * * *") {
+    await dispatch(env);
+    return;
+  }
+
   const started = Date.now();
   const loaded = await getCatalog(env);
   if (loaded.status === "unavailable") {

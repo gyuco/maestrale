@@ -1,7 +1,12 @@
 import type { Child } from "hono/jsx";
 
 import type { RunFailureRow, RunRow } from "../runs_queries";
-import { formatDuration, formatInstant, outcomeLabel } from "./esecuzioni_list";
+import {
+  formatDuration,
+  formatInstant,
+  outcomeBadgeClass,
+  outcomeLabel,
+} from "./esecuzioni_list";
 import { Layout } from "./layout";
 
 export interface EsecuzioneDetailProps {
@@ -10,7 +15,7 @@ export interface EsecuzioneDetailProps {
   failures: readonly RunFailureRow[];
 }
 
-function field(label: string, value: string): Child {
+function field(label: string, value: Child): Child {
   return (
     <>
       <dt>{label}</dt>
@@ -23,12 +28,15 @@ export function EsecuzioneDetail({ email, run, failures }: EsecuzioneDetailProps
   return (
     <Layout title="Dettaglio esecuzione" email={email} active="esecuzioni">
       <h1>Esecuzione {formatInstant(run.started_at)}</h1>
-      <p>
+      <p class="back">
         <a href="/esecuzioni">← Torna alle esecuzioni</a>
       </p>
 
-      <dl>
-        {field("Esito", outcomeLabel(run.outcome))}
+      <dl class="details">
+        {field(
+          "Esito",
+          <span class={outcomeBadgeClass(run.outcome)}>{outcomeLabel(run.outcome)}</span>,
+        )}
         {field("Origine", run.origin === "su-richiesta" ? "Su richiesta" : "Pianificata")}
         {run.triggered_by ? field("Richiesta da", run.triggered_by) : null}
         {field("Ambito", run.scope === "singola" ? `Località ${run.scope_slug ?? ""}` : "Tutte le località")}
@@ -46,31 +54,33 @@ export function EsecuzioneDetail({ email, run, failures }: EsecuzioneDetailProps
 
       <h2>Località fallite</h2>
       {failures.length === 0 ? (
-        <p>Nessuna località fallita.</p>
+        <p class="empty">Nessuna località fallita.</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Slug</th>
-              <th>Nome</th>
-              <th>Motivo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {failures.map((failure) => (
+        <div class="table-wrap">
+          <table>
+            <thead>
               <tr>
-                <td>
-                  <code>{failure.slug}</code>
-                </td>
-                <td>{failure.name ?? "—"}</td>
-                <td class="muted">
-                  {failure.kind === "not_attempted" ? "Non tentata: " : ""}
-                  {failure.message}
-                </td>
+                <th>Slug</th>
+                <th>Nome</th>
+                <th>Motivo</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {failures.map((failure) => (
+                <tr>
+                  <td>
+                    <code>{failure.slug}</code>
+                  </td>
+                  <td>{failure.name ?? "—"}</td>
+                  <td class="muted">
+                    {failure.kind === "not_attempted" ? "Non tentata: " : ""}
+                    {failure.message}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Layout>
   );

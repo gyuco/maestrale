@@ -3,7 +3,7 @@ id: E05-S09
 epic: E05
 title: "Job: registro delle esecuzioni (esiti, fallimenti, coerenza con /health)"
 type: feature
-status: ready
+status: done
 requirements: [FR-102, FR-105, FR-106, FR-110, FR-111]
 depends_on: [E05-S01]
 verify:
@@ -68,17 +68,27 @@ Il job scrive nel database un registro strutturato di ogni esecuzione: è la fon
   restano verdi senza modifiche alle fixture (FR-95).
 
 ## Tasks
-- [ ] Scrivere i test falliti (AC-1..AC-7) con `RunsWriter` reale su D1 e finto in errore
-- [ ] Implementare `runs_store.ts` (avvio, chiusura, fallimenti, lettura)
-- [ ] Integrare il registro nel job: versione catalogo, esiti, metriche, fallimenti (AC-1..AC-3, AC-6, AC-7)
-- [ ] Garantire che un errore del registro non propaghi (AC-5)
-- [ ] Eseguire `npm test` e `npm run typecheck` (AC-8)
+- [x] Scrivere i test falliti (AC-1..AC-7) con `RunsWriter` reale su D1 e finto in errore
+- [x] Implementare `runs_store.ts` (avvio, chiusura, fallimenti, lettura)
+- [x] Integrare il registro nel job: versione catalogo, esiti, metriche, fallimenti (AC-1..AC-3, AC-6, AC-7)
+- [x] Garantire che un errore del registro non propaghi (AC-5)
+- [x] Eseguire `npm test` e `npm run typecheck` (AC-8)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `worker/src/runs_store.ts`, `worker/src/update.ts` (avvio, esito, fallimenti, `safeRun`),
+  `worker/src/index.ts` (binding `CORE` e `catalogVersion`), test `runs_store.test.ts` e
+  `update_runs.test.ts`.
+- `finish` usa un'unica `batch()` (update + `json_each` per i fallimenti); un errore del registro è
+  catturato e loggato (FR-111). `rifiutata` è scritta prima di rilanciare l'errore di catalogo.
+- Conteggi per provider (Marine/Forecast) non separati dalle metriche attuali: colonne presenti ma
+  `NULL`; da completare quando `UpdateMetrics` li esporrà.
+- Verifica: `npm test`, `npm run typecheck`.
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-8 coperti: esiti, fallimenti con messaggio, rifiuto per catalogo invalido, `catalog_version`
+letto all'inizio, registro in errore non bloccante. Nessun blocker. R-1 (should): i conteggi
+dell'interruttore per provider restano `NULL` finché `UpdateMetrics` non li separa.

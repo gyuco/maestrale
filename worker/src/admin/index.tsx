@@ -3,9 +3,10 @@ import { Hono } from "hono";
 import { createAccessVerifier, type AccessVerifier } from "./access";
 import type { AdminBindings, AdminEnv } from "./env";
 import { catalogoRoutes } from "./routes/catalogo";
+import { eseguiRoutes } from "./routes/esegui";
 import { esecuzioniRoutes } from "./routes/esecuzioni";
 import { registroRoutes } from "./routes/registro";
-import { Layout } from "./views/layout";
+import { ADMIN_CSS } from "./styles";
 
 export interface AdminDeps {
   /** Iniettabile nei test (NFR-13); in produzione usa il verificatore JWT di Access. */
@@ -65,11 +66,17 @@ export function createAdminApp(deps: Partial<AdminDeps> = {}): Hono<AdminEnv> {
     c.header("X-Content-Type-Options", "nosniff");
   });
 
+  // CSS della stessa origine: la CSP `default-src 'self'` blocca lo stile inline.
+  app.get("/assets/admin.css", (c) =>
+    c.body(ADMIN_CSS, 200, { "Content-Type": "text/css; charset=utf-8" }),
+  );
+
   app.get("/", (c) => c.redirect("/catalogo", 302));
 
   app.route("/catalogo", catalogoRoutes);
 
   app.route("/esecuzioni", esecuzioniRoutes);
+  app.route("/esegui", eseguiRoutes);
 
   app.route("/registro", registroRoutes);
 

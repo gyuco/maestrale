@@ -50,6 +50,22 @@ export function outcomeLabel(outcome: string | null): string {
   }
 }
 
+export function outcomeBadgeClass(outcome: string | null): string {
+  switch (outcome) {
+    case "riuscita":
+      return "badge badge-ok";
+    case "parziale":
+    case "non_completata":
+      return "badge badge-warn";
+    case "fallita":
+      return "badge badge-err";
+    case "rifiutata":
+      return "badge badge-off";
+    default:
+      return "badge badge-info";
+  }
+}
+
 export function EsecuzioniList({
   email,
   rows,
@@ -74,7 +90,7 @@ export function EsecuzioniList({
       <p class="muted">{total} esecuzioni conservate</p>
 
       {pending.length > 0 ? (
-        <div class="flash">
+        <div class="flash flash-info" role="status">
           <strong>In attesa di avvio:</strong>{" "}
           {pending.map((request) => (
             <span>
@@ -84,7 +100,13 @@ export function EsecuzioniList({
         </div>
       ) : null}
 
-      <form method="get" action="/esecuzioni" style="margin: 16px 0; display: flex; gap: 8px;">
+      <div class="actions">
+        <a class="button button-primary" href="/esegui">
+          Esegui ora
+        </a>
+      </div>
+
+      <form method="get" action="/esecuzioni" class="toolbar">
         <select name="esito" aria-label="Filtra per esito">
           <option value="">Tutti gli esiti</option>
           {esiti.map((esito) => (
@@ -99,43 +121,48 @@ export function EsecuzioniList({
       </form>
 
       {rows.length === 0 ? (
-        <p>Nessuna esecuzione corrisponde ai filtri.</p>
+        <p class="empty">Nessuna esecuzione corrisponde ai filtri.</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Inizio</th>
-              <th>Durata</th>
-              <th>Origine</th>
-              <th>Esito</th>
-              <th>Aggiornate</th>
-              <th>Fallite</th>
-              <th>Interruttore</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
+        <div class="table-wrap">
+          <table>
+            <thead>
               <tr>
-                <td>
-                  <a href={`/esecuzioni/${row.id}`}>{formatInstant(row.started_at)}</a>
-                </td>
-                <td>{formatDuration(row.duration_ms)}</td>
-                <td>{row.origin === "su-richiesta" ? "Su richiesta" : "Pianificata"}</td>
-                <td>{outcomeLabel(row.outcome)}</td>
-                <td>{row.updated_count}</td>
-                <td>{row.failed_count}</td>
-                <td>{row.breaker === 1 ? "Sì" : "No"}</td>
+                <th>Inizio</th>
+                <th>Durata</th>
+                <th>Origine</th>
+                <th>Esito</th>
+                <th>Aggiornate</th>
+                <th>Fallite</th>
+                <th>Interruttore</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>
+                  <td>
+                    <a href={`/esecuzioni/${row.id}`}>{formatInstant(row.started_at)}</a>
+                  </td>
+                  <td>{formatDuration(row.duration_ms)}</td>
+                  <td>{row.origin === "su-richiesta" ? "Su richiesta" : "Pianificata"}</td>
+                  <td>
+                    <span class={outcomeBadgeClass(row.outcome)}>{outcomeLabel(row.outcome)}</span>
+                  </td>
+                  <td>{row.updated_count}</td>
+                  <td>{row.failed_count}</td>
+                  <td>{row.breaker === 1 ? "Sì" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {pages > 1 ? (
-        <p>
-          {page > 1 ? <a href={query(page - 1)}>← Precedente</a> : null}{" "}
-          Pagina {page} di {pages} {page < pages ? <a href={query(page + 1)}>Successiva →</a> : null}
-        </p>
+        <div class="pager">
+          {page > 1 ? <a href={query(page - 1)}>← Precedente</a> : null}
+          <span class="pager-info">Pagina {page} di {pages}</span>
+          {page < pages ? <a href={query(page + 1)}>Successiva →</a> : null}
+        </div>
       ) : null}
     </Layout>
   );

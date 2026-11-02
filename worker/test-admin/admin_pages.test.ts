@@ -33,6 +33,16 @@ describe("pagine del backoffice (FR-92, NFR-10)", () => {
     expect(body).toContain('aria-current="page"');
   });
 
+  it("include il foglio di stile della stessa origine", async () => {
+    const body = await (await get("/catalogo")).text();
+    expect(body).toContain('href="/assets/admin.css"');
+
+    const css = await get("/assets/admin.css");
+    expect(css.status).toBe(200);
+    expect(css.headers.get("content-type")).toContain("text/css");
+    expect(await css.text()).toContain(".topbar");
+  });
+
   it("una route sconosciuta risponde 404", async () => {
     expect((await get("/nope")).status).toBe(404);
   });

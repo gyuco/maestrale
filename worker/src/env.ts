@@ -33,6 +33,16 @@ export interface Bindings extends Env, UpdateEnv {
   HISTORY_MAX_AGE_LONG_SECONDS?: string;
   /** TTL della memo del catalogo per isolate (default 30, ADR-0006, NFR-33). */
   CATALOG_CACHE_TTL_SECONDS?: string;
+  /** Intervallo minimo fra due "Esegui ora" (default 900, minimo 900; FR-115). */
+  MIN_ON_DEMAND_INTERVAL_SECONDS?: string;
+  /** `false`/`0` disattiva il dispatcher (test di parità, ADR-0009). */
+  RUN_DISPATCH_ENABLED?: string;
+  /** Durata massima di un'esecuzione per il watchdog (default 900, FR-107). */
+  JOB_MAX_DURATION_SECONDS?: string;
+  /** Conservazione dei registri delle esecuzioni in giorni (default 90, FR-112). */
+  RUN_RETENTION_DAYS?: string;
+  /** Conservazione del registro operazioni in giorni (default 730, NFR-29). */
+  ACTIONS_RETENTION_DAYS?: string;
 }
 
 /** Voce del catalogo incluso nel Worker (nome -> slug senza leggere lo storage, FR-57). */

@@ -291,6 +291,14 @@ Effetto entro 15 minuti (NFR-27). L'elenco degli amministratori non è nel backo
   `wrangler` config, riapplica le migrazioni mancanti, deploy.
 - Il backoffice non offre export/import (non-goal): il backup è operativo.
 
+### Snapshot dell'app (FR-65, ADR-0010)
+In release, **prima** del build dell'app:
+1. `npx wrangler d1 execute maestrale-core --remote --json --command "SELECT slug, name, latitude,
+   longitude FROM locations WHERE active = 1 ORDER BY name" > /tmp/locations.json`
+2. `node scripts/sync_app_catalog.mjs --from /tmp/locations.json`
+3. `node scripts/sync_app_catalog.mjs --check` (fallisce se lo snapshot non è allineato)
+Lo snapshot è `app/assets/locations.json` e va committato con la release; non si modifica a mano.
+
 ### "Esegui ora" e dispatcher (ADR-0009)
 - Il cron `* * * * *` sul Worker pubblico è il dispatcher: senza, le richieste restano `pending` e la
   cache del catalogo non viene riparata.

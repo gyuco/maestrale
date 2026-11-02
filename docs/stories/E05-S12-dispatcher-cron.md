@@ -3,7 +3,7 @@ id: E05-S12
 epic: E05
 title: "Dispatcher a cron: claim, lease, watchdog, retention e riparazione cache"
 type: feature
-status: ready
+status: done
 requirements: [FR-107, FR-112, FR-120, NFR-30, NFR-33]
 depends_on: [E05-S11, E05-S02, E05-S09]
 verify:
@@ -59,17 +59,25 @@ chiuse.
 - **AC-8** — `npm test` e `npm run typecheck` verdi; i test del job esistente restano verdi.
 
 ## Tasks
-- [ ] Scrivere i test falliti con clock iniettato e D1 di test (AC-1..AC-7)
-- [ ] Implementare `dispatch.ts` con i quattro passi e il routing dei cron (AC-1, AC-5, AC-6)
-- [ ] Implementare claim/lease atomici e rilascio (AC-1, AC-2, AC-7)
-- [ ] Implementare watchdog e retention (AC-3, AC-4)
-- [ ] Eseguire `npm test` e `npm run typecheck` (AC-8)
+- [x] Scrivere i test falliti con clock iniettato e D1 di test (AC-1..AC-7)
+- [x] Implementare `dispatch.ts` con i quattro passi e il routing dei cron (AC-1, AC-5, AC-6)
+- [x] Implementare claim/lease atomici e rilascio (AC-1, AC-2, AC-7)
+- [x] Implementare watchdog e retention (AC-3, AC-4)
+- [x] Eseguire `npm test` e `npm run typecheck` (AC-8)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `worker/src/dispatch.ts`, `worker/src/index.ts` (routing dei cron), `wrangler.jsonc`
+  (cron `* * * * *`), `worker/test/dispatch.test.ts`; `writeMeta`/`catalogSize` in `update.ts`.
+- I quattro passi sono isolati (`safe`): un errore non blocca gli altri. Claim e lease atomici su
+  `job_lock`; se il catalogo non è disponibile la richiesta resta `pending` e il lock è rilasciato.
+- Esecuzione su una località: niente `meta` (OQ-52), `forecast` della località aggiornato, registro
+  con `catalog_size` della versione letta.
+- Verifica: `npm test`, `npm run typecheck`.
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-8 coperti: claim/lease, singola esecuzione, watchdog, retention 90g/730g, riparazione della
+cache, dispatcher disattivabile, esecuzione pianificata che salta col lease occupato. Nessun blocker.

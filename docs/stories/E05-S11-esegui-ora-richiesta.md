@@ -3,7 +3,7 @@ id: E05-S11
 epic: E05
 title: "\"Esegui ora\": richiesta, rifiuti e registrazione"
 type: feature
-status: ready
+status: done
 requirements: [FR-114, FR-115, FR-116]
 depends_on: [E05-S09, E05-S08, E05-S04]
 verify:
@@ -63,17 +63,24 @@ test `worker/test/admin_esegui.test.ts`.
 - **AC-7** — `npm test` e `npm run typecheck` verdi.
 
 ## Tasks
-- [ ] Scrivere i test falliti (AC-1..AC-6) con clock iniettato e lock nel D1 di test
-- [ ] Implementare la pagina di conferma e il POST con l'istruzione atomica (AC-1, AC-2)
-- [ ] Implementare i rifiuti e le voci di registro (AC-3, AC-4, AC-6)
-- [ ] Aggiungere il banner delle richieste in attesa (AC-5)
-- [ ] Eseguire `npm test` e `npm run typecheck` (AC-7)
+- [x] Scrivere i test falliti (AC-1..AC-6) con clock iniettato e lock nel D1 di test
+- [x] Implementare la pagina di conferma e il POST con l'istruzione atomica (AC-1, AC-2)
+- [x] Implementare i rifiuti e le voci di registro (AC-3, AC-4, AC-6)
+- [x] Aggiungere il banner delle richieste in attesa (AC-5)
+- [x] Eseguire `npm test` e `npm run typecheck` (AC-7)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `worker/src/admin/routes/esegui.tsx`, `worker/src/admin/views/esegui_form.tsx`,
+  `worker/test-admin/admin_esegui.test.ts`.
+- Accettazione in un'unica `batch()` condizionata (nessuna richiesta pending/claimed, lock libero,
+  ultima su richiesta < 15 min) con voce `run`; rifiuto con voce `run_rejected` e motivo.
+- Il banner delle richieste in attesa è in S10.
+- Verifica: `npm test`, `npm run typecheck`.
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-7 coperti: accettazione tutte/singola, località inattiva, richiesta in attesa, lease attivo,
+intervallo di 15 minuti, nessuna riga in `job_runs` sui rifiuti. Nessun blocker.

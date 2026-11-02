@@ -6,6 +6,7 @@ import '../models/coastal_location.dart';
 import '../models/forecast.dart';
 import '../services/forecast_api.dart';
 import '../services/history_api.dart';
+import '../services/home_location.dart';
 import '../services/home_location_store.dart';
 import '../services/location_repository.dart';
 import '../services/location_service.dart';
@@ -66,8 +67,8 @@ class _ForecastScreenState extends State<ForecastScreen>
     super.dispose();
   }
 
-  Future<void> _search() async {
-    final location = _locationController.text.trim();
+  Future<void> _search({String? query}) async {
+    final location = (query ?? _locationController.text).trim();
     if (location.isEmpty) return;
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
@@ -91,28 +92,55 @@ class _ForecastScreenState extends State<ForecastScreen>
     try {
       final savedLocation = (await widget.homeLocationStore.load())?.trim();
       if (!mounted || savedLocation == null || savedLocation.isEmpty) return;
+      final catalog = widget.locationRepository.catalog.value;
+      final slug = catalog.isEmpty
+          ? null
+          : resolveSavedHomeLocation(savedLocation, catalog);
+      if (slug == null) {
+        // Preferenza non risolvibile: resta invariata e si ritenta (OQ-54).
+        setState(() {
+          _homeLocation = savedLocation;
+          _locationController.text = savedLocation;
+        });
+        await _search();
+        return;
+      }
+      final location = catalog.locations.firstWhere(
+        (item) => item.slug == slug,
+      );
+      if (slug != savedLocation) {
+        await widget.homeLocationStore.save(slug);
+      }
+      if (!mounted) return;
       setState(() {
-        _homeLocation = savedLocation;
-        _locationController.text = savedLocation;
+        _homeLocation = slug;
+        _locationController.text = location.name;
       });
-      await _search();
+      await _search(query: slug);
     } on Object {
       // Una preferenza non disponibile non deve impedire l'uso dell'app.
     }
   }
 
   Future<void> _setCurrentLocationAsHome() async {
-    final location = _forecast?.location.name.trim();
-    if (location == null || location.isEmpty || _savingHomeLocation) return;
+    final slug = _forecast?.location.slug.trim();
+    final name = _forecast?.location.name.trim();
+    if (slug == null ||
+        slug.isEmpty ||
+        name == null ||
+        name.isEmpty ||
+        _savingHomeLocation) {
+      return;
+    }
     setState(() => _savingHomeLocation = true);
     try {
-      await widget.homeLocationStore.save(location);
+      await widget.homeLocationStore.save(slug);
       if (!mounted) return;
-      setState(() => _homeLocation = location);
+      setState(() => _homeLocation = slug);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          content: Text('$location sarà mostrata all’avvio.'),
+          content: Text('$name sarà mostrata all’avvio.'),
         ),
       );
     } on Object {
@@ -128,8 +156,7 @@ class _ForecastScreenState extends State<ForecastScreen>
     }
   }
 
-  bool _isHomeLocation(String location) =>
-      _homeLocation?.trim().toLowerCase() == location.trim().toLowerCase();
+  bool _isHomeLocation(String slug) => _homeLocation?.trim() == slug.trim();
 
   void _selectLocation(CoastalLocation location) {
     _locationController.value = TextEditingValue(
@@ -427,7 +454,7 @@ class _ForecastScreenState extends State<ForecastScreen>
       child: _ForecastContent(
         forecast: forecast,
         animation: _weatherAnimation,
-        showSetHomeButton: !_isHomeLocation(forecast.location.name),
+        showSetHomeButton: !_isHomeLocation(forecast.location.slug),
         savingHomeLocation: _savingHomeLocation,
         onSetHome: _setCurrentLocationAsHome,
       ),

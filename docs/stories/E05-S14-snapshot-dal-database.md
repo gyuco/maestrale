@@ -3,7 +3,7 @@ id: E05-S14
 epic: E05
 title: "Snapshot dell'app dal database e aggiornamento CI"
 type: feature
-status: ready
+status: done
 requirements: [FR-65, FR-104]
 depends_on: [E05-S01]
 verify:
@@ -63,17 +63,27 @@ l'output di `wrangler d1 execute --json` e a scrivere l'involucro di `GET /locat
 - **AC-7** — `node --test scripts/*.test.mjs`, `flutter analyze` e `flutter test` verdi.
 
 ## Tasks
-- [ ] Scrivere i test falliti dello script (AC-1..AC-3, AC-5)
-- [ ] Aggiornare `sync_app_catalog.mjs` con `--from`, normalizzazione, involucro e `--check` (AC-1..AC-3)
-- [ ] Aggiornare `catalog_sync_test.dart` al confronto per località (AC-4)
-- [ ] Documentare il passo di release nel runbook e l'estensione CI per E04 (AC-6)
-- [ ] Eseguire i comandi di verifica (AC-7)
+- [x] Scrivere i test falliti dello script (AC-1..AC-3, AC-5)
+- [x] Aggiornare `sync_app_catalog.mjs` con `--from`, normalizzazione, involucro e `--check` (AC-1..AC-3)
+- [x] Aggiornare `catalog_sync_test.dart` al confronto per località (AC-4)
+- [x] Documentare il passo di release nel runbook e l'estensione CI per E04 (AC-6)
+- [x] Eseguire i comandi di verifica (AC-7)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `scripts/sync_app_catalog.mjs` (`normalizeCatalog`, `render`, `--from`, `--check`),
+  `scripts/sync_app_catalog.test.mjs`, `app/assets/locations.json` (involucro rigenerato),
+  `app/test/catalog_sync_test.dart` e `coastal_location_test.dart` aggiornati.
+- Accetta l'output di `d1 execute --json`, `{locations: [...]}` o un elenco nudo; scarta le disattivate,
+  ordina per nome, `version` = hash del contenuto (16 hex).
+- In release: `wrangler d1 execute maestrale-core --remote --json --command "SELECT ... WHERE active = 1"`
+  → `node scripts/sync_app_catalog.mjs --from <file>`.
+- Verifica: `node --test scripts/*.test.mjs` (23), `flutter analyze`, `flutter test` (116).
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-7 coperti: involucro e hash, esclusione disattivate, `--check`, caricamento dell'app,
+modalità sviluppo con avviso. Nessun blocker. R-1 (should): l'estensione della CI con
+`CLOUDFLARE_API_TOKEN` (D1 Read) resta in E04.

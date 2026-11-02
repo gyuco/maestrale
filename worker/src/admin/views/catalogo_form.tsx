@@ -27,14 +27,18 @@ export function CatalogoForm({ email, mode, values, errors = {}, warning }: Cata
       active="catalogo"
     >
       <h1>{isNew ? "Nuova località" : `Modifica ${values.name}`}</h1>
-      <p>
+      <p class="back">
         <a href="/catalogo">← Torna al catalogo</a>
       </p>
-      {warning ? <p class="flash">{warning}</p> : null}
+      {warning ? (
+        <p class="flash flash-warn" role="alert">
+          {warning}
+        </p>
+      ) : null}
       <form
         method="post"
         action={isNew ? "/catalogo/nuovo" : `/catalogo/${values.slug}`}
-        style="max-width: 520px; display: grid; gap: 12px;"
+        class="form-card"
       >
         <label>
           Slug
@@ -79,7 +83,11 @@ export function CatalogoForm({ email, mode, values, errors = {}, warning }: Cata
           ) : null}
         </label>
         {values.version ? <input type="hidden" name="version" value={values.version} /> : null}
-        <button type="submit">{isNew ? "Aggiungi località" : "Salva modifiche"}</button>
+        <div class="actions">
+          <button type="submit" class="button-primary">
+            {isNew ? "Aggiungi località" : "Salva modifiche"}
+          </button>
+        </div>
       </form>
     </Layout>
   );

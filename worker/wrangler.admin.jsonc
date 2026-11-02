@@ -7,6 +7,10 @@
   "main": "src/admin/index.tsx",
   "compatibility_date": "2026-08-22",
   "observability": { "enabled": true },
+  "routes": [
+    // Custom domain del backoffice: wrangler crea il record DNS e il certificato.
+    { "pattern": "admin.gyuco.win", "custom_domain": true }
+  ],
   "kv_namespaces": [
     {
       "binding": "FORECASTS",
@@ -18,13 +22,13 @@
     {
       "binding": "CORE",
       "database_name": "maestrale-core",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "47558a36-70cb-46d2-9133-a143dc1cd8cb",
       "migrations_dir": "migrations-core"
     }
   ],
   "vars": {
-    "ADMIN_ORIGIN": "https://admin.example.com",
-    "ACCESS_TEAM_DOMAIN": "https://team.cloudflareaccess.com",
-    "ACCESS_AUD": ""
+    "ADMIN_ORIGIN": "https://admin.gyuco.win",
+    "ACCESS_TEAM_DOMAIN": "https://purple-poetry-ead0.cloudflareaccess.com",
+    "ACCESS_AUD": "1bae5e74843b0ff0553f968817a1295c63ef4fdd4b7a8afffc92670d1016cbb1"
   }
 }

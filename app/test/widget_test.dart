@@ -50,7 +50,7 @@ void main() {
     await tester.tap(find.byKey(const Key('set-home-location-button')));
     await tester.pumpAndSettle();
 
-    expect(homeLocationStore.value, 'Torre dei Corsari');
+    expect(homeLocationStore.value, 'torre-dei-corsari');
     expect(find.text('Stabilisci come pagina iniziale'), findsNothing);
   });
 
@@ -59,9 +59,10 @@ void main() {
   ) async {
     final homeLocationStore = _MemoryHomeLocationStore('Alghero');
     final client = MockClient((request) async {
-      expect(request.url.queryParameters['localita'], 'Alghero');
+      expect(request.url.queryParameters['localita'], 'alghero');
       final payload = jsonDecode(jsonEncode(forecastFixture));
       (payload['location'] as Map<String, dynamic>)['name'] = 'Alghero';
+      (payload['location'] as Map<String, dynamic>)['slug'] = 'alghero';
       return http.Response(jsonEncode(payload), 200);
     });
 
@@ -76,6 +77,7 @@ void main() {
 
     expect(find.text('Alghero'), findsNWidgets(2));
     expect(find.text('Stabilisci come pagina iniziale'), findsNothing);
+    expect(homeLocationStore.value, 'alghero');
   });
 
   testWidgets('suggerisce le localita e cerca quella selezionata', (

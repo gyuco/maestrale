@@ -3,7 +3,7 @@ id: E05-S10
 epic: E05
 title: "Backoffice: elenco paginato e dettaglio delle esecuzioni"
 type: feature
-status: ready
+status: done
 requirements: [FR-107, FR-108, FR-109]
 depends_on: [E05-S09, E05-S03]
 verify:
@@ -59,17 +59,25 @@ test `worker/test/admin_esecuzioni.test.ts`.
 - **AC-8** — `npm test` e `npm run typecheck` verdi.
 
 ## Tasks
-- [ ] Scrivere i test falliti (AC-1..AC-6) con D1 popolato
-- [ ] Implementare l'elenco con paginazione e filtri
-- [ ] Implementare il dettaglio con join dei nomi e ordinamento per slug
-- [ ] Verificare le prestazioni con 500 fallimenti (AC-7)
-- [ ] Eseguire `npm test` e `npm run typecheck` (AC-8)
+- [x] Scrivere i test falliti (AC-1..AC-6) con D1 popolato
+- [x] Implementare l'elenco con paginazione e filtri
+- [x] Implementare il dettaglio con join dei nomi e ordinamento per slug
+- [x] Verificare le prestazioni con 500 fallimenti (AC-7)
+- [x] Eseguire `npm test` e `npm run typecheck` (AC-8)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `worker/src/admin/runs_queries.ts`, `worker/src/admin/routes/esecuzioni.tsx`,
+  `worker/src/admin/views/esecuzioni_list.tsx`, `esecuzione_detail.tsx`,
+  `worker/test-admin/admin_esecuzioni.test.ts`.
+- Paginazione 20, filtri esito/date; il filtro date usa i giorni UTC di `started_at` (gli istanti sono
+  mostrati in Europe/Rome). Dettaglio con `LEFT JOIN locations` per il nome corrente, ordinato per slug.
+- La lista mostra anche le richieste `pending`/`claimed` (banner).
+- Verifica: `npm test`, `npm run typecheck`.
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-8 coperti: paginazione, filtri, banner delle richieste in attesa, dettaglio con nome
+corrente e nome assente, `non completata`, 404. Nessun blocker.

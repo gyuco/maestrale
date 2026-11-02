@@ -64,46 +64,53 @@ export function RegistroList({ email, rows, slug, admin, page, pages, total }: R
       <h1>Registro operazioni</h1>
       <p class="muted">{total} voci</p>
 
-      <form method="get" action="/registro" style="margin: 16px 0; display: flex; gap: 8px;">
+      <form method="get" action="/registro" class="toolbar">
         <input name="slug" value={slug} placeholder="Slug" aria-label="Filtra per slug" />
         <input name="admin" value={admin} placeholder="Email amministratore" aria-label="Filtra per amministratore" />
         <button type="submit">Filtra</button>
       </form>
 
       {rows.length === 0 ? (
-        <p>Nessuna operazione registrata.</p>
+        <p class="empty">Nessuna operazione registrata.</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Istante</th>
-              <th>Amministratore</th>
-              <th>Operazione</th>
-              <th>Slug</th>
-              <th>Esito</th>
-              <th>Dettaglio</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
+        <div class="table-wrap">
+          <table>
+            <thead>
               <tr>
-                <td>{formatInstant(row.at)}</td>
-                <td>{row.admin_email}</td>
-                <td>{labels[row.action] ?? row.action}</td>
-                <td>{row.slug ?? "—"}</td>
-                <td>{row.outcome === "rejected" ? "Rifiutata" : "Ok"}</td>
-                <td class="muted">{describe(row)}</td>
+                <th>Istante</th>
+                <th>Amministratore</th>
+                <th>Operazione</th>
+                <th>Slug</th>
+                <th>Esito</th>
+                <th>Dettaglio</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>
+                  <td>{formatInstant(row.at)}</td>
+                  <td>{row.admin_email}</td>
+                  <td>{labels[row.action] ?? row.action}</td>
+                  <td>{row.slug ?? "—"}</td>
+                  <td>
+                    <span class={row.outcome === "rejected" ? "badge badge-err" : "badge badge-ok"}>
+                      {row.outcome === "rejected" ? "Rifiutata" : "Ok"}
+                    </span>
+                  </td>
+                  <td class="muted">{describe(row)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {pages > 1 ? (
-        <p>
-          {page > 1 ? <a href={query(page - 1)}>← Precedente</a> : null}{" "}
-          Pagina {page} di {pages} {page < pages ? <a href={query(page + 1)}>Successiva →</a> : null}
-        </p>
+        <div class="pager">
+          {page > 1 ? <a href={query(page - 1)}>← Precedente</a> : null}
+          <span class="pager-info">Pagina {page} di {pages}</span>
+          {page < pages ? <a href={query(page + 1)}>Successiva →</a> : null}
+        </div>
       ) : null}
     </Layout>
   );

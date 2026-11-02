@@ -35,13 +35,23 @@ export function CatalogoList({
       <p class="muted">
         {total} località totali · {active} attive
       </p>
-      {flash ? <p class="flash">{flash}</p> : null}
-      {warning ? <p class="flash">{warning}</p> : null}
-      <p>
-        <a href="/catalogo/nuovo">Aggiungi località</a>
-      </p>
+      {flash ? (
+        <p class="flash flash-success" role="status">
+          {flash}
+        </p>
+      ) : null}
+      {warning ? (
+        <p class="flash flash-warn" role="alert">
+          {warning}
+        </p>
+      ) : null}
+      <div class="actions">
+        <a class="button button-primary" href="/catalogo/nuovo">
+          Aggiungi località
+        </a>
+      </div>
 
-      <form method="get" action="/catalogo" style="margin: 16px 0; display: flex; gap: 8px;">
+      <form method="get" action="/catalogo" class="toolbar">
         <input
           type="search"
           name="q"
@@ -60,32 +70,38 @@ export function CatalogoList({
       </form>
 
       {rows.length === 0 ? (
-        <p>Nessuna località corrisponde ai filtri.</p>
+        <p class="empty">Nessuna località corrisponde ai filtri.</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Slug</th>
-              <th>Latitudine</th>
-              <th>Longitudine</th>
-              <th>Stato</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
+        <div class="table-wrap">
+          <table>
+            <thead>
               <tr>
-                <td>{row.name}</td>
-                <td>
-                  <code>{row.slug}</code>
-                </td>
-                <td>{row.latitude}</td>
-                <td>{row.longitude}</td>
-                <td>{row.active === 1 ? "Attiva" : "Disattivata"}</td>
+                <th>Nome</th>
+                <th>Slug</th>
+                <th>Latitudine</th>
+                <th>Longitudine</th>
+                <th>Stato</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>
+                  <td>{row.name}</td>
+                  <td>
+                    <code>{row.slug}</code>
+                  </td>
+                  <td>{row.latitude}</td>
+                  <td>{row.longitude}</td>
+                  <td>
+                    <span class={row.active === 1 ? "badge badge-ok" : "badge badge-off"}>
+                      {row.active === 1 ? "Attiva" : "Disattivata"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Layout>
   );

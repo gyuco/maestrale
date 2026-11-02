@@ -11,7 +11,8 @@
   // 02:30/08:30/14:30/20:30 con l'ora legale (CEST) e 01:30/07:30/13:30/19:30
   // in inverno (CET): l'intervallo non cambia, si sposta solo l'ora locale.
   "triggers": {
-    "crons": ["30 0,6,12,18 * * *"]
+    // Job ogni 6 h e dispatcher ogni minuto (ADR-0009).
+    "crons": ["30 0,6,12,18 * * *", "* * * * *"]
   },
   "observability": {
     "enabled": true
@@ -35,10 +36,10 @@
     },
     {
       // Catalogo e registri del backoffice (ADR-0006/0008/0009).
-      // L'id e' un segnaposto: va sostituito con quello di `wrangler d1 create maestrale-core`.
+      // Creato il 2026-11-02 con `npx wrangler d1 create maestrale-core --location=weur`.
       "binding": "CORE",
       "database_name": "maestrale-core",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "47558a36-70cb-46d2-9133-a143dc1cd8cb",
       "migrations_dir": "migrations-core"
     }
   ]

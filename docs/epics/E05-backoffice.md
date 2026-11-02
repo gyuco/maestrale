@@ -1,7 +1,7 @@
 ---
 id: E05
 title: "Backoffice di amministrazione: catalogo su D1, registri ed Esegui ora"
-status: in-progress
+status: done
 requirements: [FR-41, FR-42, FR-61, FR-62, FR-63, FR-92, FR-93, FR-94, FR-95, FR-96, FR-97, FR-98, FR-99, FR-100, FR-101, FR-102, FR-103, FR-104, FR-105, FR-106, FR-107, FR-108, FR-109, FR-110, FR-111, FR-112, FR-113, FR-114, FR-115, FR-116, FR-117, FR-118, FR-119, FR-120, FR-121, NFR-13, NFR-19, NFR-27, NFR-28, NFR-29, NFR-30, NFR-31, NFR-32, NFR-33]
 ---
 
@@ -33,13 +33,13 @@ backoffice".
 | E05-S05 | Backoffice: aggiunta di una località con validazione | S04 | done |
 | E05-S06 | Backoffice: modifica di `name` e coordinate con controllo di versione | S05 | done |
 | E05-S07 | Backoffice: disattivazione e riattivazione con conferma | S06 | done |
-| E05-S08 | Backoffice: registro delle operazioni | S05 | ready |
-| E05-S09 | Job: registro delle esecuzioni (esiti, fallimenti, coerenza con `/health`) | S01 | ready |
-| E05-S10 | Backoffice: elenco paginato e dettaglio delle esecuzioni | S09, S03 | ready |
-| E05-S11 | "Esegui ora": richiesta, rifiuti e registrazione | S09, S08, S04 | ready |
-| E05-S12 | Dispatcher a cron: claim, lease, watchdog, retention, riparazione cache | S11, S02, S09 | ready |
-| E05-S13 | App: località iniziale per slug con migrazione una tantum | — | ready |
-| E05-S14 | Snapshot dell'app dal database e aggiornamento CI | S01 | ready |
+| E05-S08 | Backoffice: registro delle operazioni | S05 | done |
+| E05-S09 | Job: registro delle esecuzioni (esiti, fallimenti, coerenza con `/health`) | S01 | done |
+| E05-S10 | Backoffice: elenco paginato e dettaglio delle esecuzioni | S09, S03 | done |
+| E05-S11 | "Esegui ora": richiesta, rifiuti e registrazione | S09, S08, S04 | done |
+| E05-S12 | Dispatcher a cron: claim, lease, watchdog, retention, riparazione cache | S11, S02, S09 | done |
+| E05-S13 | App: località iniziale per slug con migrazione una tantum | — | done |
+| E05-S14 | Snapshot dell'app dal database e aggiornamento CI | S01 | done |
 
 Ordine consigliato: S01 → S02 → S03 → S04 → S05 → S06 → S07 → S08 → S09 → S10 → S11 → S12;
 S13 e S14 sono indipendenti e possono procedere in parallelo.

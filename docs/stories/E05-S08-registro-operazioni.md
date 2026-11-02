@@ -3,7 +3,7 @@ id: E05-S08
 epic: E05
 title: "Backoffice: registro delle operazioni"
 type: feature
-status: ready
+status: done
 requirements: [FR-113, NFR-29]
 depends_on: [E05-S05]
 verify:
@@ -55,17 +55,23 @@ test `worker/test/admin_registro.test.ts`.
 - **AC-7** — `npm test` e `npm run typecheck` verdi.
 
 ## Tasks
-- [ ] Scrivere i test falliti (AC-1..AC-6) con voci inserite nel D1 di test
-- [ ] Implementare lettura paginata e filtri per slug/amministratore
-- [ ] Implementare la pagina SSR con dettaglio prima/dopo e istanti in Europe/Rome
-- [ ] Verificare l'assenza di percorsi di modifica/cancellazione (AC-4)
-- [ ] Eseguire `npm test` e `npm run typecheck` (AC-7)
+- [x] Scrivere i test falliti (AC-1..AC-6) con voci inserite nel D1 di test
+- [x] Implementare lettura paginata e filtri per slug/amministratore
+- [x] Implementare la pagina SSR con dettaglio prima/dopo e istanti in Europe/Rome
+- [x] Verificare l'assenza di percorsi di modifica/cancellazione (AC-4)
+- [x] Eseguire `npm test` e `npm run typecheck` (AC-7)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `worker/src/admin/routes/registro.tsx`, `worker/src/admin/views/registro_list.tsx`,
+  `worker/test-admin/admin_registro.test.ts`.
+- Una query con filtri bindati; 50 voci per pagina; istanti in Europe/Rome con `Intl`; nessun link di
+  modifica o cancellazione (le rotte non esistono → 404/405).
+- Verifica: `npm test`, `npm run typecheck`.
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-7 coperti: ordine decrescente, filtri slug/amministratore combinati, rifiuti con motivo,
+paginazione a 50, assenza di percorsi di modifica, attribuzione per email. Nessun blocker.

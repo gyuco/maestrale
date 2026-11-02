@@ -3,7 +3,7 @@ id: E05-S13
 epic: E05
 title: "App: località iniziale per slug con migrazione una tantum"
 type: feature
-status: ready
+status: done
 requirements: [FR-41, FR-42, FR-117]
 depends_on: []
 verify:
@@ -67,17 +67,25 @@ e convertire una volta il valore vecchio.
   aggiornati al nuovo formato, senza regressioni sugli altri.
 
 ## Tasks
-- [ ] Scrivere i test falliti della funzione pura (AC-1..AC-5) e del widget (AC-6, AC-7)
-- [ ] Implementare `resolveSavedHomeLocation` con le tre regole
-- [ ] Aggiornare salvataggio, ripristino e confronto in `forecast_screen.dart` (AC-1, AC-2, AC-7)
-- [ ] Gestire il caso non risolvibile senza bloccare l'avvio (AC-5, AC-6)
-- [ ] Eseguire `flutter analyze` e `flutter test` (AC-8)
+- [x] Scrivere i test falliti della funzione pura (AC-1..AC-5) e del widget (AC-6, AC-7)
+- [x] Implementare `resolveSavedHomeLocation` con le tre regole
+- [x] Aggiornare salvataggio, ripristino e confronto in `forecast_screen.dart` (AC-1, AC-2, AC-7)
+- [x] Gestire il caso non risolvibile senza bloccare l'avvio (AC-5, AC-6)
+- [x] Eseguire `flutter analyze` e `flutter test` (AC-8)
 
 ## Dev notes
-<!-- Coder: decisioni, deviazioni, riepilogo. -->
+- **File**: `app/lib/services/home_location.dart` (`resolveSavedHomeLocation`),
+  `app/lib/screens/forecast_screen.dart` (ripristino, salvataggio, confronto per slug, `_search(query:)`),
+  `app/test/home_location_test.dart`, `app/test/widget_test.dart` aggiornato.
+- La preferenza salvata ora è lo slug; la migrazione avviene all'avvio con il catalogo del repository
+  (anche offline). Se non risolve, il valore resta invariato e si ritenta al prossimo avvio (OQ-54).
+- Verifica: `flutter analyze`, `flutter test` (116 test).
 
 ## Run log
 <!-- Autopilot: iteration | command | result | note -->
 
 ## Review log
-<!-- Reviewer: date, verdict, findings R-1… (blocker/should/nit) with file:line. -->
+### 2026-11-02 — verdict: done
+AC-1..AC-8 coperti: salvataggio slug, ripristino con nome corrente, conversione nome→slug, forma
+normalizzata, preferenza non risolvibile, località disattivata (404), confronto per slug. Nessun
+blocker.

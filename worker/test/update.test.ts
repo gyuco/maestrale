@@ -445,14 +445,14 @@ describe("scheduled", () => {
 });
 
 describe("wrangler.jsonc e README", () => {
-  it("triggers.crons è ogni 6 h UTC con commento sull'ora legale", async () => {
+  it("triggers.crons ha il job ogni 6 h UTC e il dispatcher ogni minuto", async () => {
     const raw = (await import("../wrangler.jsonc?raw")).default as string;
     const stripped = raw
       .split("\n")
       .filter((line) => !line.trim().startsWith("//"))
       .join("\n");
     const config = JSON.parse(stripped) as { triggers?: { crons?: string[] } };
-    expect(config.triggers?.crons).toEqual(["30 0,6,12,18 * * *"]);
+    expect(config.triggers?.crons).toEqual(["30 0,6,12,18 * * *", "* * * * *"]);
     expect(raw).toMatch(/\/\/.*ora legale/i);
   });
 

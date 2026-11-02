@@ -62,6 +62,10 @@ export interface UpdateDeps extends Pick<ForecastDeps, "fetchImpl" | "sleep" | "
   readonly runs?: RunsWriter;
   /** Versione del catalogo letta all'inizio (FR-102), per il registro. */
   readonly catalogVersion?: number;
+  /** Numero di località della versione del catalogo (per un'esecuzione su una sola). */
+  readonly catalogSize?: number;
+  /** `false` per un'esecuzione su una sola località: niente `meta` (OQ-52). */
+  readonly writeMeta?: boolean;
   /** Origine e ambito dell'esecuzione, per il registro (FR-105). */
   readonly run?: {
     readonly origin?: "pianificata" | "su-richiesta";
@@ -309,7 +313,7 @@ export async function runUpdate(
           scopeSlug: deps.run?.scopeSlug ?? null,
           triggeredBy: deps.run?.triggeredBy ?? null,
           catalogVersion: deps.catalogVersion ?? 0,
-          catalogSize: catalog.length,
+          catalogSize: deps.catalogSize ?? catalog.length,
           startedAt,
         };
   if (runRecord !== undefined) {
@@ -340,7 +344,8 @@ export async function runUpdate(
     const locations = isRecord(payload) ? payload["locations"] : null;
     legacyLocations = isRecord(locations) ? locations : {};
   }
-  const removed = previousSlugs.filter((slug) => !catalogSlugs.has(slug));
+  const writeMeta = deps.writeMeta !== false;
+  const removed = writeMeta ? previousSlugs.filter((slug) => !catalogSlugs.has(slug)) : [];
   const startIso = deps.history ? now() : undefined;
   const historyQueries = deps.history ? Math.ceil(catalog.length / config.historyWriteBatchRows) : 0;
   const budget = new RunBudget(
@@ -512,8 +517,8 @@ export async function runUpdate(
       recordKey(slug),
       JSON.stringify(forecasts.get(slug)),
     ]);
-    const known = new Set(migrating ? [] : previousSlugs);
-    if (migrating) {
+    const known = new Set(migrating && writeMeta ? [] : previousSlugs);
+    if (migrating && writeMeta) {
       // FR-59: le località di `latest` non aggiornate ricevono il proprio record.
       for (const entry of catalog) {
         const legacy = legacyLocations[entry.slug];
@@ -531,17 +536,19 @@ export async function runUpdate(
     await mapWithConcurrency(removed, (slug) => kv.delete(recordKey(slug)), 6);
     kvDeletes += removed.length;
 
-    const slugs = [...known].filter((slug) => catalogSlugs.has(slug)).sort();
-    const meta: ForecastMeta = {
-      schema_version: 1,
-      generated_at: generatedAt,
-      updated_locations: [...updated].sort(),
-      errors,
-      locations: slugs.length,
-      slugs,
-    };
-    await kv.put(META_KEY, JSON.stringify(meta));
-    kvWrites += 1;
+    if (writeMeta) {
+      const slugs = [...known].filter((slug) => catalogSlugs.has(slug)).sort();
+      const meta: ForecastMeta = {
+        schema_version: 1,
+        generated_at: generatedAt,
+        updated_locations: [...updated].sort(),
+        errors,
+        locations: slugs.length,
+        slugs,
+      };
+      await kv.put(META_KEY, JSON.stringify(meta));
+      kvWrites += 1;
+    }
     written = true;
   }
 

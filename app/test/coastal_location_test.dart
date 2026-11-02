@@ -1,17 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sardegna_mare_app/models/coastal_location.dart';
+import 'package:sardegna_mare_app/models/location_catalog.dart';
 
 void main() {
   test(
     'lo snapshot espone le 13 località del catalogo con coordinate valide (FR-1)',
     () {
-      final raw =
-          jsonDecode(File('assets/locations.json').readAsStringSync())
-              as List<dynamic>;
-      final locations = raw.map(CoastalLocation.fromJson).toList();
+      final catalog = LocationCatalog.parse(
+        File('assets/locations.json').readAsStringSync(),
+        origin: CatalogOrigin.snapshot,
+      );
+      final locations = catalog.locations;
 
       expect(locations, hasLength(13));
       expect(locations.map((l) => l.slug).toSet(), hasLength(locations.length));
